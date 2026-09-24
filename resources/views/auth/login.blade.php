@@ -52,7 +52,7 @@
                 <!-- Botón Login -->
                 <x-auth.button>Inicia Sesión</x-auth.button>
 
-                <div class="login-side-links" style="margin-top: 1.5rem; display: flex; justify-content: space-between;">
+                <div class="login-side-links">
                     <p class="register-text">
                         ¿Sin cuenta?
                         <!-- TODO: Enlace a registro -->

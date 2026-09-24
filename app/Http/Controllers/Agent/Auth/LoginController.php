@@ -26,16 +26,15 @@ class LoginController extends Controller
         // La tabla staff tiene `email` y `username`. 
         // Asumiremos que entran con correo por ahora.
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'username' => ['required', 'string'],
             'password' => ['required'],
         ], [
-            'email.required' => 'El correo electrónico es requerido.',
-            'email.email' => 'Debes proporcionar un correo electrónico válido.',
+            'username.required' => 'El usuario es requerido.',
             'password.required' => 'La contraseña es requerida.'
         ]);
 
         // Intentar autenticar usando el guard 'staff'
-        if (Auth::guard('staff')->attempt(['email' => $credentials['email'], 'password' => $credentials['password'], 'is_active' => 1])) {
+        if (Auth::guard('staff')->attempt(['username' => $credentials['username'], 'password' => $credentials['password'], 'is_active' => 1])) {
             $request->session()->regenerate();
 
             // Redirigir al dashboard de agente
@@ -44,8 +43,8 @@ class LoginController extends Controller
 
         // Si falla, volver con error
         return back()->withErrors([
-            'email' => 'Acceso denegado. Verifica tus credenciales o el estado de tu cuenta.',
-        ])->onlyInput('email');
+            'username' => 'Acceso denegado. Verifica tus credenciales o el estado de tu cuenta.',
+        ])->onlyInput('username');
     }
 
     /**

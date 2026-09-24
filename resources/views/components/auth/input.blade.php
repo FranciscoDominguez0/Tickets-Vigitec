@@ -1,7 +1,7 @@
 @props(['id', 'type' => 'text', 'name', 'label', 'placeholder' => '', 'required' => false])
 
-<div class="form-group" style="margin-bottom: 1rem;">
-    <label for="{{ $id }}" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">{{ $label }}</label>
+<div class="form-group">
+    <label for="{{ $id }}">{{ $label }}</label>
     <div style="position: relative;">
         <input 
             type="{{ $type }}" 
@@ -10,7 +10,7 @@
             placeholder="{{ $placeholder }}"
             value="{{ old($name) }}"
             {{ $required ? 'required' : '' }}
-            {{ $attributes->merge(['style' => 'width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box;']) }}
+            {{ $attributes }}
         >
         @if($type === 'password')
             <button type="button" class="toggle-password" tabindex="-1" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #64748b; padding: 0; display: flex; align-items: center; justify-content: center;" onclick="togglePasswordVisibility('{{ $id }}', this)">
