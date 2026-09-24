@@ -1,4 +1,4 @@
-@props(['id', 'type' => 'text', 'name', 'label', 'placeholder' => '', 'required' => false])
+@props(['id', 'type' => 'text', 'name', 'label', 'placeholder' => '', 'required' => false, 'help' => null])
 
 <div class="form-group">
     <label for="{{ $id }}">{{ $label }}</label>
@@ -34,6 +34,9 @@
             </script>
         @endif
     </div>
+    @if($help)
+        <small style="display: block; margin-top: 4px; color: #64748b; font-size: 12px;">{{ $help }}</small>
+    @endif
     @error($name)
         <span style="color: #e11d48; font-size: 0.875rem; margin-top: 0.25rem; display: block;">{{ $message }}</span>
     @enderror

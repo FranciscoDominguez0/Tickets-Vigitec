@@ -45,8 +45,7 @@
                 />
 
                 <div class="login-forgot">
-                    <!-- TODO: Enlace a restablecer contraseña -->
-                    <a href="#" class="register-link">Olvidé mi contraseña</a>
+                    <a href="{{ route('password.request') }}" class="register-link">Olvidé mi contraseña</a>
                 </div>
 
                 <!-- Botón Login -->
@@ -55,8 +54,7 @@
                 <div class="login-side-links">
                     <p class="register-text">
                         ¿Sin cuenta?
-                        <!-- TODO: Enlace a registro -->
-                        <a href="#" class="register-link">Crear cuenta</a>
+                        <a href="{{ route('register') }}" class="register-link">Crear cuenta</a>
                     </p>
                     <p class="agent-text">
                         ¿Eres agente?

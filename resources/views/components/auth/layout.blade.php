@@ -15,19 +15,19 @@
         <div class="support-header">
             <div class="support-header-left">
                 <!-- Nombre del Sistema o Logo -->
-                <span class="vigitec-logo" style="font-weight: bold; font-size: 1.2rem; color: var(--text-color, #1e293b);">{{ config('app.name', 'SISTEMA TICKETS') }}</span>
+                <img src="{{ asset('publico/img/vigitec-logo.webp') }}" alt="VIGITEC PANAMA" class="vigitec-logo">
             </div>
             <div class="support-header-right d-flex align-items-center gap-3">
-                <button type="button" id="loginDarkModeBtn" class="btn btn-outline-secondary btn-sm" style="border-radius:999px; width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-color: rgba(0,0,0,0.1);" title="Alternar modo oscuro">
-                    <i class="bi bi-sun" style="font-size:16px;"></i>
+                <button type="button" id="loginDarkModeBtn" class="btn btn-outline-secondary btn-sm" style="border-radius:999px; width:34px; height:34px; padding:0; display:inline-flex; align-items:center; justify-content:center; border-color: rgba(255,255,255,0.15);" title="Alternar modo oscuro">
+                    <i class="bi bi-moon-stars" style="font-size:16px;"></i>
                 </button>
-                <a href="{{ route('login') }}" class="header-login-link">Acceder</a>
+                <a href="{{ route('login') }}" class="header-login-link">Inicia Sesión</a>
             </div>
         </div>
 
         <!-- NAVEGACIÓN -->
         <div class="support-nav">
-            <button class="nav-item active">Centro de soporte</button>
+            <button class="nav-item active">Inicio Centro de Soporte</button>
         </div>
 
         <!-- CONTENIDO PRINCIPAL -->
