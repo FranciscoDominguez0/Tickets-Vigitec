@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
 
 class ForgotPasswordController extends Controller
 {
@@ -15,8 +16,14 @@ class ForgotPasswordController extends Controller
     public function sendResetLinkEmail(Request $request)
     {
         $request->validate(['email' => 'required|email']);
-        
-        // Return a dummy success message since email sending is likely not configured yet
-        return back()->with('status', 'Le hemos enviado por correo electrónico el enlace para restablecer su contraseña.');
+
+        // Usamos el Password broker nativo de Laravel para enviar el enlace al correo
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === Password::RESET_LINK_SENT
+                    ? back()->with(['status' => 'Le hemos enviado por correo electrónico el enlace para restablecer su contraseña.'])
+                    : back()->withErrors(['email' => __($status)]);
     }
 }

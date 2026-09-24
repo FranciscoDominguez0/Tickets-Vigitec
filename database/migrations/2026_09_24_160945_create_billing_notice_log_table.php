@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('fecha_vencimiento');
             $table->dateTime('created_at')->useCurrent();
 
-            $table->unique(['empresa_id', 'days_before', 'fecha_vencimiento']);
+            $table->unique(['empresa_id', 'days_before', 'fecha_vencimiento'], 'bn_log_emp_days_fecha_unique');
         });
     }
 

@@ -37,7 +37,7 @@
                         @php
                             $isPanelRoute = request()->routeIs('agent.dashboard', 'agent.directory', 'agent.map');
                         @endphp
-                        <button type="button" class="sidebar-link sidebar-toggle {{ $isPanelRoute ? 'active expanded' : '' }}" data-subnav="panel-subnav" aria-expanded="{{ $isPanelRoute ? 'true' : 'false' }}">
+                        <button type="button" class="sidebar-link sidebar-toggle {{ $isPanelRoute ? 'expanded' : '' }}" data-subnav="panel-subnav" aria-expanded="{{ $isPanelRoute ? 'true' : 'false' }}">
                             <span class="icon">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M4 12L11 5L18 12V19H4V12Z" stroke="{{ $isPanelRoute ? '#ffffff' : '#9ca3af' }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -92,7 +92,7 @@
                         @php
                             $isTicketsRoute = request()->routeIs('agent.tickets.*');
                         @endphp
-                        <button type="button" class="sidebar-link sidebar-toggle {{ $isTicketsRoute ? 'active expanded' : '' }}" data-subnav="tickets-subnav" aria-expanded="{{ $isTicketsRoute ? 'true' : 'false' }}">
+                        <button type="button" class="sidebar-link sidebar-toggle {{ $isTicketsRoute ? 'expanded' : '' }}" data-subnav="tickets-subnav" aria-expanded="{{ $isTicketsRoute ? 'true' : 'false' }}">
                             <span class="icon">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <rect x="4" y="4" width="16" height="16" rx="2" stroke="{{ $isTicketsRoute ? '#ffffff' : '#9ca3af' }}" stroke-width="1.8"/>
@@ -172,7 +172,7 @@
                         @php
                             $isUsersRoute = request()->routeIs('agent.users.*');
                         @endphp
-                        <button type="button" class="sidebar-link sidebar-toggle {{ $isUsersRoute ? 'active expanded' : '' }}" data-subnav="users-subnav" aria-expanded="{{ $isUsersRoute ? 'true' : 'false' }}">
+                        <button type="button" class="sidebar-link sidebar-toggle {{ $isUsersRoute ? 'expanded' : '' }}" data-subnav="users-subnav" aria-expanded="{{ $isUsersRoute ? 'true' : 'false' }}">
                             <span class="icon">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="9" cy="8" r="3" stroke="{{ $isUsersRoute ? '#ffffff' : '#9ca3af' }}" stroke-width="1.8"/>

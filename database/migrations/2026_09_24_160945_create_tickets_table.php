@@ -43,7 +43,6 @@ return new class extends Migration
             $table->index(['empresa_id', 'updated']);
             $table->index(['empresa_id', 'user_id']);
             $table->index(['empresa_id', 'created']);
-            $table->index(['empresa_id', 'status_id']);
             $table->index(['staff_id', 'status_id']);
             $table->index(['user_id', 'status_id']);
             $table->unique(['ticket_number']);

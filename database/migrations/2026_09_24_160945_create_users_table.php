@@ -34,7 +34,6 @@ return new class extends Migration
             $table->index(['empresa_id', 'created']);
             $table->index(['empresa_id', 'email']);
             $table->index(['empresa_id', 'status']);
-            $table->index(['empresa_id', 'status']);
         });
     }
 

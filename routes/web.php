@@ -17,6 +17,12 @@ Route::middleware('guest')->group(function () {
 
     Route::get('forgot-password', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
     Route::post('forgot-password', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+    // Ruta necesaria para que Laravel pueda generar el enlace del correo electrónico.
+    // Deberás crear el ResetPasswordController cuando quieras implementar la pantalla de nueva contraseña.
+    Route::get('reset-password/{token}', function ($token) {
+        return view('auth.reset-password', ['token' => $token]);
+    })->name('password.reset');
 });
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
