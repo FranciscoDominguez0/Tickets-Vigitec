@@ -15,15 +15,19 @@ class ForgotPasswordController extends Controller
 
     public function sendResetLinkEmail(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        $request->validate([
+            'email' => 'required|email'
+        ], [
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'Debes ingresar un correo electrónico válido.',
+        ]);
 
         // Usamos el Password broker nativo de Laravel para enviar el enlace al correo
-        $status = Password::sendResetLink(
+        Password::sendResetLink(
             $request->only('email')
         );
 
-        return $status === Password::RESET_LINK_SENT
-                    ? back()->with(['status' => 'Le hemos enviado por correo electrónico el enlace para restablecer su contraseña.'])
-                    : back()->withErrors(['email' => __($status)]);
+        // Por seguridad, siempre devolvemos el mismo mensaje para evitar enumeración de correos
+        return back()->with(['status' => 'Si el correo existe en nuestro sistema, te hemos enviado un enlace para restablecer tu contraseña.']);
     }
 }

@@ -3,12 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class ClientForgotPasswordTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     public function test_la_pantalla_de_recuperar_contrasena_se_muestra()
     {
@@ -28,7 +28,7 @@ class ClientForgotPasswordTest extends TestCase
             'email' => 'test@example.com',
         ]);
 
-        $response->assertSessionHas('status', 'Le hemos enviado por correo electrónico el enlace para restablecer su contraseña.');
+        $response->assertSessionHas('status', 'Si el correo existe en nuestro sistema, te hemos enviado un enlace para restablecer tu contraseña.');
     }
 
     public function test_falla_si_el_correo_es_invalido()

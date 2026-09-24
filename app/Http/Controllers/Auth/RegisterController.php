@@ -34,6 +34,15 @@ class RegisterController extends Controller
             'address'   => 'nullable|string',
             'latitude'  => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+        ], [
+            'firstname.required' => 'El nombre es obligatorio.',
+            'lastname.required' => 'El apellido es obligatorio.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'Debes ingresar un correo electrónico válido.',
+            'email.unique' => 'Este correo electrónico ya está registrado.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.min' => 'La contraseña debe tener al menos 6 caracteres.',
+            'password.confirmed' => 'La confirmación de la contraseña no coincide.',
         ]);
 
         // Usar el repositorio para crear la instancia del usuario

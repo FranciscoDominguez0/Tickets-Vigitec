@@ -18,18 +18,42 @@ Route::middleware('guest')->group(function () {
     Route::get('forgot-password', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
     Route::post('forgot-password', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 
-    // Ruta necesaria para que Laravel pueda generar el enlace del correo electrónico.
-    // Deberás crear el ResetPasswordController cuando quieras implementar la pantalla de nueva contraseña.
-    Route::get('reset-password/{token}', function ($token) {
-        return view('auth.reset-password', ['token' => $token]);
-    })->name('password.reset');
+    Route::get('reset-password/{token}', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('reset-password', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
 });
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
 // Dashboard de ejemplo (protegido)
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
-        return 'Bienvenido, ' . auth()->user()->email;
+        $email = auth()->user()->email;
+        $logoutUrl = route('logout');
+        $csrf = csrf_field();
+        return <<<HTML
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <title>Dashboard Cliente</title>
+            <style>
+                body { font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f8fafc; }
+                .card { background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-align: center; }
+                .btn { background: #ef4444; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; margin-top: 1.5rem; transition: background 0.2s; }
+                .btn:hover { background: #dc2626; }
+            </style>
+        </head>
+        <body>
+            <div class="card">
+                <h2 style="margin-top: 0; color: #1e293b;">¡Bienvenido!</h2>
+                <p style="color: #64748b;">$email</p>
+                <form action="$logoutUrl" method="POST">
+                    $csrf
+                    <button type="submit" class="btn">Cerrar Sesión</button>
+                </form>
+            </div>
+        </body>
+        </html>
+        HTML;
     })->name('dashboard');
 });
 
