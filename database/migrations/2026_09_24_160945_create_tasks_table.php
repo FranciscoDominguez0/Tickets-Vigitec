@@ -15,18 +15,18 @@ return new class extends Migration
             $table->integer('id', true);
             $table->string('title');
             $table->text('description')->nullable();
-            $table->integer('assigned_to')->nullable()->index('assigned_to');
-            $table->integer('created_by')->nullable()->index('created_by');
+            $table->integer('assigned_to')->nullable()->index();
+            $table->integer('created_by')->nullable()->index();
             $table->integer('dept_id');
-            $table->integer('empresa_id')->default(1)->index('idx_tasks_empresa_id');
+            $table->integer('empresa_id')->default(1)->index();
             $table->enum('status', ['pending', 'in_progress', 'completed'])->nullable()->default('pending');
             $table->enum('priority', ['low', 'normal', 'high', 'urgent'])->nullable()->default('normal');
             $table->dateTime('due_date')->nullable();
             $table->dateTime('created')->nullable()->useCurrent();
             $table->dateTime('updated')->useCurrentOnUpdate()->nullable()->useCurrent();
 
-            $table->index(['empresa_id', 'created'], 'idx_tasks_empresa_created');
-            $table->index(['empresa_id', 'status'], 'idx_tasks_empresa_status');
+            $table->index(['empresa_id', 'created']);
+            $table->index(['empresa_id', 'status']);
         });
     }
 

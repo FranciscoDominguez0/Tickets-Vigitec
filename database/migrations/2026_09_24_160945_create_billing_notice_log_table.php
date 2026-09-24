@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('billing_notice_log', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('empresa_id')->index('idx_empresa');
+            $table->integer('empresa_id')->index();
             $table->integer('days_before');
             $table->date('fecha_vencimiento');
             $table->dateTime('created_at')->useCurrent();
 
-            $table->unique(['empresa_id', 'days_before', 'fecha_vencimiento'], 'uq_billing_notice');
+            $table->unique(['empresa_id', 'days_before', 'fecha_vencimiento']);
         });
     }
 

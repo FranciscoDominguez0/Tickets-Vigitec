@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('ticket_links', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('ticket_id')->index('idx_ticket');
-            $table->integer('linked_ticket_id')->index('idx_linked');
-            $table->integer('empresa_id')->default(1)->index('idx_ticket_links_empresa_id');
+            $table->integer('ticket_id')->index();
+            $table->integer('linked_ticket_id')->index();
+            $table->integer('empresa_id')->default(1)->index();
             $table->dateTime('created')->nullable()->useCurrent();
 
-            $table->unique(['ticket_id', 'linked_ticket_id'], 'uq_ticket_link');
+            $table->unique(['ticket_id', 'linked_ticket_id']);
         });
     }
 

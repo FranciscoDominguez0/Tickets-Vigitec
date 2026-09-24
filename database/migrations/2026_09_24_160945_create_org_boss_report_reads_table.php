@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('org_boss_report_reads', function (Blueprint $table) {
             $table->bigInteger('id', true);
             $table->bigInteger('report_id');
-            $table->integer('user_id')->index('idx_obrr_user');
+            $table->integer('user_id')->index();
             $table->dateTime('read_at')->useCurrent();
 
-            $table->unique(['report_id', 'user_id'], 'uq_obr_read');
+            $table->unique(['report_id', 'user_id']);
         });
     }
 

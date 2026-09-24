@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('password_resets', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('empresa_id')->default(1)->index('idx_password_resets_empresa_id');
-            $table->integer('user_id')->index('idx_user_id');
-            $table->char('token_hash', 64)->index('idx_token_hash');
-            $table->dateTime('expires_at')->index('idx_expires');
+            $table->integer('empresa_id')->default(1)->index();
+            $table->integer('user_id')->index();
+            $table->char('token_hash', 64)->index();
+            $table->dateTime('expires_at')->index();
             $table->dateTime('used_at')->nullable();
             $table->dateTime('created')->nullable()->useCurrent();
         });

@@ -12,7 +12,19 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->redirectGuestsTo(function (Request $request) {
+            if ($request->is('agent*')) {
+                return route('agent.login');
+            }
+            return route('login');
+        });
+
+        $middleware->redirectUsersTo(function (Request $request) {
+            if (auth('staff')->check()) {
+                return route('agent.dashboard');
+            }
+            return route('dashboard');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

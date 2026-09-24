@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('email_queue', function (Blueprint $table) {
             $table->bigInteger('id', true);
-            $table->integer('empresa_id')->default(1)->index('idx_email_queue_empresa');
+            $table->integer('empresa_id')->default(1)->index();
             $table->string('recipient_email');
             $table->string('subject');
             $table->mediumText('body_html')->nullable();
@@ -30,8 +30,8 @@ return new class extends Migration
             $table->dateTime('sent_at')->nullable();
             $table->dateTime('updated_at')->nullable();
 
-            $table->index(['context_type', 'context_id'], 'idx_email_queue_context');
-            $table->index(['status', 'next_attempt_at'], 'idx_email_queue_status_next');
+            $table->index(['context_type', 'context_id']);
+            $table->index(['status', 'next_attempt_at']);
         });
     }
 

@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('role_permissions', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('empresa_id')->default(1)->index('idx_role_permissions_empresa_id');
-            $table->string('role_name', 100)->index('idx_role');
+            $table->integer('empresa_id')->default(1)->index();
+            $table->string('role_name', 100)->index();
             $table->string('perm_key', 120);
             $table->boolean('is_enabled')->default(true);
             $table->dateTime('created')->nullable()->useCurrent();
             $table->dateTime('updated')->useCurrentOnUpdate()->nullable()->useCurrent();
 
-            $table->index(['empresa_id', 'role_name'], 'idx_role_permissions_empresa_role');
-            $table->unique(['empresa_id', 'role_name', 'perm_key'], 'uq_role_perm_empresa_role_perm');
+            $table->index(['empresa_id', 'role_name']);
+            $table->unique(['empresa_id', 'role_name', 'perm_key']);
         });
     }
 

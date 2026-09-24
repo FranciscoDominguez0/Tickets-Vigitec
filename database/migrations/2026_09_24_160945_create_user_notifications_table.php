@@ -17,13 +17,13 @@ return new class extends Migration
             $table->integer('user_id');
             $table->string('type', 50);
             $table->string('message');
-            $table->integer('ticket_id')->nullable()->index('idx_ticket');
-            $table->integer('thread_entry_id')->nullable()->index('idx_thread_entry');
+            $table->integer('ticket_id')->nullable()->index();
+            $table->integer('thread_entry_id')->nullable()->index();
             $table->boolean('is_read')->default(false);
             $table->dateTime('created_at')->useCurrent();
             $table->dateTime('read_at')->nullable();
 
-            $table->index(['empresa_id', 'user_id', 'is_read', 'id'], 'idx_emp_user_read');
+            $table->index(['empresa_id', 'user_id', 'is_read', 'id']);
         });
     }
 

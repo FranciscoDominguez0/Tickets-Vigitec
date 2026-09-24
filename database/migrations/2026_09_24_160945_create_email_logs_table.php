@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('email_logs', function (Blueprint $table) {
             $table->bigInteger('id', true);
-            $table->integer('empresa_id')->default(1)->index('idx_email_logs_empresa');
-            $table->bigInteger('queue_id')->nullable()->index('idx_email_logs_queue');
+            $table->integer('empresa_id')->default(1)->index();
+            $table->bigInteger('queue_id')->nullable()->index();
             $table->string('recipient_email')->nullable();
-            $table->string('status', 20)->index('idx_email_logs_status');
+            $table->string('status', 20)->index();
             $table->text('error_message')->nullable();
             $table->dateTime('created_at')->useCurrent();
         });

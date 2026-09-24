@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('ticket_report_items', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('empresa_id')->default(1)->index('idx_empresa_id');
-            $table->unsignedInteger('report_id')->index('idx_report_id');
+            $table->integer('empresa_id')->default(1)->index();
+            $table->unsignedInteger('report_id')->index();
             $table->text('description');
             $table->decimal('price', 10)->default(0);
             $table->dateTime('created_at')->useCurrent();

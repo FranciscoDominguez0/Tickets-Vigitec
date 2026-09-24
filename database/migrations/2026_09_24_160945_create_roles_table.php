@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('roles', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('empresa_id')->default(1)->index('idx_roles_empresa_id');
+            $table->integer('empresa_id')->default(1)->index();
             $table->string('name', 100);
             $table->boolean('is_enabled')->default(true);
             $table->dateTime('created')->nullable()->useCurrent();
             $table->dateTime('updated')->useCurrentOnUpdate()->nullable()->useCurrent();
 
-            $table->unique(['empresa_id', 'name'], 'uq_roles_empresa_name');
+            $table->unique(['empresa_id', 'name']);
         });
     }
 

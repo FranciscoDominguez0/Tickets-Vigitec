@@ -15,11 +15,11 @@ return new class extends Migration
             $table->increments('id');
             $table->unsignedInteger('empresa_id')->default(1);
             $table->unsignedInteger('user_id');
-            $table->unsignedInteger('organization_id')->index('idx_org');
+            $table->unsignedInteger('organization_id')->index();
             $table->dateTime('created_at')->useCurrent();
 
-            $table->index(['empresa_id', 'user_id'], 'idx_empresa_user');
-            $table->unique(['user_id', 'organization_id'], 'uk_user_org');
+            $table->index(['empresa_id', 'user_id']);
+            $table->unique(['user_id', 'organization_id']);
         });
     }
 

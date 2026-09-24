@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('staff_locations', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('staff_id')->unique('uq_staff');
+            $table->integer('staff_id')->unique();
             $table->decimal('lat', 10, 8);
             $table->decimal('lng', 11, 8);
-            $table->timestamp('updated_at')->useCurrentOnUpdate()->useCurrent()->index('idx_updated');
+            $table->timestamp('updated_at')->useCurrentOnUpdate()->useCurrent()->index();
         });
     }
 

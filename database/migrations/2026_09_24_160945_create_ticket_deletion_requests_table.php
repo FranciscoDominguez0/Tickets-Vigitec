@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('ticket_deletion_requests', function (Blueprint $table) {
             $table->integer('id', true);
             $table->integer('ticket_id');
-            $table->integer('empresa_id')->index('idx_empresa_id');
+            $table->integer('empresa_id')->index();
             $table->string('ticket_number', 100);
             $table->string('ticket_subject');
             $table->integer('requested_by');
             $table->text('reason');
-            $table->enum('status', ['pending', 'approved', 'rejected'])->nullable()->default('pending')->index('idx_status');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->nullable()->default('pending')->index();
             $table->dateTime('created_at')->nullable()->useCurrent();
             $table->dateTime('resolved_at')->nullable();
             $table->integer('resolved_by')->nullable();

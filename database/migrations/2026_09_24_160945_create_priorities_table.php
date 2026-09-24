@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('priorities', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->string('name', 50)->unique('name')->comment('Nombre de prioridad');
-            $table->integer('level')->nullable()->default(0)->index('idx_level')->comment('Nivel numérico (1=bajo, 4=urgente)');
+            $table->string('name', 50)->unique()->comment('Nombre de prioridad');
+            $table->integer('level')->nullable()->default(0)->index()->comment('Nivel numérico (1=bajo, 4=urgente)');
             $table->string('color', 20)->nullable()->comment('Color en hex');
         });
     }

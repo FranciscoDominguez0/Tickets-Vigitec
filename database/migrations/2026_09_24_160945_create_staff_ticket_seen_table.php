@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('staff_ticket_seen', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('staff_id');
-            $table->integer('ticket_id')->index('idx_ticket');
+            $table->integer('ticket_id')->index();
             $table->dateTime('seen_at')->useCurrent();
 
-            $table->index(['staff_id', 'seen_at'], 'idx_staff_seen_at');
-            $table->unique(['staff_id', 'ticket_id'], 'uq_staff_ticket_seen_original_pk');
+            $table->index(['staff_id', 'seen_at']);
+            $table->unique(['staff_id', 'ticket_id']);
         });
     }
 

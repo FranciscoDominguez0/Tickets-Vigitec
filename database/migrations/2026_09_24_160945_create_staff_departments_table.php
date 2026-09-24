@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('staff_departments', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('staff_id')->index('idx_sd_staff_id');
-            $table->integer('dept_id')->index('idx_sd_dept_id');
+            $table->integer('staff_id')->index();
+            $table->integer('dept_id')->index();
             $table->dateTime('created_at')->useCurrent();
 
-            $table->unique(['staff_id', 'dept_id'], 'uq_staff_departments_original_pk');
+            $table->unique(['staff_id', 'dept_id']);
         });
     }
 

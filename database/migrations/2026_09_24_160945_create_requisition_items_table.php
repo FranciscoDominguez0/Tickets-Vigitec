@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('requisition_items', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('requisition_id')->index('requisition_id');
+            $table->integer('requisition_id')->index();
             $table->string('product_name');
             $table->integer('quantity')->default(1);
             $table->integer('quantity_used')->nullable();

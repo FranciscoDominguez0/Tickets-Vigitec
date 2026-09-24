@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('threads', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('ticket_id')->unique('unique_ticket')->comment('Ticket asociado');
-            $table->integer('empresa_id')->default(1)->index('idx_threads_empresa_id');
-            $table->dateTime('created')->nullable()->useCurrent()->index('idx_created')->comment('Fecha creación');
+            $table->integer('ticket_id')->unique()->comment('Ticket asociado');
+            $table->integer('empresa_id')->default(1)->index();
+            $table->dateTime('created')->nullable()->useCurrent()->index()->comment('Fecha creación');
 
-            $table->index(['empresa_id', 'created'], 'idx_threads_empresa_created');
+            $table->index(['empresa_id', 'created']);
         });
     }
 

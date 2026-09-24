@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('ticket_status', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->string('name', 50)->index('idx_name')->comment('Nombre del estado');
+            $table->string('name', 50)->index()->comment('Nombre del estado');
             $table->string('color', 20)->nullable()->comment('Color en hex (ej: #3498db)');
             $table->string('icon', 50)->nullable()->comment('Ícono Font Awesome');
             $table->integer('order_by')->nullable()->default(0)->comment('Orden de visualización');
 
-            $table->unique(['name'], 'name');
+            $table->unique(['name']);
         });
     }
 

@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('super_admins', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->string('username')->unique('username');
-            $table->string('email')->unique('email');
+            $table->string('username')->unique();
+            $table->string('email')->unique();
             $table->string('firstname');
             $table->string('lastname');
             $table->string('password');

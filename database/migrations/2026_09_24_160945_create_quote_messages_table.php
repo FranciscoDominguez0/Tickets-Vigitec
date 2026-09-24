@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('quote_messages', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('quote_id')->index('quote_id');
+            $table->integer('quote_id')->index();
             $table->integer('user_id')->nullable();
             $table->integer('staff_id')->nullable();
             $table->text('message');

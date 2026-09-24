@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('ticket_referrals', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('ticket_id')->index('idx_ticket');
-            $table->integer('staff_id')->nullable()->index('idx_staff');
-            $table->integer('dept_id')->nullable()->index('idx_dept');
+            $table->integer('ticket_id')->index();
+            $table->integer('staff_id')->nullable()->index();
+            $table->integer('dept_id')->nullable()->index();
             $table->dateTime('created')->nullable()->useCurrent();
         });
     }

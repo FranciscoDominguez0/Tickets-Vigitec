@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('organizations', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->string('name')->index('idx_name');
-            $table->integer('empresa_id')->default(1)->index('idx_organizations_empresa_id');
+            $table->string('name')->index();
+            $table->integer('empresa_id')->default(1)->index();
             $table->text('address')->nullable();
             $table->string('phone', 50)->nullable();
             $table->string('phone_ext', 20)->nullable();
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->dateTime('updated')->useCurrentOnUpdate()->nullable()->useCurrent();
             $table->boolean('plain_text_emails')->default(false);
 
-            $table->unique(['name'], 'name');
+            $table->unique(['name']);
         });
     }
 

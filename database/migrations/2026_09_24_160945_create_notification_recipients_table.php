@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('notification_recipients', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('empresa_id')->default(1)->index('idx_notification_empresa');
-            $table->integer('staff_id')->index('idx_notification_staff');
+            $table->integer('empresa_id')->default(1)->index();
+            $table->integer('staff_id')->index();
             $table->dateTime('created_at')->useCurrent();
 
-            $table->unique(['empresa_id', 'staff_id'], 'uq_notification_recipient');
+            $table->unique(['empresa_id', 'staff_id']);
         });
     }
 

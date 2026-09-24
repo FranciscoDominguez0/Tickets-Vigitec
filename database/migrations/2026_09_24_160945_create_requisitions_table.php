@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('requisitions', function (Blueprint $table) {
             $table->integer('id', true);
             $table->integer('ticket_id')->nullable();
-            $table->integer('empresa_id')->index('empresa_id');
-            $table->integer('agent_id')->index('agent_id');
+            $table->integer('empresa_id')->index();
+            $table->integer('agent_id')->index();
             $table->integer('client_id')->nullable();
             $table->string('client_name');
             $table->enum('status', ['pending', 'delivered'])->default('pending');

@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('empresas', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->string('nombre')->unique('uq_empresas_nombre');
-            $table->enum('estado', ['activa', 'suspendida', 'bloqueada'])->default('activa')->index('idx_empresas_estado');
+            $table->string('nombre')->unique();
+            $table->enum('estado', ['activa', 'suspendida', 'bloqueada'])->default('activa')->index();
             $table->dateTime('fecha_creacion')->useCurrent();
             $table->decimal('precio_mensual', 10)->default(0);
             $table->date('fecha_inicio_servicio')->nullable();

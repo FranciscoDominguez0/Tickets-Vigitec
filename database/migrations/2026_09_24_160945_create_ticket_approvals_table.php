@@ -20,7 +20,7 @@ return new class extends Migration
             $table->dateTime('created_at')->nullable()->useCurrent();
             $table->dateTime('resolved_at')->nullable();
 
-            $table->index(['ticket_id', 'id'], 'idx_ta_ticket_id');
+            $table->index(['ticket_id', 'id']);
         });
     }
 

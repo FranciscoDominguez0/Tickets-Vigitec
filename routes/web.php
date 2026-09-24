@@ -8,8 +8,10 @@ Route::get('/', function () {
 });
 
 // Rutas de Autenticación (Cliente)
-Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('login', [LoginController::class, 'login']);
+Route::middleware('guest')->group(function () {
+    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [LoginController::class, 'login']);
+});
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
 // Dashboard de ejemplo (protegido)
@@ -21,8 +23,10 @@ Route::middleware('auth')->group(function () {
 
 // Rutas de Autenticación (Agentes/Staff)
 Route::prefix('agent')->group(function () {
-    Route::get('login', [\App\Http\Controllers\Agent\Auth\LoginController::class, 'showLoginForm'])->name('agent.login');
-    Route::post('login', [\App\Http\Controllers\Agent\Auth\LoginController::class, 'login']);
+    Route::middleware('guest:staff')->group(function () {
+        Route::get('login', [\App\Http\Controllers\Agent\Auth\LoginController::class, 'showLoginForm'])->name('agent.login');
+        Route::post('login', [\App\Http\Controllers\Agent\Auth\LoginController::class, 'login']);
+    });
     Route::post('logout', [\App\Http\Controllers\Agent\Auth\LoginController::class, 'logout'])->name('agent.logout');
 
     Route::middleware('auth:staff')->group(function () {

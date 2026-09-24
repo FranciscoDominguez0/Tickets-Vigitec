@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('audit_logs', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('empresa_id')->default(1)->index('empresa_id_idx');
+            $table->integer('empresa_id')->default(1)->index();
             $table->string('actor_type', 50);
             $table->integer('actor_id');
             $table->string('action', 100);
@@ -21,10 +21,10 @@ return new class extends Migration
             $table->integer('entity_id')->nullable();
             $table->text('description')->nullable();
             $table->string('ip_address', 45)->nullable();
-            $table->dateTime('created_at')->index('created_at_idx');
+            $table->dateTime('created_at')->index();
 
-            $table->index(['actor_type', 'actor_id'], 'actor_idx');
-            $table->index(['entity_type', 'entity_id'], 'entity_idx');
+            $table->index(['actor_type', 'actor_id']);
+            $table->index(['entity_type', 'entity_id']);
         });
     }
 

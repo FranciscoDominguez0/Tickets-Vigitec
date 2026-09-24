@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('staff_login_attempts', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('empresa_id')->default(1)->index('idx_staff_login_attempts_empresa_id');
+            $table->integer('empresa_id')->default(1)->index();
             $table->string('username');
             $table->string('ip', 45)->nullable();
             $table->integer('attempts')->default(0);
             $table->dateTime('locked_until')->nullable();
             $table->dateTime('updated')->nullable();
 
-            $table->index(['empresa_id', 'updated'], 'idx_staff_login_attempts_empresa_updated');
-            $table->unique(['username', 'ip'], 'uq_staff_login_attempts');
+            $table->index(['empresa_id', 'updated']);
+            $table->unique(['username', 'ip']);
         });
     }
 

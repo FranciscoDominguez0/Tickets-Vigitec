@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('quotes', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('empresa_id')->index('empresa_id');
-            $table->integer('ticket_id')->nullable()->index('ticket_id');
-            $table->integer('org_id')->index('org_id');
-            $table->integer('staff_id')->index('staff_id');
+            $table->integer('empresa_id')->index();
+            $table->integer('ticket_id')->nullable()->index();
+            $table->integer('org_id')->index();
+            $table->integer('staff_id')->index();
             $table->string('title');
             $table->string('sucursal')->nullable()->default('');
             $table->text('description')->nullable();

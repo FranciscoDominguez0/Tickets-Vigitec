@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('config', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('empresa_id')->default(1)->index('idx_config_empresa_id');
-            $table->string('config_key', 100)->unique('config_key')->comment('Clave de configuración');
+            $table->integer('empresa_id')->default(1)->index();
+            $table->string('config_key', 100)->unique()->comment('Clave de configuración');
             $table->longText('config_value')->nullable()->comment('Valor');
             $table->text('description')->nullable()->comment('Descripción');
             $table->dateTime('created')->nullable()->useCurrent()->comment('Creación');
 
-            $table->index(['config_key'], 'idx_key');
+            $table->index(['config_key']);
         });
     }
 

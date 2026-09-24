@@ -13,17 +13,17 @@ return new class extends Migration
     {
         Schema::create('thread_entries', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('thread_id')->index('idx_thread_id')->comment('Conversación');
-            $table->integer('empresa_id')->default(1)->index('idx_thread_entries_empresa_id');
-            $table->integer('user_id')->nullable()->index('idx_user_id')->comment('Usuario que escribió (NULL si es agente)');
-            $table->integer('staff_id')->nullable()->index('idx_staff_id')->comment('Agente que escribió (NULL si es usuario)');
+            $table->integer('thread_id')->index()->comment('Conversación');
+            $table->integer('empresa_id')->default(1)->index();
+            $table->integer('user_id')->nullable()->index()->comment('Usuario que escribió (NULL si es agente)');
+            $table->integer('staff_id')->nullable()->index()->comment('Agente que escribió (NULL si es usuario)');
             $table->longText('body')->comment('Contenido del mensaje');
-            $table->tinyInteger('is_internal')->nullable()->default(0)->index('idx_internal')->comment('1=nota interna (solo agentes)');
-            $table->dateTime('created')->nullable()->useCurrent()->index('idx_created')->comment('Fecha creación');
+            $table->tinyInteger('is_internal')->nullable()->default(0)->index()->comment('1=nota interna (solo agentes)');
+            $table->dateTime('created')->nullable()->useCurrent()->index()->comment('Fecha creación');
             $table->dateTime('updated')->useCurrentOnUpdate()->nullable()->useCurrent()->comment('Última edición');
 
-            $table->index(['empresa_id', 'created'], 'idx_thread_entries_empresa_created');
-            $table->index(['thread_id', 'created'], 'idx_thread_entries_thread');
+            $table->index(['empresa_id', 'created']);
+            $table->index(['thread_id', 'created']);
         });
     }
 

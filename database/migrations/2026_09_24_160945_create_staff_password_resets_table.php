@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('staff_password_resets', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('empresa_id')->default(1)->index('idx_staff_password_resets_empresa_id');
-            $table->integer('staff_id')->index('idx_staff_id');
-            $table->char('token_hash', 64)->index('idx_token_hash');
-            $table->dateTime('expires_at')->index('idx_expires');
+            $table->integer('empresa_id')->default(1)->index();
+            $table->integer('staff_id')->index();
+            $table->char('token_hash', 64)->index();
+            $table->dateTime('expires_at')->index();
             $table->dateTime('used_at')->nullable();
             $table->dateTime('created')->nullable()->useCurrent();
 
-            $table->index(['empresa_id', 'expires_at'], 'idx_staff_password_resets_empresa_expires');
+            $table->index(['empresa_id', 'expires_at']);
         });
     }
 

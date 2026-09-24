@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('pagos_empresas', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('empresa_id')->index('idx_pago_empresa');
+            $table->integer('empresa_id')->index();
             $table->decimal('monto', 10);
             $table->dateTime('fecha_pago');
             $table->date('periodo_desde');

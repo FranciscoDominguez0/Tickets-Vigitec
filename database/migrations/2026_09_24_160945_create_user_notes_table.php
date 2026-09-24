@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('user_notes', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('empresa_id')->default(1)->index('idx_user_notes_empresa_id');
+            $table->integer('empresa_id')->default(1)->index();
             $table->integer('user_id');
-            $table->integer('staff_id')->nullable()->index('idx_staff');
+            $table->integer('staff_id')->nullable()->index();
             $table->text('note');
             $table->dateTime('created')->useCurrent();
             $table->dateTime('updated')->nullable();
 
-            $table->index(['user_id', 'created'], 'idx_user_created');
+            $table->index(['user_id', 'created']);
         });
     }
 

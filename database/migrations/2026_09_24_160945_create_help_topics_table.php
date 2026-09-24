@@ -13,16 +13,16 @@ return new class extends Migration
     {
         Schema::create('help_topics', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->string('name', 100)->index('idx_name');
+            $table->string('name', 100)->index();
             $table->text('description')->nullable();
-            $table->integer('empresa_id')->default(1)->index('idx_help_topics_empresa_id');
-            $table->integer('dept_id')->nullable()->index('idx_dept_id');
-            $table->tinyInteger('is_active')->nullable()->default(1)->index('idx_active');
+            $table->integer('empresa_id')->default(1)->index();
+            $table->integer('dept_id')->nullable()->index();
+            $table->tinyInteger('is_active')->nullable()->default(1)->index();
             $table->dateTime('created')->nullable()->useCurrent();
             $table->boolean('is_public')->nullable()->default(true);
 
-            $table->index(['empresa_id', 'is_active'], 'idx_help_topics_empresa_active');
-            $table->unique(['name'], 'name');
+            $table->index(['empresa_id', 'is_active']);
+            $table->unique(['name']);
         });
     }
 

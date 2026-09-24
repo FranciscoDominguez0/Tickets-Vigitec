@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id', 128)->primary()->comment('ID de sesión');
-            $table->string('user_type', 50)->nullable()->index('idx_user_type');
-            $table->integer('user_id')->nullable()->index('idx_user_id')->comment('ID del usuario');
+            $table->string('user_type', 50)->nullable()->index();
+            $table->integer('user_id')->nullable()->index()->comment('ID del usuario');
             $table->binary('data')->nullable()->comment('Datos de sesión');
             $table->dateTime('created')->nullable()->useCurrent()->comment('Creación');
-            $table->dateTime('expires')->nullable()->index('idx_expires')->comment('Expiración');
+            $table->dateTime('expires')->nullable()->index()->comment('Expiración');
             $table->dateTime('last_activity')->useCurrentOnUpdate()->nullable()->useCurrent()->comment('Último movimiento');
         });
     }

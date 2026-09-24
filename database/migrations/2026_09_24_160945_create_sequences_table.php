@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('sequences', function (Blueprint $table) {
             $table->integer('id', true);
-            $table->integer('empresa_id')->default(1)->index('idx_sequences_empresa_id');
-            $table->string('name', 100)->unique('name');
+            $table->integer('empresa_id')->default(1)->index();
+            $table->string('name', 100)->unique();
             $table->bigInteger('next')->default(1);
             $table->integer('increment')->default(1);
             $table->integer('padding')->default(0);
             $table->dateTime('created');
             $table->dateTime('updated')->nullable();
 
-            $table->unique(['empresa_id', 'name'], 'uq_sequences_empresa_name');
+            $table->unique(['empresa_id', 'name']);
         });
     }
 
