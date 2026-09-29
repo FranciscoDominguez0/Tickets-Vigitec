@@ -13,6 +13,7 @@
     <!-- Custom CSS from legacy -->
     <link rel="stylesheet" href="{{ asset('css/scp/scp.css') }}">
     <link rel="stylesheet" href="{{ asset('css/scp/dark.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/scp/tickets.css') }}">
     
     @stack('styles')
 </head>
@@ -251,7 +252,7 @@
         </aside>
 
         <!-- MAIN CONTENT -->
-        <main class="main-content">
+        <main class="main-shell">
             <!-- TOP NAVBAR -->
             <nav class="navbar navbar-expand-lg border-bottom px-3 py-2" style="background-color: var(--card-bg, #1e293b); border-color: rgba(255,255,255,0.1) !important;">
                 <div class="container-fluid">
