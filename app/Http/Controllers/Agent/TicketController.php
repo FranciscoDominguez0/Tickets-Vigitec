@@ -16,7 +16,21 @@ class TicketController extends Controller
      */
     public function index()
     {
-        return view('agent.tickets.index');
+        // Load tickets with their related data to avoid N+1 queries
+        $tickets = Ticket::with(['user', 'department', 'priority', 'status', 'staff', 'thread.entries'])
+                         ->orderBy('created', 'desc')
+                         ->paginate(20);
+
+        $staffId = auth('staff')->id() ?? 1;
+
+        $stats = [
+            'open' => Ticket::where('status_id', 1)->count(), // Suponiendo 1 = Abierto
+            'unassigned' => Ticket::whereNull('staff_id')->orWhere('staff_id', 0)->count(),
+            'mine' => Ticket::where('staff_id', $staffId)->count(),
+            'billing' => 0 // Ajustar según lógica de facturación
+        ];
+
+        return view('agent.tickets.index', compact('tickets', 'stats'));
     }
 
     /**
@@ -80,7 +94,7 @@ class TicketController extends Controller
             ]);
         }
 
-        return redirect()->route('agent.tickets.index')->with('success', 'Ticket creado correctamente.');
+        return redirect()->route('agent.tickets.show', $ticket->id)->with('success', 'Ticket creado correctamente.');
     }
 
     /**
@@ -88,18 +102,58 @@ class TicketController extends Controller
      */
     public function show($id)
     {
-        // Simulando datos para visualizar la interfaz
-        $ticket = (object)[
-            'id' => $id,
-            'ticket_number' => 'TCK-100' . $id,
-            'subject' => 'Problema con la conexión a internet',
-            'status_id' => 1,
-            'user' => (object)['firstname' => 'Juan', 'lastname' => 'Pérez'],
-            'status' => (object)['name' => 'Abierto'],
-            'priority' => (object)['name' => 'Alta'],
-            'department' => (object)['name' => 'Soporte Técnico'],
-            'staff' => (object)['firstname' => 'Agente', 'lastname' => 'Admin']
-        ];
-        return view('agent.ticket.show', compact('ticket'));
+        $ticket = Ticket::with(['user', 'department', 'priority', 'status', 'thread.entries.attachments', 'staff'])->findOrFail($id);
+        
+        return view('agent.tickets.show', compact('ticket'));
+    }
+
+    /**
+     * Guarda una respuesta en el hilo del ticket.
+     */
+    public function reply(Request $request, $id)
+    {
+        $ticket = Ticket::findOrFail($id);
+
+        $validated = $request->validate([
+            'response_body' => 'required|string',
+            'attachments.*' => 'nullable|file|max:10240' // Max 10MB
+        ]);
+
+        $thread = $ticket->thread;
+        
+        // Si el ticket no tiene un hilo aún, lo creamos
+        if (!$thread) {
+            $thread = $ticket->thread()->create([
+                'created' => now(),
+            ]);
+        }
+
+        // Insertamos la respuesta
+        $entry = $thread->entries()->create([
+            'empresa_id' => $ticket->empresa_id,
+            'staff_id' => auth('staff')->id() ?? 1, // fallback si se prueba sin estar logueado
+            'body' => $validated['response_body'],
+            'is_internal' => 0,
+            'created' => now(),
+        ]);
+
+        // Manejo de archivos adjuntos
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $path = $file->store('tickets/attachments');
+                
+                $entry->attachments()->create([
+                    'empresa_id' => $ticket->empresa_id,
+                    'filename' => $file->hashName(),
+                    'original_filename' => $file->getClientOriginalName(),
+                    'mimetype' => $file->getMimeType(),
+                    'size' => $file->getSize(),
+                    'path' => $path,
+                    'created' => now(),
+                ]);
+            }
+        }
+
+        return redirect()->route('agent.tickets.show', $ticket->id)->with('success', 'Respuesta enviada correctamente.');
     }
 }

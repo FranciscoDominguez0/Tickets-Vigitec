@@ -79,6 +79,7 @@ Route::prefix('agent')->group(function () {
         Route::get('/tickets/create', [\App\Http\Controllers\Agent\TicketController::class, 'create'])->name('agent.tickets.create');
         Route::post('/tickets', [\App\Http\Controllers\Agent\TicketController::class, 'store'])->name('agent.tickets.store');
         Route::get('/ticket/{id}', [\App\Http\Controllers\Agent\TicketController::class, 'show'])->name('agent.tickets.show');
+        Route::post('/ticket/{id}/reply', [\App\Http\Controllers\Agent\TicketController::class, 'reply'])->name('agent.tickets.reply');
 
         Route::get('/tickets/billing', function () { return view('agent.tickets.billing'); })->name('agent.tickets.billing');
         Route::get('/tickets/report-sheet', function () { return view('agent.tickets.report_sheet'); })->name('agent.tickets.report_sheet');

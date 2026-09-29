@@ -9,5 +9,13 @@ class ThreadEntry extends Model
     public $timestamps = false;
     protected $guarded = [];
 
-    // Configuración adicional del modelo si es requerida
+    public function thread()
+    {
+        return $this->belongsTo(Thread::class);
+    }
+
+    public function attachments()
+    {
+        return $this->hasMany(Attachment::class, 'thread_entry_id');
+    }
 }

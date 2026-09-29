@@ -7,10 +7,10 @@
                 <div>
                     <h1>Tickets</h1>
                     <div class="sub">
-                        Abiertos: <strong>1</strong> · 
-                        Sin asignar: <strong>0</strong> · 
-                        Míos: <strong>1</strong> · 
-                        Por facturar: <strong>0</strong>
+                        Abiertos: <strong>{{ $stats['open'] }}</strong> · 
+                        Sin asignar: <strong>{{ $stats['unassigned'] }}</strong> · 
+                        Míos: <strong>{{ $stats['mine'] }}</strong> · 
+                        Por facturar: <strong>{{ $stats['billing'] }}</strong>
                     </div>
                 </div>
                 <a href="{{ route('agent.tickets.create') }}" class="btn-new"><i class="bi bi-plus-lg me-1"></i> Nuevo</a>
@@ -73,121 +73,94 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Fila 1 -->
-                    <tr class="ticket-row" style="background: #fff; cursor: pointer; transition: all 0.2s;" onclick="window.location='{{ route('agent.tickets.show', 1) }}';">
-                        <td class="check-cell" style="vertical-align: middle; text-align: center; width: 44px;">
-                            <input class="form-check-input" type="checkbox" style="cursor: pointer; width: 1.1em; height: 1.1em;" onclick="event.stopPropagation();">
-                        </td>
-                        <td style="vertical-align: middle; padding: 18px 12px 18px 0;">
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                                <a href="{{ route('agent.tickets.show', 1) }}" style="font-weight: 800; font-size: 1.05rem; color: #60a5fa; text-decoration: none;">
-                                    <i class="bi bi-hash" style="opacity: 0.5;"></i>254
-                                </a>
-                                <span title="Prioridad: Alta" style="display:inline-flex; align-items:center; gap:4px; background:#f59e0b18; color:#f59e0b; border:1px solid #f59e0b40; border-radius:5px; padding:1px 7px; font-size:0.68rem; font-weight:800; letter-spacing:0.04em; line-height:1.6; text-transform:uppercase; white-space:nowrap;">
-                                    <span style="width:5px; height:5px; border-radius:50%; background:#f59e0b; flex-shrink:0; display:inline-block;"></span>
-                                    Alta
-                                </span>
-                            </div>
-                            <div style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin-bottom: 8px; line-height: 1.4; display: block; max-width: 55ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: none;">
-                                videos de cámaras de Meteti
-                            </div>
-                            <div style="display: flex; align-items: center; font-size: 0.8rem; color: #64748b;">
-                                <span style="display:inline-flex; align-items:center; gap:5px;">
-                                    <i class="bi bi-headset" style="color:#94a3b8;"></i> Asignado a: <strong style="color: #475569; font-weight:600;">Agente Admin</strong>
-                                </span>
-                            </div>
-                        </td>
-                        <td class="d-none d-lg-table-cell" style="vertical-align: middle;">
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;">
-                                    <i class="bi bi-person-fill"></i>
-                                </div>
-                                <div style="display:flex; flex-direction:column;">
-                                    <span style="font-weight: 700; color: #334155; font-size: 0.9rem;">Leivis Santana</span>
-                                    <span style="font-size: 0.75rem; color: #64748b; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-                                        <i class="bi bi-building" style="font-size: 0.7rem;"></i> Fertilizantes Superiores
-                                    </span>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="d-none d-md-table-cell" style="vertical-align: middle;">
-                            <div style="display:flex; flex-direction:column; gap:6px; align-items: flex-start;">
-                                <span class="chip chip-status" style="background: #22c55e15; color: #22c55e; border: 1px solid #22c55e33; padding: 6px 14px; font-weight: 700; letter-spacing: 0.03em; border-radius: 8px; font-size: 0.8rem; text-transform: uppercase;">
-                                    <i class="bi bi-record-circle-fill" style="font-size: 0.6rem; margin-right: 4px; vertical-align: middle;"></i> RESUELTO
-                                </span>
-                            </div>
-                        </td>
-                        <td class="d-none d-lg-table-cell" style="vertical-align: middle;">
-                            <div style="color:#64748b; font-size: 0.85rem; font-weight: 600; display:flex; align-items:center; gap:6px;">
-                                <i class="bi bi-clock-history" style="color:#94a3b8; font-size: 1rem;"></i>
-                                <span>29/09/2026 11:11 AM</span>
-                            </div>
-                        </td>
-                        <td style="vertical-align: middle; text-align: right; padding-right: 12px;">
-                            <a href="{{ route('agent.tickets.show', 1) }}" class="btn btn-sm" style="background: transparent; color: #94a3b8; border: none; font-size: 1.2rem; transition: all 0.2s; display: inline-flex; align-items: center;" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#94a3b8'">
-                                <i class="bi bi-chevron-right"></i>
-                            </a>
-                        </td>
-                    </tr>
+                    @forelse($tickets as $ticket)
+                        @php
+                            // Configuración visual según prioridad (muy simple)
+                            $priorityName = strtolower($ticket->priority->name ?? 'baja');
+                            $prioColor = match($priorityName) {
+                                'alta', 'urgente' => '#f59e0b',
+                                'normal' => '#10b981',
+                                default => '#3b82f6'
+                            };
 
-                    <!-- Fila 2 -->
-                    <tr class="ticket-row" style="background: #fff; cursor: pointer; transition: all 0.2s;" onclick="window.location='{{ route('agent.tickets.show', 2) }}';">
-                        <td class="check-cell" style="vertical-align: middle; text-align: center; width: 44px;">
-                            <input class="form-check-input" type="checkbox" style="cursor: pointer; width: 1.1em; height: 1.1em;" onclick="event.stopPropagation();">
-                        </td>
-                        <td style="vertical-align: middle; padding: 18px 12px 18px 0;">
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                                <a href="{{ route('agent.tickets.show', 2) }}" style="font-weight: 800; font-size: 1.05rem; color: #60a5fa; text-decoration: none;">
-                                    <i class="bi bi-hash" style="opacity: 0.5;"></i>250
-                                </a>
-                                <span title="Prioridad: Baja" style="display:inline-flex; align-items:center; gap:4px; background:#3b82f618; color:#3b82f6; border:1px solid #3b82f640; border-radius:5px; padding:1px 7px; font-size:0.68rem; font-weight:800; letter-spacing:0.04em; line-height:1.6; text-transform:uppercase; white-space:nowrap;">
-                                    <span style="width:5px; height:5px; border-radius:50%; background:#3b82f6; flex-shrink:0; display:inline-block;"></span>
-                                    Baja
-                                </span>
-                            </div>
-                            <div style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin-bottom: 8px; line-height: 1.4; display: block; max-width: 55ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: none;">
-                                Alarma no suena
-                            </div>
-                            <div style="display: flex; align-items: center; font-size: 0.8rem; color: #64748b;">
-                                <span style="display:inline-flex; align-items:center; gap:5px;">
-                                    <i class="bi bi-headset" style="color:#94a3b8;"></i> Asignado a: <strong style="color: #475569; font-weight:600;">Sin asignar</strong>
-                                </span>
-                            </div>
-                        </td>
-                        <td class="d-none d-lg-table-cell" style="vertical-align: middle;">
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <div style="width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;">
-                                    <i class="bi bi-person-fill"></i>
-                                </div>
-                                <div style="display:flex; flex-direction:column;">
-                                    <span style="font-weight: 700; color: #334155; font-size: 0.9rem;">Juan Pérez</span>
-                                    <span style="font-size: 0.75rem; color: #64748b; font-weight: 600; display: flex; align-items: center; gap: 4px;">
-                                        <i class="bi bi-building" style="font-size: 0.7rem;"></i> Fertilizantes Superiores
+                            // Configuración visual según estado
+                            $statusName = strtolower($ticket->status->name ?? 'abierto');
+                            $statusColor = match($statusName) {
+                                'resuelto', 'cerrado' => '#22c55e',
+                                default => '#3b82f6'
+                            };
+                        @endphp
+                        <tr class="ticket-row" style="background: #fff; cursor: pointer; transition: all 0.2s;" onclick="window.location='{{ route('agent.tickets.show', $ticket->id) }}';">
+                            <td class="check-cell" style="vertical-align: middle; text-align: center; width: 44px;">
+                                <input class="form-check-input" type="checkbox" style="cursor: pointer; width: 1.1em; height: 1.1em;" onclick="event.stopPropagation();">
+                            </td>
+                            <td style="vertical-align: middle; padding: 18px 12px 18px 0;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                    <a href="{{ route('agent.tickets.show', $ticket->id) }}" style="font-weight: 800; font-size: 1.05rem; color: #60a5fa; text-decoration: none;">
+                                        <i class="bi bi-hash" style="opacity: 0.5;"></i>{{ $ticket->ticket_number }}
+                                    </a>
+                                    <span title="Prioridad: {{ $ticket->priority->name ?? 'Baja' }}" style="display:inline-flex; align-items:center; gap:4px; background:{{ $prioColor }}18; color:{{ $prioColor }}; border:1px solid {{ $prioColor }}40; border-radius:5px; padding:1px 7px; font-size:0.68rem; font-weight:800; letter-spacing:0.04em; line-height:1.6; text-transform:uppercase; white-space:nowrap;">
+                                        <span style="width:5px; height:5px; border-radius:50%; background:{{ $prioColor }}; flex-shrink:0; display:inline-block;"></span>
+                                        {{ $ticket->priority->name ?? 'Baja' }}
                                     </span>
                                 </div>
-                            </div>
-                        </td>
-                        <td class="d-none d-md-table-cell" style="vertical-align: middle;">
-                            <div style="display:flex; flex-direction:column; gap:6px; align-items: flex-start;">
-                                <span class="chip chip-status" style="background: #3b82f615; color: #3b82f6; border: 1px solid #3b82f633; padding: 6px 14px; font-weight: 700; letter-spacing: 0.03em; border-radius: 8px; font-size: 0.8rem; text-transform: uppercase;">
-                                    <i class="bi bi-record-circle-fill" style="font-size: 0.6rem; margin-right: 4px; vertical-align: middle;"></i> ABIERTO
-                                </span>
-                            </div>
-                        </td>
-                        <td class="d-none d-lg-table-cell" style="vertical-align: middle;">
-                            <div style="color:#64748b; font-size: 0.85rem; font-weight: 600; display:flex; align-items:center; gap:6px;">
-                                <i class="bi bi-clock-history" style="color:#94a3b8; font-size: 1rem;"></i>
-                                <span>24/09/2026 02:40 PM</span>
-                            </div>
-                        </td>
-                        <td style="vertical-align: middle; text-align: right; padding-right: 12px;">
-                            <a href="{{ route('agent.tickets.show', 2) }}" class="btn btn-sm" style="background: transparent; color: #94a3b8; border: none; font-size: 1.2rem; transition: all 0.2s; display: inline-flex; align-items: center;" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#94a3b8'">
-                                <i class="bi bi-chevron-right"></i>
-                            </a>
-                        </td>
-                    </tr>
+                                <div style="font-weight: 600; color: #1e293b; font-size: 0.95rem; margin-bottom: 8px; line-height: 1.4; display: block; max-width: 55ch; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: none;">
+                                    {{ $ticket->subject }}
+                                </div>
+                                <div style="display: flex; align-items: center; font-size: 0.8rem; color: #64748b;">
+                                    <span style="display:inline-flex; align-items:center; gap:5px;">
+                                        <i class="bi bi-headset" style="color:#94a3b8;"></i> Asignado a: <strong style="color: #475569; font-weight:600;">{{ $ticket->staff->firstname ?? 'Sin asignar' }}</strong>
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="d-none d-lg-table-cell" style="vertical-align: middle;">
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;">
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
+                                    <div style="display:flex; flex-direction:column;">
+                                        <span style="font-weight: 700; color: #334155; font-size: 0.9rem;">{{ $ticket->user->firstname ?? 'N/A' }} {{ $ticket->user->lastname ?? '' }}</span>
+                                        <span style="font-size: 0.75rem; color: #64748b; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                                            <i class="bi bi-building" style="font-size: 0.7rem;"></i> Empresa Predeterminada
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="d-none d-md-table-cell" style="vertical-align: middle;">
+                                <div style="display:flex; flex-direction:column; gap:6px; align-items: flex-start;">
+                                    <span class="chip chip-status" style="background: {{ $statusColor }}15; color: {{ $statusColor }}; border: 1px solid {{ $statusColor }}33; padding: 6px 14px; font-weight: 700; letter-spacing: 0.03em; border-radius: 8px; font-size: 0.8rem; text-transform: uppercase;">
+                                        <i class="bi bi-record-circle-fill" style="font-size: 0.6rem; margin-right: 4px; vertical-align: middle;"></i> {{ $ticket->status->name ?? 'ABIERTO' }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="d-none d-lg-table-cell" style="vertical-align: middle;">
+                                <div style="color:#64748b; font-size: 0.85rem; font-weight: 600; display:flex; align-items:center; gap:6px;">
+                                    <i class="bi bi-clock-history" style="color:#94a3b8; font-size: 1rem;"></i>
+                                    <span>{{ \Carbon\Carbon::parse($ticket->created)->format('d/m/Y h:i A') }}</span>
+                                </div>
+                            </td>
+                            <td style="vertical-align: middle; text-align: right; padding-right: 12px;">
+                                <a href="{{ route('agent.tickets.show', $ticket->id) }}" class="btn btn-sm" style="background: transparent; color: #94a3b8; border: none; font-size: 1.2rem; transition: all 0.2s; display: inline-flex; align-items: center;" onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#94a3b8'">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                No se encontraron tickets.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
+        
+        @if($tickets->hasPages())
+        <div class="mt-3 p-3 bg-white rounded-3 shadow-sm border" style="border-color: #e2e8f0;">
+            {{ $tickets->links('pagination::bootstrap-5') }}
+        </div>
+        @endif
     </div>
 </x-agent.layout>
