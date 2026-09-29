@@ -13,7 +13,7 @@
                         Por facturar: <strong>0</strong>
                     </div>
                 </div>
-                <a href="#" class="btn-new"><i class="bi bi-plus-lg me-1"></i> Nuevo</a>
+                <a href="{{ route('agent.tickets.create') }}" class="btn-new"><i class="bi bi-plus-lg me-1"></i> Nuevo</a>
             </div>
         </div>
 

@@ -74,25 +74,14 @@ Route::prefix('agent')->group(function () {
         Route::get('/directory', function () { return view('agent.directory.index'); })->name('agent.directory');
         Route::get('/map', function () { return view('agent.map.index'); })->name('agent.map');
 
-        // Tickets
-        Route::get('/tickets', function () { return view('agent.tickets.index'); })->name('agent.tickets.index');
+                // Tickets
+        Route::get('/tickets', [\App\Http\Controllers\Agent\TicketController::class, 'index'])->name('agent.tickets.index');
+        Route::get('/tickets/create', [\App\Http\Controllers\Agent\TicketController::class, 'create'])->name('agent.tickets.create');
+        Route::post('/tickets', [\App\Http\Controllers\Agent\TicketController::class, 'store'])->name('agent.tickets.store');
+        Route::get('/ticket/{id}', [\App\Http\Controllers\Agent\TicketController::class, 'show'])->name('agent.tickets.show');
+
         Route::get('/tickets/billing', function () { return view('agent.tickets.billing'); })->name('agent.tickets.billing');
         Route::get('/tickets/report-sheet', function () { return view('agent.tickets.report_sheet'); })->name('agent.tickets.report_sheet');
-        Route::get('/ticket/{id}', function ($id) {
-            // Datos de prueba para previsualizar el diseño
-            $ticket = (object)[
-                'id' => $id,
-                'ticket_number' => 'TCK-100' . $id,
-                'subject' => 'Problema con la conexión a internet',
-                'status_id' => 1,
-                'user' => (object)['firstname' => 'Juan', 'lastname' => 'Pérez'],
-                'status' => (object)['name' => 'Abierto'],
-                'priority' => (object)['name' => 'Alta'],
-                'department' => (object)['name' => 'Soporte Técnico'],
-                'staff' => (object)['firstname' => 'Agente', 'lastname' => 'Admin']
-            ];
-            return view('agent.ticket.show', compact('ticket'));
-        })->name('agent.tickets.show');
 
         // Reporte e Inventario
         Route::get('/reports', function () { return view('agent.reports.index'); })->name('agent.reports.index');
