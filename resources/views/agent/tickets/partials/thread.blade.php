@@ -63,9 +63,14 @@
                                 <div class="avatar staff-avatar">{{ $initials }}</div>
                                 <span class="author-name text-white fw-bold">{{ $authorName }}</span>
                                 <span class="badge bg-secondary badge-role">Técnico</span>
-                                <div class="ms-auto message-actions">
-                                    <i class="bi bi-pencil-square text-primary me-2 cursor-pointer"></i>
-                                    <i class="bi bi-trash text-danger cursor-pointer"></i>
+                                <div class="ms-auto message-actions d-flex align-items-center">
+                                    <button type="button" class="btn btn-link p-0 border-0 bg-transparent text-primary me-2" data-bs-toggle="modal" data-bs-target="#editThreadModal{{ $entry->id }}">
+                                        <i class="bi bi-pencil-square cursor-pointer"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-link p-0 border-0 bg-transparent text-danger" data-bs-toggle="modal" data-bs-target="#deleteThreadModal{{ $entry->id }}">
+                                        <i class="bi bi-trash cursor-pointer"></i>
+                                    </button>
+
                                 </div>
                             </div>
                             <div class="message-bubble staff-bubble">
@@ -100,6 +105,37 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Modal de Edición -->
+                        <div class="modal fade" id="editThreadModal{{ $entry->id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content bg-dark text-white border-secondary">
+                                    <div class="modal-header border-secondary">
+                                        <h5 class="modal-title">Editar Mensaje</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form action="{{ route('agent.tickets.thread.update', $entry->id) }}" method="POST">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="modal-body">
+                                            <textarea name="body" class="form-control bg-black text-white border-secondary" rows="8" required>{{ $entry->body }}</textarea>
+                                        </div>
+                                        <div class="modal-footer border-secondary">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Modal de Eliminación de Mensaje -->
+                        <x-delete-modal 
+                            id="deleteThreadModal{{ $entry->id }}" 
+                            title="Eliminar Mensaje" 
+                            message="¿Estás seguro de eliminar este mensaje? Esta acción no se puede deshacer."
+                            formAction="{{ route('agent.tickets.thread.destroy', $entry->id) }}"
+                        />
                     @endif
                 @endforeach
             @else

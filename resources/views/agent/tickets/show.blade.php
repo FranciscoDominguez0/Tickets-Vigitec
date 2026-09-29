@@ -123,14 +123,10 @@
                         <span>Bloquear Email</span>
                     </a>
                     
-                    <form action="#" method="POST" onsubmit="return confirm('¿Seguro que quieres borrar este ticket?');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="creative-dropdown-item text-danger border-0 w-100 text-start bg-transparent">
-                            <div class="creative-dropdown-icon text-danger" style="background: rgba(239, 68, 68, 0.1);"><i class="bi bi-trash"></i></div>
-                            <span>Borrar Ticket</span>
-                        </button>
-                    </form>
+                    <button type="button" class="creative-dropdown-item text-danger border-0 w-100 text-start bg-transparent" data-bs-toggle="modal" data-bs-target="#deleteTicketModal">
+                        <div class="creative-dropdown-icon text-danger" style="background: rgba(239, 68, 68, 0.1);"><i class="bi bi-trash"></i></div>
+                        <span>Borrar Ticket</span>
+                    </button>
                 </x-agent.creative-dropdown>
             </div>
         </div>
@@ -143,6 +139,14 @@
 
         <!-- Formulario de Respuesta -->
         @include('agent.tickets.partials.reply-form')
+        
+        <!-- Modal de Eliminación -->
+        <x-delete-modal 
+            id="deleteTicketModal" 
+            title="Eliminar Ticket #{{ $ticket->ticket_number }}" 
+            message="¿Estás seguro de que deseas eliminar este ticket de forma permanente? Esta acción no se puede deshacer y se perderán todos los mensajes del hilo."
+            formAction="{{ route('agent.tickets.destroy', $ticket->id) }}"
+        />
     </div>
 
     @push('styles')

@@ -110,11 +110,11 @@
                         </button>
                         <ul id="tickets-subnav" class="sidebar-subnav {{ $isTicketsRoute ? 'open' : '' }}">
                             <li>
-                                <a href="{{ route('agent.tickets.index') }}" class="sidebar-link {{ request()->routeIs('agent.tickets.index') ? 'active' : '' }}">
+                                <a href="{{ route('agent.tickets.index') }}" class="sidebar-link {{ request()->routeIs('agent.tickets.index') || request()->routeIs('agent.tickets.show') ? 'active' : '' }}">
                                     <span class="icon">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <rect x="2" y="4" width="20" height="16" rx="2" stroke="{{ request()->routeIs('agent.tickets.index') ? '#ffffff' : '#64748b' }}" stroke-width="1.6"/>
-                                            <path d="M7 9H17M7 14H13" stroke="{{ request()->routeIs('agent.tickets.index') ? '#ffffff' : '#64748b' }}" stroke-width="1.6" stroke-linecap="round"/>
+                                            <rect x="2" y="4" width="20" height="16" rx="2" stroke="{{ request()->routeIs('agent.tickets.index') || request()->routeIs('agent.tickets.show') ? '#ffffff' : '#64748b' }}" stroke-width="1.6"/>
+                                            <path d="M7 9H17M7 14H13" stroke="{{ request()->routeIs('agent.tickets.index') || request()->routeIs('agent.tickets.show') ? '#ffffff' : '#64748b' }}" stroke-width="1.6" stroke-linecap="round"/>
                                         </svg>
                                     </span>
                                     Detalles
