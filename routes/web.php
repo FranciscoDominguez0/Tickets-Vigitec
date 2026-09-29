@@ -80,6 +80,11 @@ Route::prefix('agent')->group(function () {
         Route::post('/tickets', [\App\Http\Controllers\Agent\TicketController::class, 'store'])->name('agent.tickets.store');
         Route::get('/ticket/{id}', [\App\Http\Controllers\Agent\TicketController::class, 'show'])->name('agent.tickets.show');
         Route::post('/ticket/{id}/reply', [\App\Http\Controllers\Agent\TicketController::class, 'reply'])->name('agent.tickets.reply');
+        
+        // Ticket Action Routes
+        Route::post('/ticket/{id}/assign', [\App\Http\Controllers\Agent\TicketController::class, 'assign'])->name('agent.tickets.assign');
+        Route::post('/ticket/{id}/transfer', [\App\Http\Controllers\Agent\TicketController::class, 'transfer'])->name('agent.tickets.transfer');
+        Route::post('/ticket/{id}/status', [\App\Http\Controllers\Agent\TicketController::class, 'status'])->name('agent.tickets.status');
 
         Route::get('/tickets/billing', function () { return view('agent.tickets.billing'); })->name('agent.tickets.billing');
         Route::get('/tickets/report-sheet', function () { return view('agent.tickets.report_sheet'); })->name('agent.tickets.report_sheet');

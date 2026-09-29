@@ -104,7 +104,10 @@ class TicketController extends Controller
     {
         $ticket = Ticket::with(['user', 'department', 'priority', 'status', 'thread.entries.attachments', 'staff'])->findOrFail($id);
         
-        return view('agent.tickets.show', compact('ticket'));
+        $departments = Department::orderBy('name')->get();
+        $staffMembers = \App\Models\Staff::where('is_active', 1)->orderBy('firstname')->get();
+        
+        return view('agent.tickets.show', compact('ticket', 'departments', 'staffMembers'));
     }
 
     /**
@@ -155,5 +158,54 @@ class TicketController extends Controller
         }
 
         return redirect()->route('agent.tickets.show', $ticket->id)->with('success', 'Respuesta enviada correctamente.');
+    }
+
+    /**
+     * Asigna un ticket a un agente.
+     */
+    public function assign(Request $request, $id)
+    {
+        $request->validate(['staff_id' => 'required|exists:staff,id']);
+        
+        $ticket = Ticket::findOrFail($id);
+        $ticket->staff_id = $request->staff_id;
+        // Optionally save internal note
+        $ticket->save();
+
+        return redirect()->back()->with('success', 'Ticket asignado correctamente.');
+    }
+
+    /**
+     * Transfiere el ticket a otro departamento.
+     */
+    public function transfer(Request $request, $id)
+    {
+        $request->validate(['dept_id' => 'required|exists:departments,id']);
+        
+        $ticket = Ticket::findOrFail($id);
+        $ticket->dept_id = $request->dept_id;
+        // Optionally save internal note
+        $ticket->save();
+
+        return redirect()->back()->with('success', 'Ticket transferido exitosamente.');
+    }
+
+    /**
+     * Cambia el estado del ticket.
+     */
+    public function status(Request $request, $id)
+    {
+        $request->validate(['status_id' => 'required|exists:ticket_status,id']);
+        
+        $ticket = Ticket::findOrFail($id);
+        $ticket->status_id = $request->status_id;
+        
+        if ($request->status_id == 3) { // Cerrado
+            $ticket->closed = now();
+        }
+
+        $ticket->save();
+
+        return redirect()->back()->with('success', 'Estado del ticket actualizado.');
     }
 }
