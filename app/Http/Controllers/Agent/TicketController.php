@@ -8,21 +8,32 @@ use App\Models\Priority;
 use App\Models\Staff;
 use App\Models\ThreadEntry;
 use App\Models\Ticket;
+use App\Models\TicketStatus;
 use App\Models\User;
+use App\Services\TicketService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class TicketController extends Controller
 {
+    public function __construct(
+        protected TicketService $ticketService
+    ) {}
+
     /**
      * Muestra la lista de tickets.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Load tickets with their related data to avoid N+1 queries
-        $tickets = Ticket::with(['user', 'department', 'priority', 'status', 'staff', 'thread.entries'])
-            ->orderBy('created', 'desc')
-            ->paginate(20);
+        $query = Ticket::with(['user', 'department', 'priority', 'status', 'staff', 'thread.entries'])
+            ->orderBy('created', 'desc');
+
+        if ($request->input('filter') === 'billing') {
+            // Filtrar tickets cerrados que necesitan reporte pero que aún no lo tienen, etc.
+            // Por ahora, como es "por facturar", listamos tickets que no tengan reporte
+            $query->where('status_id', 3)->whereDoesntHave('report');
+        }
+
+        $tickets = $query->paginate(20);
 
         $idPersonal = auth('staff')->id() ?? 1;
 
@@ -67,37 +78,8 @@ class TicketController extends Controller
         ]);
 
         // Generación del número de ticket usando la tabla sequences (desde 1)
-        $numeroTicket = DB::transaction(function () {
-            $empresa_id = auth('staff')->user()->empresa_id ?? 1;
-            $secuencia = DB::table('sequences')
-                ->where('empresa_id', $empresa_id)
-                ->where('name', 'tickets')
-                ->lockForUpdate()
-                ->first();
-
-            if (! $secuencia) {
-                DB::table('sequences')->insert([
-                    'empresa_id' => $empresa_id,
-                    'name' => 'tickets',
-                    'next' => 2,
-                    'increment' => 1,
-                    'padding' => 0,
-                    'created' => now(),
-                    'updated' => now(),
-                ]);
-
-                return '1';
-            } else {
-                DB::table('sequences')
-                    ->where('id', $secuencia->id)
-                    ->update([
-                        'next' => $secuencia->next + $secuencia->increment,
-                        'updated' => now(),
-                    ]);
-
-                return (string) $secuencia->next;
-            }
-        });
+        $empresa_id = auth('staff')->user()->empresa_id ?? 1;
+        $numeroTicket = $this->ticketService->generateTicketNumber($empresa_id);
 
         $ticket = new Ticket;
         $ticket->ticket_number = $numeroTicket;
@@ -113,21 +95,7 @@ class TicketController extends Controller
 
         $ticket->save();
 
-        if (! empty($validado['body'])) {
-            // Primero se debe crear el hilo padre en la tabla threads
-            $hilo = $ticket->thread()->create([
-                'created' => now(),
-            ]);
-
-            // Luego insertamos la respuesta inicial en thread_entries
-            $hilo->entries()->create([
-                'empresa_id' => $ticket->empresa_id,
-                'staff_id' => auth('staff')->id(),
-                'body' => $validado['body'],
-                'is_internal' => 0,
-                'created' => now(),
-            ]);
-        }
+        $this->ticketService->createInitialThread($ticket, $validado['body'] ?? null, auth('staff')->id() ?? 1);
 
         return redirect()->route('agent.tickets.show', $ticket->id)->with('success', 'Ticket creado correctamente.');
     }
@@ -141,7 +109,7 @@ class TicketController extends Controller
 
         $departamentos = Department::orderBy('name')->get();
         $miembrosStaff = Staff::where('is_active', 1)->orderBy('firstname')->get();
-        $estados = \App\Models\TicketStatus::orderBy('id')->get();
+        $estados = TicketStatus::orderBy('id')->get();
 
         return view('agent.tickets.show', compact('ticket', 'departamentos', 'miembrosStaff', 'estados'));
     }
@@ -158,40 +126,7 @@ class TicketController extends Controller
             'attachments.*' => 'nullable|file|max:10240', // Max 10MB
         ]);
 
-        $hilo = $ticket->thread;
-
-        // Si el ticket no tiene un hilo aún, lo creamos
-        if (! $hilo) {
-            $hilo = $ticket->thread()->create([
-                'created' => now(),
-            ]);
-        }
-
-        // Insertamos la respuesta
-        $entrada = $hilo->entries()->create([
-            'empresa_id' => $ticket->empresa_id,
-            'staff_id' => auth('staff')->id() ?? 1, // fallback si se prueba sin estar logueado
-            'body' => $validado['response_body'],
-            'is_internal' => 0,
-            'created' => now(),
-        ]);
-
-        // Manejo de archivos adjuntos
-        if ($request->hasFile('attachments')) {
-            foreach ($request->file('attachments') as $archivo) {
-                $ruta = $archivo->store('tickets/attachments');
-
-                $entrada->attachments()->create([
-                    'empresa_id' => $ticket->empresa_id,
-                    'filename' => $archivo->hashName(),
-                    'original_filename' => $archivo->getClientOriginalName(),
-                    'mimetype' => $archivo->getMimeType(),
-                    'size' => $archivo->getSize(),
-                    'path' => $ruta,
-                    'created' => now(),
-                ]);
-            }
-        }
+        $this->ticketService->addReply($ticket, $validado['response_body'], auth('staff')->id() ?? 1, $request->file('attachments') ?? []);
 
         return redirect()->route('agent.tickets.show', $ticket->id)->with('success', 'Respuesta enviada correctamente.');
     }
@@ -231,33 +166,33 @@ class TicketController extends Controller
         $request->validate(['status_id' => 'required|exists:ticket_status,id']);
 
         $ticket = Ticket::findOrFail($id);
-        $ticket->status_id = $request->status_id;
 
-        if ($request->status_id == 3) { // Cerrado
-            $ticket->closed = now();
+        $this->ticketService->updateStatus($ticket, $request->status_id, auth('staff')->id() ?? 1);
+
+        if ($request->status_id == 3) {
+            return redirect()->route('agent.tickets.report_sheet', $ticket->id)
+                ->with('success', 'Ticket cerrado. Por favor complete la hoja de reporte.');
         }
-
-        $nuevoEstado = \App\Models\TicketStatus::find($request->status_id);
-        if ($nuevoEstado && in_array($nuevoEstado->name, ['En camino', 'En proceso'])) {
-            // Auto asignar si está sin asignar
-            if (!$ticket->staff_id || $ticket->staff_id == 0) {
-                $ticket->staff_id = auth('staff')->id() ?? 1;
-            }
-
-            // Simular ubicación en staff_locations para que aparezca en el mapa inmediatamente
-            DB::table('staff_locations')->updateOrInsert(
-                ['staff_id' => $ticket->staff_id],
-                [
-                    'lat' => 8.9824 + (rand(-10, 10) * 0.002), 
-                    'lng' => -79.5199 + (rand(-10, 10) * 0.002),
-                    'updated_at' => now(),
-                ]
-            );
-        }
-
-        $ticket->save();
 
         return redirect()->back()->with('success', 'Estado del ticket actualizado.');
+    }
+
+    /**
+     * Guarda la firma del cliente dibujada en pantalla para cerrar el ticket.
+     */
+    public function requestSignature(Request $request, $id)
+    {
+        $ticket = Ticket::findOrFail($id);
+
+        if ($request->has('firma_base64') && ! empty($request->firma_base64)) {
+            $this->ticketService->saveSignatureFromBase64($ticket, $request->firma_base64);
+            $this->ticketService->updateStatus($ticket, $request->input('status_id', 3), auth('staff')->id() ?? 1);
+
+            return redirect()->route('agent.tickets.report_sheet', $ticket->id)
+                ->with('success', 'Firma guardada y ticket cerrado correctamente. Por favor complete la hoja de reporte.');
+        }
+
+        return redirect()->back()->with('error', 'No se recibió ninguna firma.');
     }
 
     /**

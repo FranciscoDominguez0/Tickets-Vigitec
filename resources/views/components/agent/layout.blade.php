@@ -121,14 +121,24 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('agent.tickets.billing') }}" class="sidebar-link {{ request()->routeIs('agent.tickets.billing') ? 'active' : '' }}">
+                                <a href="{{ route('agent.tickets.index', ['filter' => 'billing']) }}" class="sidebar-link {{ request('filter') == 'billing' ? 'active' : '' }}">
                                     <span class="icon">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <circle cx="12" cy="12" r="9" stroke="{{ request()->routeIs('agent.tickets.billing') ? '#ffffff' : '#64748b' }}" stroke-width="1.6"/>
-                                            <path d="M12 7v5l3 2" stroke="{{ request()->routeIs('agent.tickets.billing') ? '#ffffff' : '#64748b' }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <circle cx="12" cy="12" r="9" stroke="{{ request('filter') == 'billing' ? '#ffffff' : '#64748b' }}" stroke-width="1.6"/>
+                                            <path d="M12 7v5l3 2" stroke="{{ request('filter') == 'billing' ? '#ffffff' : '#64748b' }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                                         </svg>
                                     </span>
                                     Por facturar
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ route('agent.tickets.reports') }}" class="sidebar-link {{ request()->routeIs('agent.tickets.reports') ? 'active' : '' }}">
+                                    <span class="icon">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M4 19v-4m4 4v-8m4 8v-6m4 6v-10" stroke="{{ request()->routeIs('agent.tickets.reports') ? '#ffffff' : '#64748b' }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </span>
+                                    Hoja de reporte
                                 </a>
                             </li>
 

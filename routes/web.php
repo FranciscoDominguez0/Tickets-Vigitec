@@ -95,13 +95,14 @@ Route::prefix('agent')->group(function () {
         Route::post('/ticket/{id}/assign', [TicketController::class, 'asignar'])->name('agent.tickets.assign');
         Route::post('/ticket/{id}/transfer', [TicketController::class, 'transferir'])->name('agent.tickets.transfer');
         Route::post('/ticket/{id}/status', [TicketController::class, 'estado'])->name('agent.tickets.status');
+        Route::post('/ticket/{id}/request-signature', [TicketController::class, 'requestSignature'])->name('agent.tickets.request_signature');
         Route::delete('/ticket/{id}', [TicketController::class, 'destroy'])->name('agent.tickets.destroy');
 
         // Hilo del ticket
         Route::put('/thread/{id}', [TicketController::class, 'actualizarHilo'])->name('agent.tickets.thread.update');
         Route::delete('/thread/{id}', [TicketController::class, 'eliminarHilo'])->name('agent.tickets.thread.destroy');
 
-        Route::get('/tickets/billing', [TicketReportController::class, 'billing'])->name('agent.tickets.billing');
+        Route::get('/tickets/reportes', [TicketReportController::class, 'billing'])->name('agent.tickets.reports');
         Route::get('/ticket/{id}/report-sheet', [TicketReportController::class, 'reportSheet'])->name('agent.tickets.report_sheet');
         Route::post('/ticket/{id}/report-sheet', [TicketReportController::class, 'storeReport'])->name('agent.tickets.report.store');
 

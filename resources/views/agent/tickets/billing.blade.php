@@ -6,7 +6,7 @@
     <!-- Filtros -->
     <div class="card bg-dark border-secondary mb-4">
         <div class="card-body py-3">
-            <form action="{{ route('agent.tickets.billing') }}" method="GET" class="row g-2 align-items-center">
+            <form action="{{ route('agent.tickets.reports') }}" method="GET" class="row g-2 align-items-center">
                 <div class="col-auto">
                     <label class="text-white-50 small me-2">Mes:</label>
                 </div>
