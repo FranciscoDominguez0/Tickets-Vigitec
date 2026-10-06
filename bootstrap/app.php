@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->is('agent*')) {
                 return route('agent.login');
             }
+
             return route('login');
         });
 
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             if (auth('staff')->check()) {
                 return route('agent.dashboard');
             }
+
             return route('dashboard');
         });
     })

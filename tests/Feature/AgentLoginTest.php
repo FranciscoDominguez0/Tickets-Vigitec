@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Staff;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
-use App\Models\Staff;
 
 class AgentLoginTest extends TestCase
 {

@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Staff;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class TestUsersSeeder extends Seeder
 {
@@ -13,25 +15,25 @@ class TestUsersSeeder extends Seeder
     public function run(): void
     {
         // 1. Crear un Usuario (Cliente) de prueba
-        \App\Models\User::firstOrCreate(
+        User::firstOrCreate(
             ['email' => 'cliente@test.com'],
             [
                 'firstname' => 'Juan',
                 'lastname' => 'Cliente',
-                'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+                'password' => Hash::make('password123'),
                 'empresa_id' => 1, // Empresa default
                 'status' => 1,
             ]
         );
 
         // 2. Crear un Administrador/Agente de prueba
-        \App\Models\Staff::firstOrCreate(
+        Staff::firstOrCreate(
             ['username' => 'admin'],
             [
                 'email' => 'admin@test.com',
                 'firstname' => 'Carlos',
                 'lastname' => 'Administrador',
-                'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+                'password' => Hash::make('password123'),
                 'empresa_id' => 1, // Empresa default
                 'dept_id' => 1,    // Departamento default
                 'role' => 'admin',

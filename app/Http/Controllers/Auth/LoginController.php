@@ -11,7 +11,7 @@ class LoginController extends Controller
     /**
      * Muestra el formulario de login.
      */
-    public function showLoginForm()
+    public function mostrarFormularioLogin()
     {
         return view('auth.login');
     }
@@ -19,21 +19,21 @@ class LoginController extends Controller
     /**
      * Procesa la solicitud de inicio de sesión.
      */
-    public function login(Request $request)
+    public function iniciarSesion(Request $request)
     {
         // Validación de datos
-        $credentials = $request->validate([
+        $credenciales = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ], [
             'email.required' => 'El correo electrónico es requerido.',
             'email.email' => 'Debes proporcionar un correo electrónico válido.',
-            'password.required' => 'La contraseña es requerida.'
+            'password.required' => 'La contraseña es requerida.',
         ]);
 
         // Intentar autenticar
         // Asegúrate de que el modelo User esté configurado con el campo "password" correcto.
-        if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
+        if (Auth::attempt(['email' => $credenciales['email'], 'password' => $credenciales['password']])) {
             $request->session()->regenerate();
 
             // Redirigir al dashboard/panel principal
@@ -49,7 +49,7 @@ class LoginController extends Controller
     /**
      * Cierra la sesión del usuario.
      */
-    public function logout(Request $request)
+    public function cerrarSesion(Request $request)
     {
         Auth::logout();
 

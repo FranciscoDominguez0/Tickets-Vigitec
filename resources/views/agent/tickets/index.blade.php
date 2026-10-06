@@ -7,10 +7,10 @@
                 <div>
                     <h1>Tickets</h1>
                     <div class="sub">
-                        Abiertos: <strong>{{ $stats['open'] }}</strong> · 
-                        Sin asignar: <strong>{{ $stats['unassigned'] }}</strong> · 
-                        Míos: <strong>{{ $stats['mine'] }}</strong> · 
-                        Por facturar: <strong>{{ $stats['billing'] }}</strong>
+                        Abiertos: <strong>{{ $estadisticas['open'] }}</strong> · 
+                        Sin asignar: <strong>{{ $estadisticas['unassigned'] }}</strong> · 
+                        Míos: <strong>{{ $estadisticas['mine'] }}</strong> · 
+                        Por facturar: <strong>{{ $estadisticas['billing'] }}</strong>
                     </div>
                 </div>
                 <a href="{{ route('agent.tickets.create') }}" class="btn-new"><i class="bi bi-plus-lg me-1"></i> Nuevo</a>

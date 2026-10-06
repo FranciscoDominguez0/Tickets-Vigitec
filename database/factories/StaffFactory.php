@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Staff;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * @extends Factory<Staff>
@@ -20,7 +21,7 @@ class StaffFactory extends Factory
         return [
             'username' => $this->faker->unique()->userName(),
             'email' => $this->faker->unique()->safeEmail(),
-            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'password' => Hash::make('password'),
             'firstname' => $this->faker->firstName(),
             'lastname' => $this->faker->lastName(),
             'empresa_id' => 1,

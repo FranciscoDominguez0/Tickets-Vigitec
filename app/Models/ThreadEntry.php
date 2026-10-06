@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ThreadEntry extends Model
 {
     public $timestamps = false;
+
     protected $guarded = [];
 
     public function thread()

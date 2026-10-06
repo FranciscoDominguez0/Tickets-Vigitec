@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Agent\TicketController;
+use App\Http\Controllers\Agent\TicketReportController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -13,8 +14,8 @@ Route::get('/', function () {
 
 // Rutas de Autenticación (Cliente)
 Route::middleware('guest')->group(function () {
-    Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [LoginController::class, 'login']);
+    Route::get('login', [LoginController::class, 'mostrarFormularioLogin'])->name('login');
+    Route::post('login', [LoginController::class, 'iniciarSesion']);
 
     Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('register', [RegisterController::class, 'register']);
@@ -25,7 +26,7 @@ Route::middleware('guest')->group(function () {
     Route::get('reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
     Route::post('reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 });
-Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+Route::post('logout', [LoginController::class, 'cerrarSesion'])->name('logout');
 
 // Dashboard de ejemplo (protegido)
 Route::middleware('auth')->group(function () {
@@ -65,10 +66,10 @@ Route::middleware('auth')->group(function () {
 // Rutas de Autenticación (Agentes/Staff)
 Route::prefix('agent')->group(function () {
     Route::middleware('guest:staff')->group(function () {
-        Route::get('login', [App\Http\Controllers\Agent\Auth\LoginController::class, 'showLoginForm'])->name('agent.login');
-        Route::post('login', [App\Http\Controllers\Agent\Auth\LoginController::class, 'login']);
+        Route::get('login', [App\Http\Controllers\Agent\Auth\LoginController::class, 'mostrarFormularioLogin'])->name('agent.login');
+        Route::post('login', [App\Http\Controllers\Agent\Auth\LoginController::class, 'iniciarSesion']);
     });
-    Route::post('logout', [App\Http\Controllers\Agent\Auth\LoginController::class, 'logout'])->name('agent.logout');
+    Route::post('logout', [App\Http\Controllers\Agent\Auth\LoginController::class, 'cerrarSesion'])->name('agent.logout');
 
     Route::middleware('auth:staff')->group(function () {
         Route::get('/dashboard', function () {
@@ -88,24 +89,21 @@ Route::prefix('agent')->group(function () {
         Route::get('/tickets/create', [TicketController::class, 'create'])->name('agent.tickets.create');
         Route::post('/tickets', [TicketController::class, 'store'])->name('agent.tickets.store');
         Route::get('/ticket/{id}', [TicketController::class, 'show'])->name('agent.tickets.show');
-        Route::post('/ticket/{id}/reply', [TicketController::class, 'reply'])->name('agent.tickets.reply');
+        Route::post('/ticket/{id}/reply', [TicketController::class, 'responder'])->name('agent.tickets.reply');
 
         // Ticket Action Routes
-        Route::post('/ticket/{id}/assign', [TicketController::class, 'assign'])->name('agent.tickets.assign');
-        Route::post('/ticket/{id}/transfer', [TicketController::class, 'transfer'])->name('agent.tickets.transfer');
-        Route::post('/ticket/{id}/status', [TicketController::class, 'status'])->name('agent.tickets.status');
+        Route::post('/ticket/{id}/assign', [TicketController::class, 'asignar'])->name('agent.tickets.assign');
+        Route::post('/ticket/{id}/transfer', [TicketController::class, 'transferir'])->name('agent.tickets.transfer');
+        Route::post('/ticket/{id}/status', [TicketController::class, 'estado'])->name('agent.tickets.status');
         Route::delete('/ticket/{id}', [TicketController::class, 'destroy'])->name('agent.tickets.destroy');
 
         // Hilo del ticket
-        Route::put('/thread/{id}', [TicketController::class, 'updateThread'])->name('agent.tickets.thread.update');
-        Route::delete('/thread/{id}', [TicketController::class, 'deleteThread'])->name('agent.tickets.thread.destroy');
+        Route::put('/thread/{id}', [TicketController::class, 'actualizarHilo'])->name('agent.tickets.thread.update');
+        Route::delete('/thread/{id}', [TicketController::class, 'eliminarHilo'])->name('agent.tickets.thread.destroy');
 
-        Route::get('/tickets/billing', function () {
-            return view('agent.tickets.billing');
-        })->name('agent.tickets.billing');
-        Route::get('/tickets/report-sheet', function () {
-            return view('agent.tickets.report_sheet');
-        })->name('agent.tickets.report_sheet');
+        Route::get('/tickets/billing', [TicketReportController::class, 'billing'])->name('agent.tickets.billing');
+        Route::get('/ticket/{id}/report-sheet', [TicketReportController::class, 'reportSheet'])->name('agent.tickets.report_sheet');
+        Route::post('/ticket/{id}/report-sheet', [TicketReportController::class, 'storeReport'])->name('agent.tickets.report.store');
 
         // Reporte e Inventario
         Route::get('/reports', function () {

@@ -34,7 +34,7 @@
                     <label class="form-label">Seleccionar Cliente <span class="required">*</span></label>
                     <select name="user_id" class="form-select" required>
                         <option value="">Seleccione un cliente...</option>
-                        @foreach ($users as $u)
+                        @foreach ($usuarios as $u)
                             <option value="{{ $u->id }}">{{ $u->firstname }} {{ $u->lastname }} ({{ $u->email }})</option>
                         @endforeach
                     </select>
@@ -54,7 +54,7 @@
                         <label class="form-label">Departamento: <span class="required">*</span></label>
                         <select name="dept_id" class="form-select" required>
                             <option value="">Seleccione un departamento...</option>
-                            @foreach ($departments as $d)
+                            @foreach ($departamentos as $d)
                                 <option value="{{ $d->id }}" {{ old('dept_id') == $d->id ? 'selected' : '' }}>{{ $d->name }}</option>
                             @endforeach
                         </select>
@@ -63,7 +63,7 @@
                     <div class="col-md-6">
                         <label class="form-label">Prioridad:</label>
                         <select name="priority_id" class="form-select">
-                            @foreach ($priorities as $p)
+                            @foreach ($prioridades as $p)
                                 <option value="{{ $p->id }}" {{ old('priority_id', 2) == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
                             @endforeach
                         </select>

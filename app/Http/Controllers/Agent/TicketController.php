@@ -24,16 +24,16 @@ class TicketController extends Controller
             ->orderBy('created', 'desc')
             ->paginate(20);
 
-        $staffId = auth('staff')->id() ?? 1;
+        $idPersonal = auth('staff')->id() ?? 1;
 
-        $stats = [
+        $estadisticas = [
             'open' => Ticket::where('status_id', 1)->count(), // Suponiendo 1 = Abierto
             'unassigned' => Ticket::whereNull('staff_id')->orWhere('staff_id', 0)->count(),
-            'mine' => Ticket::where('staff_id', $staffId)->count(),
+            'mine' => Ticket::where('staff_id', $idPersonal)->count(),
             'billing' => 0, // Ajustar según lógica de facturación
         ];
 
-        return view('agent.tickets.index', compact('tickets', 'stats'));
+        return view('agent.tickets.index', compact('tickets', 'estadisticas'));
     }
 
     /**
@@ -41,14 +41,14 @@ class TicketController extends Controller
      */
     public function create()
     {
-        $departments = Department::where('is_active', 1)->orderBy('name')->get();
-        $priorities = Priority::orderBy('id')->get();
+        $departamentos = Department::where('is_active', 1)->orderBy('name')->get();
+        $prioridades = Priority::orderBy('id')->get();
 
         // Obtenemos los primeros usuarios para fines de diseño de interfaz.
         // En un entorno real se debe usar búsqueda asíncrona.
-        $users = User::limit(10)->get();
+        $usuarios = User::limit(10)->get();
 
-        return view('agent.tickets.create', compact('departments', 'priorities', 'users'));
+        return view('agent.tickets.create', compact('departamentos', 'prioridades', 'usuarios'));
     }
 
     /**
@@ -56,7 +56,7 @@ class TicketController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $validado = $request->validate([
             'user_id' => 'required|exists:users,id',
             'subject' => 'required|string|max:255',
             'dept_id' => 'required|exists:departments,id',
@@ -67,15 +67,15 @@ class TicketController extends Controller
         ]);
 
         // Generación del número de ticket usando la tabla sequences (desde 1)
-        $ticket_number = DB::transaction(function () {
+        $numeroTicket = DB::transaction(function () {
             $empresa_id = auth('staff')->user()->empresa_id ?? 1;
-            $sequence = DB::table('sequences')
+            $secuencia = DB::table('sequences')
                 ->where('empresa_id', $empresa_id)
                 ->where('name', 'tickets')
                 ->lockForUpdate()
                 ->first();
 
-            if (! $sequence) {
+            if (! $secuencia) {
                 DB::table('sequences')->insert([
                     'empresa_id' => $empresa_id,
                     'name' => 'tickets',
@@ -89,22 +89,22 @@ class TicketController extends Controller
                 return '1';
             } else {
                 DB::table('sequences')
-                    ->where('id', $sequence->id)
+                    ->where('id', $secuencia->id)
                     ->update([
-                        'next' => $sequence->next + $sequence->increment,
+                        'next' => $secuencia->next + $secuencia->increment,
                         'updated' => now(),
                     ]);
 
-                return (string) $sequence->next;
+                return (string) $secuencia->next;
             }
         });
 
         $ticket = new Ticket;
-        $ticket->ticket_number = $ticket_number;
-        $ticket->user_id = $validated['user_id'];
-        $ticket->subject = $validated['subject'];
-        $ticket->dept_id = $validated['dept_id'];
-        $ticket->priority_id = $validated['priority_id'];
+        $ticket->ticket_number = $numeroTicket;
+        $ticket->user_id = $validado['user_id'];
+        $ticket->subject = $validado['subject'];
+        $ticket->dept_id = $validado['dept_id'];
+        $ticket->priority_id = $validado['priority_id'];
 
         // Valores por defecto
         $ticket->empresa_id = auth('staff')->user()->empresa_id ?? 1;
@@ -113,17 +113,17 @@ class TicketController extends Controller
 
         $ticket->save();
 
-        if (! empty($validated['body'])) {
+        if (! empty($validado['body'])) {
             // Primero se debe crear el hilo padre en la tabla threads
-            $thread = $ticket->thread()->create([
+            $hilo = $ticket->thread()->create([
                 'created' => now(),
             ]);
 
             // Luego insertamos la respuesta inicial en thread_entries
-            $thread->entries()->create([
+            $hilo->entries()->create([
                 'empresa_id' => $ticket->empresa_id,
                 'staff_id' => auth('staff')->id(),
-                'body' => $validated['body'],
+                'body' => $validado['body'],
                 'is_internal' => 0,
                 'created' => now(),
             ]);
@@ -139,54 +139,54 @@ class TicketController extends Controller
     {
         $ticket = Ticket::with(['user', 'department', 'priority', 'status', 'thread.entries.attachments', 'staff'])->findOrFail($id);
 
-        $departments = Department::orderBy('name')->get();
-        $staffMembers = Staff::where('is_active', 1)->orderBy('firstname')->get();
+        $departamentos = Department::orderBy('name')->get();
+        $miembrosStaff = Staff::where('is_active', 1)->orderBy('firstname')->get();
 
-        return view('agent.tickets.show', compact('ticket', 'departments', 'staffMembers'));
+        return view('agent.tickets.show', compact('ticket', 'departamentos', 'miembrosStaff'));
     }
 
     /**
      * Guarda una respuesta en el hilo del ticket.
      */
-    public function reply(Request $request, $id)
+    public function responder(Request $request, $id)
     {
         $ticket = Ticket::findOrFail($id);
 
-        $validated = $request->validate([
+        $validado = $request->validate([
             'response_body' => 'required|string',
             'attachments.*' => 'nullable|file|max:10240', // Max 10MB
         ]);
 
-        $thread = $ticket->thread;
+        $hilo = $ticket->thread;
 
         // Si el ticket no tiene un hilo aún, lo creamos
-        if (! $thread) {
-            $thread = $ticket->thread()->create([
+        if (! $hilo) {
+            $hilo = $ticket->thread()->create([
                 'created' => now(),
             ]);
         }
 
         // Insertamos la respuesta
-        $entry = $thread->entries()->create([
+        $entrada = $hilo->entries()->create([
             'empresa_id' => $ticket->empresa_id,
             'staff_id' => auth('staff')->id() ?? 1, // fallback si se prueba sin estar logueado
-            'body' => $validated['response_body'],
+            'body' => $validado['response_body'],
             'is_internal' => 0,
             'created' => now(),
         ]);
 
         // Manejo de archivos adjuntos
         if ($request->hasFile('attachments')) {
-            foreach ($request->file('attachments') as $file) {
-                $path = $file->store('tickets/attachments');
+            foreach ($request->file('attachments') as $archivo) {
+                $ruta = $archivo->store('tickets/attachments');
 
-                $entry->attachments()->create([
+                $entrada->attachments()->create([
                     'empresa_id' => $ticket->empresa_id,
-                    'filename' => $file->hashName(),
-                    'original_filename' => $file->getClientOriginalName(),
-                    'mimetype' => $file->getMimeType(),
-                    'size' => $file->getSize(),
-                    'path' => $path,
+                    'filename' => $archivo->hashName(),
+                    'original_filename' => $archivo->getClientOriginalName(),
+                    'mimetype' => $archivo->getMimeType(),
+                    'size' => $archivo->getSize(),
+                    'path' => $ruta,
                     'created' => now(),
                 ]);
             }
@@ -198,7 +198,7 @@ class TicketController extends Controller
     /**
      * Asigna un ticket a un agente.
      */
-    public function assign(Request $request, $id)
+    public function asignar(Request $request, $id)
     {
         $request->validate(['staff_id' => 'required|exists:staff,id']);
 
@@ -213,7 +213,7 @@ class TicketController extends Controller
     /**
      * Transfiere el ticket a otro departamento.
      */
-    public function transfer(Request $request, $id)
+    public function transferir(Request $request, $id)
     {
         $request->validate(['dept_id' => 'required|exists:departments,id']);
 
@@ -228,7 +228,7 @@ class TicketController extends Controller
     /**
      * Cambia el estado del ticket.
      */
-    public function status(Request $request, $id)
+    public function estado(Request $request, $id)
     {
         $request->validate(['status_id' => 'required|exists:ticket_status,id']);
 
@@ -247,14 +247,14 @@ class TicketController extends Controller
     /**
      * Actualiza el cuerpo de un mensaje del hilo.
      */
-    public function updateThread(Request $request, $id)
+    public function actualizarHilo(Request $request, $id)
     {
         $request->validate(['body' => 'required|string']);
 
-        $entry = ThreadEntry::findOrFail($id);
-        $entry->body = $request->body;
-        $entry->updated = now();
-        $entry->save();
+        $entrada = ThreadEntry::findOrFail($id);
+        $entrada->body = $request->body;
+        $entrada->updated = now();
+        $entrada->save();
 
         return redirect()->back()->with('success', 'Mensaje actualizado correctamente.');
     }
@@ -262,10 +262,10 @@ class TicketController extends Controller
     /**
      * Elimina un mensaje del hilo.
      */
-    public function deleteThread($id)
+    public function eliminarHilo($id)
     {
-        $entry = ThreadEntry::findOrFail($id);
-        $entry->delete();
+        $entrada = ThreadEntry::findOrFail($id);
+        $entrada->delete();
 
         return redirect()->back()->with('success', 'Mensaje eliminado del hilo.');
     }

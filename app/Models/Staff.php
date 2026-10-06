@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Traits\Tenantable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Traits\Tenantable;
 
 class Staff extends Authenticatable
 {
@@ -15,6 +15,7 @@ class Staff extends Authenticatable
 
     // Personalización de timestamps según la base de datos importada
     public const CREATED_AT = 'created';
+
     public const UPDATED_AT = 'updated';
 
     /**

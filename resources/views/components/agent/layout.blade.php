@@ -131,16 +131,7 @@
                                     Por facturar
                                 </a>
                             </li>
-                            <li>
-                                <a href="{{ route('agent.tickets.report_sheet') }}" class="sidebar-link {{ request()->routeIs('agent.tickets.report_sheet') ? 'active' : '' }}">
-                                    <span class="icon">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M4 19v-4m4 4v-8m4 8v-6m4 6v-10" stroke="{{ request()->routeIs('agent.tickets.report_sheet') ? '#ffffff' : '#64748b' }}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-                                    </span>
-                                    Hoja de reporte
-                                </a>
-                            </li>
+
                         </ul>
                     </li>
 

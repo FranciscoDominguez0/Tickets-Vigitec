@@ -11,7 +11,7 @@ class LoginController extends Controller
     /**
      * Muestra el formulario de login para agentes.
      */
-    public function showLoginForm()
+    public function mostrarFormularioLogin()
     {
         return view('agent.auth.login');
     }
@@ -19,22 +19,22 @@ class LoginController extends Controller
     /**
      * Procesa la solicitud de inicio de sesión de agentes.
      */
-    public function login(Request $request)
+    public function iniciarSesion(Request $request)
     {
         // Validación de datos
         // El sistema original permitía login por email o username, usaremos email o ajustaremos a username.
-        // La tabla staff tiene `email` y `username`. 
+        // La tabla staff tiene `email` y `username`.
         // Asumiremos que entran con correo por ahora.
-        $credentials = $request->validate([
+        $credenciales = $request->validate([
             'username' => ['required', 'string'],
             'password' => ['required'],
         ], [
             'username.required' => 'El usuario es requerido.',
-            'password.required' => 'La contraseña es requerida.'
+            'password.required' => 'La contraseña es requerida.',
         ]);
 
         // Intentar autenticar usando el guard 'staff'
-        if (Auth::guard('staff')->attempt(['username' => $credentials['username'], 'password' => $credentials['password'], 'is_active' => 1])) {
+        if (Auth::guard('staff')->attempt(['username' => $credenciales['username'], 'password' => $credenciales['password'], 'is_active' => 1])) {
             $request->session()->regenerate();
 
             // Redirigir al dashboard de agente
@@ -50,7 +50,7 @@ class LoginController extends Controller
     /**
      * Cierra la sesión del agente.
      */
-    public function logout(Request $request)
+    public function cerrarSesion(Request $request)
     {
         Auth::guard('staff')->logout();
 

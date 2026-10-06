@@ -19,7 +19,7 @@
                         — Sin asignar —
                     </x-agent.creative-dropdown-item>
                     
-                    @foreach($staffMembers as $staff)
+                    @foreach($miembrosStaff as $staff)
                         @php
                             $initials = strtoupper(substr($staff->firstname, 0, 1) . substr($staff->lastname, 0, 1));
                         @endphp
@@ -36,7 +36,7 @@
                     headerTitle="Transferir Departamento" 
                     formAction="{{ route('agent.tickets.transfer', $ticket->id) }}">
                     
-                    @foreach($departments as $dept)
+                    @foreach($departamentos as $dept)
                         <x-agent.creative-dropdown-item name="dept_id" value="{{ $dept->id }}" :isActive="$ticket->dept_id == $dept->id" icon="<i class='bi bi-building'></i>">
                             {{ $dept->name }}
                         </x-agent.creative-dropdown-item>

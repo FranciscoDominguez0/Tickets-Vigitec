@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Attachment extends Model
 {
     protected $table = 'attachments';
+
     public $timestamps = false; // Maneja 'created' en lugar de created_at/updated_at
 
     protected $fillable = [
