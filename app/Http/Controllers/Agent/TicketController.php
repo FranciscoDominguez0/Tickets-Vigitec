@@ -170,8 +170,8 @@ class TicketController extends Controller
         $this->ticketService->updateStatus($ticket, $request->status_id, auth('staff')->id() ?? 1);
 
         if ($request->status_id == 3) {
-            return redirect()->route('agent.tickets.report_sheet', $ticket->id)
-                ->with('success', 'Ticket cerrado. Por favor complete la hoja de reporte.');
+            return redirect()->back()
+                ->with('success', 'Ticket cerrado. Recuerda llenar la hoja de reporte desde la sección "Por facturar".');
         }
 
         return redirect()->back()->with('success', 'Estado del ticket actualizado.');
@@ -188,8 +188,8 @@ class TicketController extends Controller
             $this->ticketService->saveSignatureFromBase64($ticket, $request->firma_base64);
             $this->ticketService->updateStatus($ticket, $request->input('status_id', 3), auth('staff')->id() ?? 1);
 
-            return redirect()->route('agent.tickets.report_sheet', $ticket->id)
-                ->with('success', 'Firma guardada y ticket cerrado correctamente. Por favor complete la hoja de reporte.');
+            return redirect()->back()
+                ->with('success', 'Firma guardada y ticket cerrado correctamente. Recuerda llenar la hoja de reporte desde la sección "Por facturar".');
         }
 
         return redirect()->back()->with('error', 'No se recibió ninguna firma.');

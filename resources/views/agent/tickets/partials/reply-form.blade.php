@@ -1,4 +1,18 @@
-
+        @if($ticket->status_id == 3)
+        <!-- Mensaje de Ticket Cerrado -->
+        <div class="mt-4 text-center py-5" style="border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px; background-color: #0b0f19;">
+            <div style="font-size: 1.5rem; color: #94a3b8; margin-bottom: 0.5rem;"><i class="bi bi-lock-fill"></i></div>
+            <h5 class="fw-bold mb-2 text-white">Este ticket está cerrado</h5>
+            <p class="text-muted mb-4" style="font-size: 0.9rem;">Para escribir una nueva respuesta, primero debes reabrir el ticket.</p>
+            <form action="{{ route('agent.tickets.status', $ticket->id) }}" method="POST">
+                @csrf
+                <input type="hidden" name="status_id" value="1">
+                <button type="submit" class="btn btn-danger px-4 py-2 rounded-3" style="font-size: 0.9rem; font-weight: 600; background-color: #f87171; border: none; color: white;">
+                    <i class="bi bi-unlock-fill me-2"></i> Reabrir Ticket
+                </button>
+            </form>
+        </div>
+        @else
         <!-- Caja del Formulario de Respuesta -->
         <div class="response-box mt-4">
             <h5 class="response-title">Respuesta</h5>
@@ -68,6 +82,7 @@
                 </div>
             </form>
         </div>
+        @endif
     </div>
 
     @push('scripts')

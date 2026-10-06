@@ -149,6 +149,16 @@
         <!-- Tabs y Hilo de Mensajes -->
         @include('agent.tickets.partials.thread')
 
+        @if($ticket->client_signature)
+        <!-- Firma del cliente -->
+        <div class="mt-4" style="background-color: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1.25rem;">
+            <h6 class="mb-3 fw-bold text-white" style="font-size: 0.85rem;">Firma del cliente</h6>
+            <div style="border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; background-color: #0b0f19; width: fit-content; padding: 10px 20px;">
+                <img src="{{ asset('storage/' . $ticket->client_signature) }}" alt="Firma del cliente" style="max-height: 120px; filter: invert(1);">
+            </div>
+        </div>
+        @endif
+
         <!-- Formulario de Respuesta -->
         @include('agent.tickets.partials.reply-form')
         

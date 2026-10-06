@@ -102,9 +102,9 @@ Route::prefix('agent')->group(function () {
         Route::put('/thread/{id}', [TicketController::class, 'actualizarHilo'])->name('agent.tickets.thread.update');
         Route::delete('/thread/{id}', [TicketController::class, 'eliminarHilo'])->name('agent.tickets.thread.destroy');
 
-        Route::get('/tickets/reportes', [TicketReportController::class, 'billing'])->name('agent.tickets.reports');
-        Route::get('/ticket/{id}/report-sheet', [TicketReportController::class, 'reportSheet'])->name('agent.tickets.report_sheet');
-        Route::post('/ticket/{id}/report-sheet', [TicketReportController::class, 'storeReport'])->name('agent.tickets.report.store');
+        Route::get('/tickets/reportes', [TicketReportController::class, 'facturacion'])->name('agent.tickets.reports');
+        Route::get('/ticket/{id}/report-sheet', [TicketReportController::class, 'hojaReporte'])->name('agent.tickets.report_sheet');
+        Route::post('/ticket/{id}/report-sheet', [TicketReportController::class, 'guardarReporte'])->name('agent.tickets.report.store');
 
         // Reporte e Inventario
         Route::get('/reports', function () {

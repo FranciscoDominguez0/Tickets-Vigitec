@@ -13,15 +13,12 @@ class TicketReportController extends Controller
     /**
      * Display the tickets that require a report (billing).
      */
-    public function billing(Request $request)
+    public function facturacion(Request $request)
     {
         $search = $request->input('q');
         $month = $request->input('month', date('Y-m'));
 
         $query = Ticket::with(['department', 'staff', 'user', 'report'])
-            ->whereHas('department', function ($q) {
-                $q->where('requires_report', true);
-            })
             ->where('status_id', 3); // Assuming 3 is Closed
 
         if ($month !== 'all') {
@@ -43,10 +40,7 @@ class TicketReportController extends Controller
         $tickets = $query->orderBy('closed', 'desc')->paginate(10);
 
         // Get months with closed tickets for filter
-        $months = Ticket::whereHas('department', function ($q) {
-            $q->where('requires_report', true);
-        })
-            ->where('status_id', 3)
+        $months = Ticket::where('status_id', 3)
             ->selectRaw("DATE_FORMAT(closed, '%Y-%m') as month")
             ->distinct()
             ->orderBy('month', 'desc')
@@ -63,7 +57,7 @@ class TicketReportController extends Controller
     /**
      * Display the report sheet for a specific ticket.
      */
-    public function reportSheet($id)
+    public function hojaReporte($id)
     {
         $ticket = Ticket::with(['department', 'staff', 'user', 'report.items'])->findOrFail($id);
 
@@ -78,7 +72,7 @@ class TicketReportController extends Controller
     /**
      * Store or update the ticket report.
      */
-    public function storeReport(Request $request, $id)
+    public function guardarReporte(Request $request, $id)
     {
         $ticket = Ticket::findOrFail($id);
 
@@ -123,6 +117,7 @@ class TicketReportController extends Controller
                 'final_price' => $total,
                 'billing_status' => $request->input('report_type'),
                 'empresa_id' => $ticket->empresa_id ?? 1,
+                'created_by' => auth('staff')->id() ?? 1,
             ]
         );
 

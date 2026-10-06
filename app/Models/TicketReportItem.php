@@ -10,6 +10,7 @@ class TicketReportItem extends Model
     use HasFactory;
 
     protected $guarded = [];
+    public $timestamps = false;
 
     public function report()
     {
