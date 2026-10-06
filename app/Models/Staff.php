@@ -60,4 +60,14 @@ class Staff extends Authenticatable
         'is_active' => 'boolean',
         'dark_mode' => 'boolean',
     ];
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'dept_id');
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'staff_id');
+    }
 }

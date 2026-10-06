@@ -141,8 +141,9 @@ class TicketController extends Controller
 
         $departamentos = Department::orderBy('name')->get();
         $miembrosStaff = Staff::where('is_active', 1)->orderBy('firstname')->get();
+        $estados = \App\Models\TicketStatus::orderBy('id')->get();
 
-        return view('agent.tickets.show', compact('ticket', 'departamentos', 'miembrosStaff'));
+        return view('agent.tickets.show', compact('ticket', 'departamentos', 'miembrosStaff', 'estados'));
     }
 
     /**
@@ -225,9 +226,6 @@ class TicketController extends Controller
         return redirect()->back()->with('success', 'Ticket transferido exitosamente.');
     }
 
-    /**
-     * Cambia el estado del ticket.
-     */
     public function estado(Request $request, $id)
     {
         $request->validate(['status_id' => 'required|exists:ticket_status,id']);
@@ -237,6 +235,24 @@ class TicketController extends Controller
 
         if ($request->status_id == 3) { // Cerrado
             $ticket->closed = now();
+        }
+
+        $nuevoEstado = \App\Models\TicketStatus::find($request->status_id);
+        if ($nuevoEstado && in_array($nuevoEstado->name, ['En camino', 'En proceso'])) {
+            // Auto asignar si está sin asignar
+            if (!$ticket->staff_id || $ticket->staff_id == 0) {
+                $ticket->staff_id = auth('staff')->id() ?? 1;
+            }
+
+            // Simular ubicación en staff_locations para que aparezca en el mapa inmediatamente
+            DB::table('staff_locations')->updateOrInsert(
+                ['staff_id' => $ticket->staff_id],
+                [
+                    'lat' => 8.9824 + (rand(-10, 10) * 0.002), 
+                    'lng' => -79.5199 + (rand(-10, 10) * 0.002),
+                    'updated_at' => now(),
+                ]
+            );
         }
 
         $ticket->save();

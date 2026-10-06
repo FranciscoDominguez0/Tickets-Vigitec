@@ -2,20 +2,12 @@
     <div class="tickets-shell">
         
         <!-- HEADER PREMIUM -->
-        <div class="tickets-header">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
-                <div>
-                    <h1>Tickets</h1>
-                    <div class="sub">
-                        Abiertos: <strong>{{ $estadisticas['open'] }}</strong> · 
-                        Sin asignar: <strong>{{ $estadisticas['unassigned'] }}</strong> · 
-                        Míos: <strong>{{ $estadisticas['mine'] }}</strong> · 
-                        Por facturar: <strong>{{ $estadisticas['billing'] }}</strong>
-                    </div>
-                </div>
-                <a href="{{ route('agent.tickets.create') }}" class="btn-new"><i class="bi bi-plus-lg me-1"></i> Nuevo</a>
-            </div>
-        </div>
+        <x-agent.page-header title="Tickets" actionUrl="{{ route('agent.tickets.create') }}" actionText="Nuevo">
+            Abiertos: <strong>{{ $estadisticas['open'] }}</strong> · 
+            Sin asignar: <strong>{{ $estadisticas['unassigned'] }}</strong> · 
+            Míos: <strong>{{ $estadisticas['mine'] }}</strong> · 
+            Por facturar: <strong>{{ $estadisticas['billing'] }}</strong>
+        </x-agent.page-header>
 
         <!-- FILTROS Y BÚSQUEDA -->
         <div class="tickets-toolbar">

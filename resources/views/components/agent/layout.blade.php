@@ -257,7 +257,7 @@
                 </div>
             </nav>
 
-            <div class="content-padding p-4">
+            <div class="content-padding px-4 pb-4 pt-2">
                 {{ $slot }}
             </div>
         </main>
@@ -317,6 +317,35 @@
     </script>
     @stack('scripts')
     
+    <!-- Geolocation Tracker -->
+    @if(auth('staff')->check())
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.watchPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    fetch('{{ route("agent.location.update") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ lat: lat, lng: lng })
+                    }).catch(e => console.error('Geotracking error:', e));
+                }, function(error) {
+                    console.warn("Permiso de ubicación denegado o error:", error.message);
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 60000
+                });
+            }
+        });
+    </script>
+    @endif
+
     <!-- Toast Notifications -->
     <x-agent.toast />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

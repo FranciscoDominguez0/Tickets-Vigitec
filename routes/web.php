@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Agent\DirectoryController;
+use App\Http\Controllers\Agent\MapController;
 use App\Http\Controllers\Agent\TicketController;
 use App\Http\Controllers\Agent\TicketReportController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -77,12 +79,10 @@ Route::prefix('agent')->group(function () {
         })->name('agent.dashboard');
 
         // Panel de control
-        Route::get('/directory', function () {
-            return view('agent.directory.index');
-        })->name('agent.directory');
-        Route::get('/map', function () {
-            return view('agent.map.index');
-        })->name('agent.map');
+        Route::get('/directory', [DirectoryController::class, 'index'])->name('agent.directory');
+        Route::get('/map', [MapController::class, 'index'])->name('agent.map');
+        Route::get('/map/ubicaciones', [MapController::class, 'ubicaciones'])->name('agent.map.locations');
+        Route::post('/map/update-location', [MapController::class, 'updateLocation'])->name('agent.location.update');
 
         // Tickets
         Route::get('/tickets', [TicketController::class, 'index'])->name('agent.tickets.index');

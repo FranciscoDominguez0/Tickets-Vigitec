@@ -52,17 +52,19 @@
                     headerTitle="Cambiar Estado" 
                     formAction="{{ route('agent.tickets.status', $ticket->id) }}">
                     
-                    <x-agent.creative-dropdown-item name="status_id" value="1" :isActive="$ticket->status_id == 1" icon="<i class='bi bi-circle-fill'></i>" iconColor="#3b82f6">
-                        Abierto
-                    </x-agent.creative-dropdown-item>
-                    
-                    <x-agent.creative-dropdown-item name="status_id" value="2" :isActive="$ticket->status_id == 2" icon="<i class='bi bi-check-circle-fill'></i>" iconColor="#22c55e">
-                        Resuelto
-                    </x-agent.creative-dropdown-item>
-                    
-                    <x-agent.creative-dropdown-item name="status_id" value="3" :isActive="$ticket->status_id == 3" icon="<i class='bi bi-slash-circle-fill'></i>" iconColor="#64748b">
-                        Cerrado
-                    </x-agent.creative-dropdown-item>
+                    @foreach($estados as $estado)
+                        @php
+                            $iconClass = 'bi-circle-fill';
+                            $iconColor = '#64748b'; // default gris
+                            if(strtolower($estado->name) == 'abierto') { $iconColor = '#3b82f6'; }
+                            if(strtolower($estado->name) == 'resuelto' || strtolower($estado->name) == 'cerrado') { $iconColor = '#22c55e'; $iconClass = 'bi-check-circle-fill'; }
+                            if(strtolower($estado->name) == 'en camino') { $iconColor = '#f59e0b'; $iconClass = 'bi-truck'; }
+                            if(strtolower($estado->name) == 'en proceso') { $iconColor = '#eab308'; $iconClass = 'bi-gear-fill'; }
+                        @endphp
+                        <x-agent.creative-dropdown-item name="status_id" value="{{ $estado->id }}" :isActive="$ticket->status_id == $estado->id" icon="<i class='bi {{ $iconClass }}'></i>" iconColor="{{ $iconColor }}">
+                            {{ $estado->name }}
+                        </x-agent.creative-dropdown-item>
+                    @endforeach
                 </x-agent.creative-dropdown>
 
                 <!-- Dropdown Opciones -->
