@@ -35,7 +35,7 @@
                     <select name="user_id" class="form-select" required>
                         <option value="">Seleccione un cliente...</option>
                         @foreach ($usuarios as $u)
-                            <option value="{{ $u->id }}">{{ $u->firstname }} {{ $u->lastname }} ({{ $u->email }})</option>
+                            <option value="{{ $u->id }}" {{ old('user_id', request('user_id')) == $u->id ? 'selected' : '' }}>{{ $u->firstname }} {{ $u->lastname }} ({{ $u->email }})</option>
                         @endforeach
                     </select>
                 </div>

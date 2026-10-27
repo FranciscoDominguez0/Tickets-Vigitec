@@ -2,14 +2,55 @@
 
 namespace App\Services;
 
+use App\DataTransferObjects\Ticket\TicketData;
 use App\Models\Ticket;
 use App\Models\TicketStatus;
+use App\Repositories\DepartmentRepository;
+use App\Repositories\PriorityRepository;
+use App\Repositories\TicketRepository;
+use App\Repositories\UserRepository;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class TicketService
 {
+    public function __construct(
+        protected TicketRepository $ticketRepository,
+        protected DepartmentRepository $departmentRepository,
+        protected PriorityRepository $priorityRepository,
+        protected UserRepository $userRepository
+    ) {}
+
+    /**
+     * Retorna los datos necesarios para renderizar el formulario de creación de ticket.
+     */
+    public function obtenerDatosParaFormularioCreacion(): array
+    {
+        return [
+            'departamentos' => $this->departmentRepository->obtenerActivos(),
+            'prioridades' => $this->priorityRepository->obtenerTodas(),
+            'usuarios' => $this->userRepository->obtenerFiltrados(porPagina: 50),
+        ];
+    }
+
+    /**
+     * Coordina la creación completa de un ticket utilizando DTO y Repositorio.
+     */
+    public function crearTicket(TicketData $datosTicket, ?string $cuerpoInicial = null, ?int $staffId = null): Ticket
+    {
+        $numeroTicket = $this->generateTicketNumber($datosTicket->empresaId);
+        $datosTicket->ticketNumber = $numeroTicket;
+
+        $ticket = $this->ticketRepository->crear($datosTicket->toArray());
+
+        if (! empty($cuerpoInicial)) {
+            $this->createInitialThread($ticket, $cuerpoInicial, $staffId ?? 1);
+        }
+
+        return $ticket;
+    }
+
     /**
      * Genera el siguiente número de secuencia para tickets.
      */

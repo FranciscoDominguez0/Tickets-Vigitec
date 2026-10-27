@@ -2,47 +2,38 @@
 
 namespace App\Http\Controllers\Agent;
 
+use App\DataTransferObjects\Ticket\TicketData;
 use App\Http\Controllers\Controller;
-use App\Models\Department;
-use App\Models\Priority;
+use App\Http\Requests\Ticket\StoreTicketRequest;
 use App\Models\Staff;
 use App\Models\ThreadEntry;
 use App\Models\Ticket;
 use App\Models\TicketStatus;
-use App\Models\User;
+use App\Repositories\DepartmentRepository;
+use App\Repositories\TicketRepository;
 use App\Services\TicketService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class TicketController extends Controller
 {
     public function __construct(
-        protected TicketService $ticketService
+        protected TicketService $ticketService,
+        protected TicketRepository $ticketRepository,
+        protected DepartmentRepository $departmentRepository
     ) {}
 
     /**
      * Muestra la lista de tickets.
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
-        $query = Ticket::with(['user', 'department', 'priority', 'status', 'staff', 'thread.entries'])
-            ->orderBy('created', 'desc');
-
-        if ($request->input('filter') === 'billing') {
-            // Filtrar tickets cerrados que necesitan reporte pero que aún no lo tienen, etc.
-            // Por ahora, como es "por facturar", listamos tickets que no tengan reporte
-            $query->where('status_id', 3)->whereDoesntHave('report');
-        }
-
-        $tickets = $query->paginate(20);
+        $filtro = $request->input('filter');
+        $tickets = $this->ticketRepository->obtenerPaginados($filtro, 20);
 
         $idPersonal = auth('staff')->id() ?? 1;
-
-        $estadisticas = [
-            'open' => Ticket::where('status_id', 1)->count(), // Suponiendo 1 = Abierto
-            'unassigned' => Ticket::whereNull('staff_id')->orWhere('staff_id', 0)->count(),
-            'mine' => Ticket::where('staff_id', $idPersonal)->count(),
-            'billing' => 0, // Ajustar según lógica de facturación
-        ];
+        $estadisticas = $this->ticketRepository->obtenerEstadisticas($idPersonal);
 
         return view('agent.tickets.index', compact('tickets', 'estadisticas'));
     }
@@ -50,64 +41,47 @@ class TicketController extends Controller
     /**
      * Muestra el formulario para crear un nuevo ticket.
      */
-    public function create()
+    public function create(): View
     {
-        $departamentos = Department::where('is_active', 1)->orderBy('name')->get();
-        $prioridades = Priority::orderBy('id')->get();
+        $datos = $this->ticketService->obtenerDatosParaFormularioCreacion();
 
-        // Obtenemos los primeros usuarios para fines de diseño de interfaz.
-        // En un entorno real se debe usar búsqueda asíncrona.
-        $usuarios = User::limit(10)->get();
-
-        return view('agent.tickets.create', compact('departamentos', 'prioridades', 'usuarios'));
+        return view('agent.tickets.create', $datos);
     }
 
     /**
-     * Almacena un ticket recién creado en la base de datos.
+     * Almacena un ticket recién creado en la base de datos siguiendo la arquitectura:
+     * Form Request -> Controller -> DTO -> Service -> Repository.
      */
-    public function store(Request $request)
+    public function store(StoreTicketRequest $request): RedirectResponse
     {
-        $validado = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'subject' => 'required|string|max:255',
-            'dept_id' => 'required|exists:departments,id',
-            'priority_id' => 'required|exists:priorities,id',
-            'body' => 'nullable|string',
-            'walkin_phone' => 'nullable|string|max:20',
-            'walkin_address' => 'nullable|string|max:255',
-        ]);
+        $empresaId = auth('staff')->user()->empresa_id ?? 1;
+        $staffId = auth('staff')->id() ?? 1;
 
-        // Generación del número de ticket usando la tabla sequences (desde 1)
-        $empresa_id = auth('staff')->user()->empresa_id ?? 1;
-        $numeroTicket = $this->ticketService->generateTicketNumber($empresa_id);
+        $ticketData = TicketData::fromRequest($request, $empresaId);
 
-        $ticket = new Ticket;
-        $ticket->ticket_number = $numeroTicket;
-        $ticket->user_id = $validado['user_id'];
-        $ticket->subject = $validado['subject'];
-        $ticket->dept_id = $validado['dept_id'];
-        $ticket->priority_id = $validado['priority_id'];
+        $ticket = $this->ticketService->crearTicket(
+            $ticketData,
+            $request->input('body'),
+            $staffId
+        );
 
-        // Valores por defecto
-        $ticket->empresa_id = auth('staff')->user()->empresa_id ?? 1;
-        $ticket->status_id = 1; // Abierto
-        $ticket->created = now();
-
-        $ticket->save();
-
-        $this->ticketService->createInitialThread($ticket, $validado['body'] ?? null, auth('staff')->id() ?? 1);
-
-        return redirect()->route('agent.tickets.show', $ticket->id)->with('success', 'Ticket creado correctamente.');
+        return redirect()
+            ->route('agent.tickets.show', $ticket->id)
+            ->with('success', 'Ticket creado correctamente.');
     }
 
     /**
      * Muestra la vista detallada de un ticket específico.
      */
-    public function show($id)
+    public function show($id): View
     {
-        $ticket = Ticket::with(['user', 'department', 'priority', 'status', 'thread.entries.attachments', 'staff'])->findOrFail($id);
+        $ticket = $this->ticketRepository->buscarConDetalles((int) $id);
 
-        $departamentos = Department::orderBy('name')->get();
+        if (! $ticket) {
+            abort(404, 'Ticket no encontrado');
+        }
+
+        $departamentos = $this->departmentRepository->obtenerTodos();
         $miembrosStaff = Staff::where('is_active', 1)->orderBy('firstname')->get();
         $estados = TicketStatus::orderBy('id')->get();
 
