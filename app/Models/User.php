@@ -62,4 +62,30 @@ class User extends Authenticatable
         'dark_mode' => 'boolean',
         'org_tickets_view' => 'boolean',
     ];
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'user_id');
+    }
+
+    public function getNombreCompletoAttribute(): string
+    {
+        $nombre = trim("{$this->firstname} {$this->lastname}");
+
+        return $nombre !== '' ? $nombre : ($this->email ?? 'Usuario');
+    }
+
+    public function getInicialesAttribute(): string
+    {
+        $primera = mb_substr($this->firstname ?? '', 0, 1);
+        $segunda = mb_substr($this->lastname ?? '', 0, 1);
+        $iniciales = mb_strtoupper($primera.$segunda);
+
+        return $iniciales !== '' ? $iniciales : mb_strtoupper(mb_substr($this->email ?? 'U', 0, 2));
+    }
+
+    public function esActivo(): bool
+    {
+        return $this->status === 'active' || $this->status == 1;
+    }
 }

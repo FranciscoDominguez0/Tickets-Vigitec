@@ -4,6 +4,7 @@ use App\Http\Controllers\Agent\DirectoryController;
 use App\Http\Controllers\Agent\MapController;
 use App\Http\Controllers\Agent\TicketController;
 use App\Http\Controllers\Agent\TicketReportController;
+use App\Http\Controllers\Agent\UserController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -115,9 +116,15 @@ Route::prefix('agent')->group(function () {
         })->name('agent.inventory.index');
 
         // Usuarios
-        Route::get('/users/directory', function () {
-            return view('agent.users.directory');
-        })->name('agent.users.directory');
+        Route::get('/users', fn () => redirect()->route('agent.users.directory'))->name('agent.users.index');
+        Route::get('/users/directory', [UserController::class, 'listar'])->name('agent.users.directory');
+        Route::get('/users/create', [UserController::class, 'crear'])->name('agent.users.create');
+        Route::post('/users', [UserController::class, 'guardar'])->name('agent.users.store');
+        Route::get('/users/{id}', [UserController::class, 'mostrar'])->name('agent.users.show');
+        Route::get('/users/{id}/edit', [UserController::class, 'editar'])->name('agent.users.edit');
+        Route::put('/users/{id}', [UserController::class, 'actualizar'])->name('agent.users.update');
+        Route::post('/users/{id}/toggle-status', [UserController::class, 'cambiarEstado'])->name('agent.users.toggle_status');
+        Route::delete('/users/{id}', [UserController::class, 'eliminar'])->name('agent.users.destroy');
         Route::get('/users/orgs', function () {
             return view('agent.users.orgs');
         })->name('agent.users.orgs');
