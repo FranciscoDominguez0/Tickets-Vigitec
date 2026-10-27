@@ -211,4 +211,128 @@ class AgentUserTest extends TestCase
         $response->assertSessionHas('error');
         $this->assertDatabaseHas('users', ['id' => $cliente->id]);
     }
+
+    public function test_usuario_no_autenticado_no_puede_acceder_al_directorio_de_usuarios(): void
+    {
+        $response = $this->get(route('agent.users.directory'));
+
+        $response->assertRedirect(route('agent.login'));
+    }
+
+    public function test_falla_validacion_al_registrar_usuario_sin_campos_obligatorios(): void
+    {
+        $response = $this->actingAs($this->agente, 'staff')
+            ->post(route('agent.users.store'), []);
+
+        $response->assertSessionHasErrors(['firstname', 'lastname', 'email']);
+    }
+
+    public function test_falla_validacion_al_registrar_usuario_con_email_duplicado(): void
+    {
+        User::factory()->create(['email' => 'duplicado@test.com']);
+
+        $response = $this->actingAs($this->agente, 'staff')
+            ->post(route('agent.users.store'), [
+                'firstname' => 'Otro',
+                'lastname' => 'Usuario',
+                'email' => 'duplicado@test.com',
+            ]);
+
+        $response->assertSessionHasErrors(['email']);
+    }
+
+    public function test_falla_validacion_al_actualizar_con_email_duplicado_de_otro_usuario(): void
+    {
+        $primerCliente = User::factory()->create(['email' => 'primero@test.com']);
+        $segundoCliente = User::factory()->create(['email' => 'segundo@test.com']);
+
+        $response = $this->actingAs($this->agente, 'staff')
+            ->put(route('agent.users.update', $segundoCliente->id), [
+                'firstname' => 'Segundo',
+                'lastname' => 'Cliente',
+                'email' => 'primero@test.com',
+            ]);
+
+        $response->assertSessionHasErrors(['email']);
+    }
+
+    public function test_permite_actualizar_usuario_conservando_su_mismo_email(): void
+    {
+        $cliente = User::factory()->create(['email' => 'mismo@test.com']);
+
+        $response = $this->actingAs($this->agente, 'staff')
+            ->put(route('agent.users.update', $cliente->id), [
+                'firstname' => 'NombreNuevo',
+                'lastname' => 'ApellidoNuevo',
+                'email' => 'mismo@test.com',
+            ]);
+
+        $response->assertRedirect(route('agent.users.show', $cliente->id));
+        $this->assertDatabaseHas('users', [
+            'id' => $cliente->id,
+            'firstname' => 'NombreNuevo',
+            'email' => 'mismo@test.com',
+        ]);
+    }
+
+    public function test_agente_puede_filtrar_usuarios_por_estado_activo(): void
+    {
+        $activo = User::factory()->create([
+            'firstname' => 'UsuarioActivoPrueba',
+            'status' => 'active',
+        ]);
+
+        $inactivo = User::factory()->create([
+            'firstname' => 'UsuarioInactivoOculto',
+            'status' => 'inactive',
+        ]);
+
+        $response = $this->actingAs($this->agente, 'staff')
+            ->get(route('agent.users.directory', ['estado' => '1']));
+
+        $response->assertStatus(200);
+        $response->assertSee('UsuarioActivoPrueba');
+        $response->assertDontSee('UsuarioInactivoOculto');
+    }
+
+    public function test_agente_puede_filtrar_usuarios_por_estado_inactivo(): void
+    {
+        $activo = User::factory()->create([
+            'firstname' => 'UsuarioActivoOculto',
+            'status' => 'active',
+        ]);
+
+        $inactivo = User::factory()->create([
+            'firstname' => 'UsuarioInactivoVisible',
+            'status' => 'inactive',
+        ]);
+
+        $response = $this->actingAs($this->agente, 'staff')
+            ->get(route('agent.users.directory', ['estado' => '0']));
+
+        $response->assertStatus(200);
+        $response->assertSee('UsuarioInactivoVisible');
+        $response->assertDontSee('UsuarioActivoOculto');
+    }
+
+    public function test_agente_puede_buscar_usuarios_por_empresa_o_telefono(): void
+    {
+        User::factory()->create([
+            'firstname' => 'Ana',
+            'company' => 'Constructora Panama S.A.',
+            'phone' => '+507 6888-9999',
+        ]);
+
+        $responseEmpresa = $this->actingAs($this->agente, 'staff')
+            ->get(route('agent.users.directory', ['q' => 'Constructora']));
+
+        $responseEmpresa->assertStatus(200);
+        $responseEmpresa->assertSee('Constructora Panama S.A.');
+
+        $responseTelefono = $this->actingAs($this->agente, 'staff')
+            ->get(route('agent.users.directory', ['q' => '6888-9999']));
+
+        $responseTelefono->assertStatus(200);
+        $responseTelefono->assertSee('Constructora Panama S.A.');
+    }
 }
