@@ -35,8 +35,8 @@ class MapController extends Controller
             ->select([
                 's.id as staff_id',
                 DB::raw("CONCAT(s.firstname, ' ', s.lastname) as name"),
-                DB::raw("COALESCE(sl.lat, 8.9824 + (s.id * 0.005)) as lat"), // Fallback: ciudad de Panamá con variación según ID
-                DB::raw("COALESCE(sl.lng, -79.5199 + (s.id * 0.005)) as lng"),
+                DB::raw('COALESCE(sl.lat, 8.9824 + (s.id * 0.005)) as lat'), // Fallback: ciudad de Panamá con variación según ID
+                DB::raw('COALESCE(sl.lng, -79.5199 + (s.id * 0.005)) as lng'),
                 'sl.updated_at as updated',
                 't.id as ticket_id',
                 't.ticket_number',

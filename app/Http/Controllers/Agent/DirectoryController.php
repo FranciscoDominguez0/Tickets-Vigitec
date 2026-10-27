@@ -17,7 +17,7 @@ class DirectoryController extends Controller
         // Construir la consulta
         $consulta = Staff::with('department')
             ->withCount(['tickets as total_asignados', 'tickets as abiertos' => function ($query) {
-                $query->whereIn('status_id', [1]); 
+                $query->whereIn('status_id', [1]);
             }]);
 
         if ($departamentoId) {
@@ -26,10 +26,10 @@ class DirectoryController extends Controller
 
         if ($busqueda) {
             $consulta->where(function ($q) use ($busqueda) {
-                $q->where('firstname', 'like', '%' . $busqueda . '%')
-                  ->orWhere('lastname', 'like', '%' . $busqueda . '%')
-                  ->orWhere('username', 'like', '%' . $busqueda . '%')
-                  ->orWhere('email', 'like', '%' . $busqueda . '%');
+                $q->where('firstname', 'like', '%'.$busqueda.'%')
+                    ->orWhere('lastname', 'like', '%'.$busqueda.'%')
+                    ->orWhere('username', 'like', '%'.$busqueda.'%')
+                    ->orWhere('email', 'like', '%'.$busqueda.'%');
             });
         }
 
