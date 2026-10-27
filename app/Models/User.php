@@ -31,6 +31,8 @@ class User extends Authenticatable
         'phone',
         'company',
         'empresa_id',
+        'organization_id',
+        'department_id',
         'status',
         'last_login',
         'address',
@@ -66,6 +68,16 @@ class User extends Authenticatable
     public function tickets()
     {
         return $this->hasMany(Ticket::class, 'user_id');
+    }
+
+    public function departamento()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    public function organizacion()
+    {
+        return $this->belongsTo(Organization::class, 'organization_id');
     }
 
     public function getNombreCompletoAttribute(): string

@@ -335,4 +335,76 @@ class AgentUserTest extends TestCase
         $responseTelefono->assertStatus(200);
         $responseTelefono->assertSee('Constructora Panama S.A.');
     }
+
+    public function test_directorio_muestra_boton_y_componente_modal_de_usuario(): void
+    {
+        $response = $this->actingAs($this->agente, 'staff')
+            ->get(route('agent.users.directory'));
+
+        $response->assertStatus(200);
+        $response->assertSee('data-bs-target="#modalCrearUsuario"', false);
+        $response->assertSee('id="modalCrearUsuario"', false);
+        $response->assertSee('name="firstname"', false);
+        $response->assertSee('name="lastname"', false);
+        $response->assertSee('name="email"', false);
+        $response->assertSee('name="phone"', false);
+    }
+
+    public function test_agente_puede_registrar_usuario_con_empresa_y_departamento(): void
+    {
+        $departamento = Department::firstOrCreate(
+            ['name' => 'Soporte Técnico'],
+            ['empresa_id' => 1, 'is_active' => true]
+        );
+
+        $datosUsuario = [
+            'firstname' => 'Fernando',
+            'lastname' => 'Alonso',
+            'email' => 'fernando.alonso@empresa.com',
+            'phone' => '+507 6555-1234',
+            'company' => 'Aston Martin F1',
+            'department_id' => $departamento->id,
+            'address' => 'Costa del Este, Panamá',
+            'status' => '1',
+        ];
+
+        $response = $this->actingAs($this->agente, 'staff')
+            ->post(route('agent.users.store'), $datosUsuario);
+
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'fernando.alonso@empresa.com',
+            'company' => 'Aston Martin F1',
+            'department_id' => $departamento->id,
+        ]);
+    }
+
+    public function test_agente_puede_registrar_usuario_via_ajax_desde_el_modal(): void
+    {
+        $datosUsuario = [
+            'firstname' => 'Checo',
+            'lastname' => 'Pérez',
+            'email' => 'checo.perez@f1.com',
+            'phone' => '+507 6111-2222',
+            'company' => 'Red Bull Racing',
+        ];
+
+        $response = $this->actingAs($this->agente, 'staff')
+            ->postJson(route('agent.users.store'), $datosUsuario);
+
+        $response->assertStatus(201);
+        $response->assertJson([
+            'exito' => true,
+            'mensaje' => 'Usuario registrado correctamente.',
+            'usuario' => [
+                'email' => 'checo.perez@f1.com',
+                'company' => 'Red Bull Racing',
+            ],
+        ]);
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'checo.perez@f1.com',
+        ]);
+    }
 }

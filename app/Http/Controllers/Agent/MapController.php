@@ -50,7 +50,7 @@ class MapController extends Controller
         ]);
     }
 
-    public function updateLocation(Request $request)
+    public function actualizarUbicacion(Request $request)
     {
         $request->validate([
             'lat' => 'required|numeric',
@@ -73,5 +73,10 @@ class MapController extends Controller
         }
 
         return response()->json(['ok' => false], 403);
+    }
+
+    public function updateLocation(Request $request)
+    {
+        return $this->actualizarUbicacion($request);
     }
 }

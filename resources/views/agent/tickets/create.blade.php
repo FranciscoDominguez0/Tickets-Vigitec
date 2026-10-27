@@ -28,7 +28,12 @@
 
             <!-- Búsqueda/Selección de Cliente -->
             <div class="open-section">
-                <div class="section-title"><i class="bi bi-person-badge"></i> Cliente</div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="section-title mb-0"><i class="bi bi-person-badge"></i> Cliente</div>
+                    <button type="button" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#modalCrearUsuario" style="border-radius: 6px;">
+                        <i class="bi bi-person-plus-fill"></i> Nuevo Cliente
+                    </button>
+                </div>
                 
                 <div class="mb-3">
                     <label class="form-label">Seleccionar Cliente <span class="required">*</span></label>
@@ -277,4 +282,7 @@
         });
     </script>
     @endpush
+
+    <!-- Modal Reutilizable para Registrar Cliente en Tickets -->
+    <x-modal-usuario modoAjax="true" />
 </x-agent.layout>

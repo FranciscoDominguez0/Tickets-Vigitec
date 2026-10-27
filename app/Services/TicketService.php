@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\DataTransferObjects\Ticket\TicketData;
+use App\Models\Thread;
+use App\Models\ThreadEntry;
 use App\Models\Ticket;
 use App\Models\TicketStatus;
 use App\Repositories\DepartmentRepository;
@@ -39,13 +41,22 @@ class TicketService
      */
     public function crearTicket(TicketData $datosTicket, ?string $cuerpoInicial = null, ?int $staffId = null): Ticket
     {
-        $numeroTicket = $this->generateTicketNumber($datosTicket->empresaId);
+        $numeroTicket = $this->generarNumeroTicket($datosTicket->empresaId);
         $datosTicket->ticketNumber = $numeroTicket;
+
+        // Asegurar que el estado asignado exista en la base de datos
+        $estado = TicketStatus::find($datosTicket->statusId);
+        if (! $estado) {
+            TicketStatus::firstOrCreate(
+                ['id' => $datosTicket->statusId],
+                ['name' => 'Abierto', 'color' => '#3498db', 'icon' => 'fa-folder-open', 'order_by' => 1]
+            );
+        }
 
         $ticket = $this->ticketRepository->crear($datosTicket->toArray());
 
         if (! empty($cuerpoInicial)) {
-            $this->createInitialThread($ticket, $cuerpoInicial, $staffId ?? 1);
+            $this->crearHiloInicial($ticket, $cuerpoInicial, $staffId ?? 1);
         }
 
         return $ticket;
@@ -54,7 +65,7 @@ class TicketService
     /**
      * Genera el siguiente número de secuencia para tickets.
      */
-    public function generateTicketNumber($empresaId)
+    public function generarNumeroTicket(int $empresaId): string
     {
         return DB::transaction(function () use ($empresaId) {
             $secuencia = DB::table('sequences')
@@ -75,23 +86,28 @@ class TicketService
                 ]);
 
                 return '1';
-            } else {
-                DB::table('sequences')
-                    ->where('id', $secuencia->id)
-                    ->update([
-                        'next' => $secuencia->next + $secuencia->increment,
-                        'updated' => now(),
-                    ]);
-
-                return (string) $secuencia->next;
             }
+
+            DB::table('sequences')
+                ->where('id', $secuencia->id)
+                ->update([
+                    'next' => $secuencia->next + $secuencia->increment,
+                    'updated' => now(),
+                ]);
+
+            return (string) $secuencia->next;
         });
+    }
+
+    public function generateTicketNumber(int $empresaId): string
+    {
+        return $this->generarNumeroTicket($empresaId);
     }
 
     /**
      * Crea el hilo inicial del ticket.
      */
-    public function createInitialThread(Ticket $ticket, $body, $staffId)
+    public function crearHiloInicial(Ticket $ticket, ?string $body, ?int $staffId = null): ?Thread
     {
         if (empty($body)) {
             return null;
@@ -112,10 +128,15 @@ class TicketService
         return $hilo;
     }
 
+    public function createInitialThread(Ticket $ticket, ?string $body, ?int $staffId = null): ?Thread
+    {
+        return $this->crearHiloInicial($ticket, $body, $staffId);
+    }
+
     /**
      * Añade una respuesta al hilo del ticket, opcionalmente con adjuntos.
      */
-    public function addReply(Ticket $ticket, $body, $staffId, $attachments = [])
+    public function agregarRespuesta(Ticket $ticket, string $body, ?int $staffId = null, array $attachments = []): ThreadEntry
     {
         $hilo = $ticket->thread;
 
@@ -154,26 +175,29 @@ class TicketService
         return $entrada;
     }
 
+    public function addReply(Ticket $ticket, string $body, ?int $staffId = null, array $attachments = []): ThreadEntry
+    {
+        return $this->agregarRespuesta($ticket, $body, $staffId, $attachments);
+    }
+
     /**
      * Actualiza el estado del ticket y realiza acciones secundarias.
      */
-    public function updateStatus(Ticket $ticket, $statusId, $staffId = null)
+    public function actualizarEstado(Ticket $ticket, int $statusId, ?int $staffId = null): Ticket
     {
         $ticket->status_id = $statusId;
 
-        if ($statusId == 3) { // Cerrado
+        if ($statusId == 3) {
             $ticket->closed = now();
         }
 
         $nuevoEstado = TicketStatus::find($statusId);
 
         if ($nuevoEstado && in_array($nuevoEstado->name, ['En camino', 'En proceso'])) {
-            // Auto asignar si está sin asignar
             if (! $ticket->staff_id || $ticket->staff_id == 0) {
                 $ticket->staff_id = $staffId ?? 1;
             }
 
-            // Simular ubicación en staff_locations para que aparezca en el mapa inmediatamente
             DB::table('staff_locations')->updateOrInsert(
                 ['staff_id' => $ticket->staff_id],
                 [
@@ -189,23 +213,33 @@ class TicketService
         return $ticket;
     }
 
+    public function updateStatus(Ticket $ticket, int $statusId, ?int $staffId = null): Ticket
+    {
+        return $this->actualizarEstado($ticket, $statusId, $staffId);
+    }
+
     /**
      * Procesa y guarda la firma en formato Base64.
      */
-    public function saveSignatureFromBase64(Ticket $ticket, $base64Image)
+    public function guardarFirmaDesdeBase64(Ticket $ticket, string $base64Image): Ticket
     {
-        $imageParts = explode(';base64,', $base64Image);
-        $imageTypeAux = explode('image/', $imageParts[0]);
-        $imageType = $imageTypeAux[1] ?? 'png';
-        $imageBase64 = base64_decode($imageParts[1]);
+        $partes = explode(';base64,', $base64Image);
+        $tipoAux = explode('image/', $partes[0]);
+        $tipoImagen = $tipoAux[1] ?? 'png';
+        $imagenBase64 = base64_decode($partes[1]);
 
-        $filename = 'tickets/signatures/ticket_'.$ticket->id.'_'.time().'.'.$imageType;
+        $nombreArchivo = 'tickets/signatures/ticket_'.$ticket->id.'_'.time().'.'.$tipoImagen;
 
-        Storage::disk('public')->put($filename, $imageBase64);
+        Storage::disk('public')->put($nombreArchivo, $imagenBase64);
 
-        $ticket->client_signature = $filename;
+        $ticket->client_signature = $nombreArchivo;
         $ticket->save();
 
         return $ticket;
+    }
+
+    public function saveSignatureFromBase64(Ticket $ticket, string $base64Image): Ticket
+    {
+        return $this->guardarFirmaDesdeBase64($ticket, $base64Image);
     }
 }

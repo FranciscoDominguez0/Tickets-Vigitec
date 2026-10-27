@@ -22,7 +22,7 @@ class TicketData
     /**
      * Construye el DTO desde la solicitud validada.
      */
-    public static function fromRequest(StoreTicketRequest $solicitud, int $empresaId, ?string $numeroTicket = null): self
+    public static function desdeSolicitud(StoreTicketRequest $solicitud, int $empresaId, ?string $numeroTicket = null): self
     {
         return new self(
             userId: (int) $solicitud->validated('user_id'),
@@ -38,10 +38,15 @@ class TicketData
         );
     }
 
+    public static function fromRequest(StoreTicketRequest $solicitud, int $empresaId, ?string $numeroTicket = null): self
+    {
+        return self::desdeSolicitud($solicitud, $empresaId, $numeroTicket);
+    }
+
     /**
      * Convierte las propiedades a arreglo para inserción en Eloquent.
      */
-    public function toArray(): array
+    public function aArreglo(): array
     {
         return [
             'ticket_number' => $this->ticketNumber,
@@ -53,5 +58,10 @@ class TicketData
             'status_id' => $this->statusId,
             'created' => now(),
         ];
+    }
+
+    public function toArray(): array
+    {
+        return $this->aArreglo();
     }
 }

@@ -142,11 +142,15 @@
                     <div class="data-label">Teléfono</div>
                     <div class="data-value">{{ $usuario->phone ?: 'No registrado' }}</div>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-2">
                     <div class="data-label">Organización / Empresa</div>
-                    <div class="data-value">{{ $usuario->company ?: 'Particular' }}</div>
+                    <div class="data-value">{{ $usuario->company ?: ($usuario->organizacion?->name ?: 'Particular') }}</div>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-6 col-md-2">
+                    <div class="data-label">Departamento</div>
+                    <div class="data-value">{{ $usuario->departamento?->name ?: 'Sin asignar' }}</div>
+                </div>
+                <div class="col-6 col-md-2">
                     <div class="data-label">Dirección</div>
                     <div class="data-value">{{ $usuario->address ?: 'Sin dirección' }}</div>
                 </div>

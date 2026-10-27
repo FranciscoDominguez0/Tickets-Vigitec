@@ -80,24 +80,24 @@ Route::prefix('agent')->group(function () {
         })->name('agent.dashboard');
 
         // Panel de control
-        Route::get('/directory', [DirectoryController::class, 'index'])->name('agent.directory');
+        Route::get('/directory', [DirectoryController::class, 'listar'])->name('agent.directory');
         Route::get('/map', [MapController::class, 'index'])->name('agent.map');
         Route::get('/map/ubicaciones', [MapController::class, 'ubicaciones'])->name('agent.map.locations');
-        Route::post('/map/update-location', [MapController::class, 'updateLocation'])->name('agent.location.update');
+        Route::post('/map/update-location', [MapController::class, 'actualizarUbicacion'])->name('agent.location.update');
 
         // Tickets
-        Route::get('/tickets', [TicketController::class, 'index'])->name('agent.tickets.index');
-        Route::get('/tickets/create', [TicketController::class, 'create'])->name('agent.tickets.create');
-        Route::post('/tickets', [TicketController::class, 'store'])->name('agent.tickets.store');
-        Route::get('/ticket/{id}', [TicketController::class, 'show'])->name('agent.tickets.show');
+        Route::get('/tickets', [TicketController::class, 'listar'])->name('agent.tickets.index');
+        Route::get('/tickets/create', [TicketController::class, 'crear'])->name('agent.tickets.create');
+        Route::post('/tickets', [TicketController::class, 'guardar'])->name('agent.tickets.store');
+        Route::get('/ticket/{id}', [TicketController::class, 'mostrar'])->name('agent.tickets.show');
         Route::post('/ticket/{id}/reply', [TicketController::class, 'responder'])->name('agent.tickets.reply');
 
         // Ticket Action Routes
         Route::post('/ticket/{id}/assign', [TicketController::class, 'asignar'])->name('agent.tickets.assign');
         Route::post('/ticket/{id}/transfer', [TicketController::class, 'transferir'])->name('agent.tickets.transfer');
         Route::post('/ticket/{id}/status', [TicketController::class, 'estado'])->name('agent.tickets.status');
-        Route::post('/ticket/{id}/request-signature', [TicketController::class, 'requestSignature'])->name('agent.tickets.request_signature');
-        Route::delete('/ticket/{id}', [TicketController::class, 'destroy'])->name('agent.tickets.destroy');
+        Route::post('/ticket/{id}/request-signature', [TicketController::class, 'guardarFirma'])->name('agent.tickets.request_signature');
+        Route::delete('/ticket/{id}', [TicketController::class, 'eliminar'])->name('agent.tickets.destroy');
 
         // Hilo del ticket
         Route::put('/thread/{id}', [TicketController::class, 'actualizarHilo'])->name('agent.tickets.thread.update');

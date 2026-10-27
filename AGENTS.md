@@ -20,8 +20,13 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 ## Conventions
 
 - You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, and naming.
-- Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
+- Use descriptive names for variables and methods.
 - Check for existing components to reuse before writing a new one.
+
+## Idioma del Código (Español Obligatorio)
+
+- **Regla Estricta y Obligatoria**: Todo el código nuevo o modificado del proyecto (métodos, funciones, variables, controladores, servicios, repositorios, DTOs, tests y comentarios) DEBE estar en **español** (por ejemplo: `listar()`, `crear()`, `guardar()`, `mostrar()`, `actualizar()`, `eliminar()`, `generarNumeroTicket()`, `agregarRespuesta()`, `$departamentos`, `$usuario`, etc.).
+- **Única Excepción Permitida**: Se permite el inglés **únicamente** para las funciones, interfaces y métodos propios y nativos del framework Laravel o PHP (ejemplos: `validate()`, `create()`, `find()`, `where()`, `get()`, `first()`, `redirect()`, `with()`, `assertStatus()`, `assertSee()`, etc.). Toda función o método propio desarrollado para el sistema debe estar nombrado en español.
 
 ## Verification Scripts
 

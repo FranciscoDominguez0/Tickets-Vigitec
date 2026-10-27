@@ -27,7 +27,7 @@ class TicketController extends Controller
     /**
      * Muestra la lista de tickets.
      */
-    public function index(Request $request): View
+    public function listar(Request $request): View
     {
         $filtro = $request->input('filter');
         $tickets = $this->ticketRepository->obtenerPaginados($filtro, 20);
@@ -38,26 +38,36 @@ class TicketController extends Controller
         return view('agent.tickets.index', compact('tickets', 'estadisticas'));
     }
 
+    public function index(Request $request): View
+    {
+        return $this->listar($request);
+    }
+
     /**
      * Muestra el formulario para crear un nuevo ticket.
      */
-    public function create(): View
+    public function crear(): View
     {
         $datos = $this->ticketService->obtenerDatosParaFormularioCreacion();
 
         return view('agent.tickets.create', $datos);
     }
 
+    public function create(): View
+    {
+        return $this->crear();
+    }
+
     /**
      * Almacena un ticket recién creado en la base de datos siguiendo la arquitectura:
      * Form Request -> Controller -> DTO -> Service -> Repository.
      */
-    public function store(StoreTicketRequest $request): RedirectResponse
+    public function guardar(StoreTicketRequest $request): RedirectResponse
     {
         $empresaId = auth('staff')->user()->empresa_id ?? 1;
         $staffId = auth('staff')->id() ?? 1;
 
-        $ticketData = TicketData::fromRequest($request, $empresaId);
+        $ticketData = TicketData::desdeSolicitud($request, $empresaId);
 
         $ticket = $this->ticketService->crearTicket(
             $ticketData,
@@ -70,10 +80,15 @@ class TicketController extends Controller
             ->with('success', 'Ticket creado correctamente.');
     }
 
+    public function store(StoreTicketRequest $request): RedirectResponse
+    {
+        return $this->guardar($request);
+    }
+
     /**
      * Muestra la vista detallada de un ticket específico.
      */
-    public function show($id): View
+    public function mostrar($id): View
     {
         $ticket = $this->ticketRepository->buscarConDetalles((int) $id);
 
@@ -88,19 +103,29 @@ class TicketController extends Controller
         return view('agent.tickets.show', compact('ticket', 'departamentos', 'miembrosStaff', 'estados'));
     }
 
+    public function show($id): View
+    {
+        return $this->mostrar($id);
+    }
+
     /**
      * Guarda una respuesta en el hilo del ticket.
      */
-    public function responder(Request $request, $id)
+    public function responder(Request $request, $id): RedirectResponse
     {
         $ticket = Ticket::findOrFail($id);
 
         $validado = $request->validate([
             'response_body' => 'required|string',
-            'attachments.*' => 'nullable|file|max:10240', // Max 10MB
+            'attachments.*' => 'nullable|file|max:10240',
         ]);
 
-        $this->ticketService->addReply($ticket, $validado['response_body'], auth('staff')->id() ?? 1, $request->file('attachments') ?? []);
+        $this->ticketService->agregarRespuesta(
+            $ticket,
+            $validado['response_body'],
+            auth('staff')->id() ?? 1,
+            $request->file('attachments') ?? []
+        );
 
         return redirect()->route('agent.tickets.show', $ticket->id)->with('success', 'Respuesta enviada correctamente.');
     }
@@ -108,13 +133,12 @@ class TicketController extends Controller
     /**
      * Asigna un ticket a un agente.
      */
-    public function asignar(Request $request, $id)
+    public function asignar(Request $request, $id): RedirectResponse
     {
         $request->validate(['staff_id' => 'required|exists:staff,id']);
 
         $ticket = Ticket::findOrFail($id);
         $ticket->staff_id = $request->staff_id;
-        // Optionally save internal note
         $ticket->save();
 
         return redirect()->back()->with('success', 'Ticket asignado correctamente.');
@@ -123,25 +147,27 @@ class TicketController extends Controller
     /**
      * Transfiere el ticket a otro departamento.
      */
-    public function transferir(Request $request, $id)
+    public function transferir(Request $request, $id): RedirectResponse
     {
         $request->validate(['dept_id' => 'required|exists:departments,id']);
 
         $ticket = Ticket::findOrFail($id);
         $ticket->dept_id = $request->dept_id;
-        // Optionally save internal note
         $ticket->save();
 
         return redirect()->back()->with('success', 'Ticket transferido exitosamente.');
     }
 
-    public function estado(Request $request, $id)
+    /**
+     * Actualiza el estado del ticket.
+     */
+    public function estado(Request $request, $id): RedirectResponse
     {
         $request->validate(['status_id' => 'required|exists:ticket_status,id']);
 
         $ticket = Ticket::findOrFail($id);
 
-        $this->ticketService->updateStatus($ticket, $request->status_id, auth('staff')->id() ?? 1);
+        $this->ticketService->actualizarEstado($ticket, (int) $request->status_id, auth('staff')->id() ?? 1);
 
         if ($request->status_id == 3) {
             return redirect()->back()
@@ -154,13 +180,13 @@ class TicketController extends Controller
     /**
      * Guarda la firma del cliente dibujada en pantalla para cerrar el ticket.
      */
-    public function requestSignature(Request $request, $id)
+    public function guardarFirma(Request $request, $id): RedirectResponse
     {
         $ticket = Ticket::findOrFail($id);
 
         if ($request->has('firma_base64') && ! empty($request->firma_base64)) {
-            $this->ticketService->saveSignatureFromBase64($ticket, $request->firma_base64);
-            $this->ticketService->updateStatus($ticket, $request->input('status_id', 3), auth('staff')->id() ?? 1);
+            $this->ticketService->guardarFirmaDesdeBase64($ticket, $request->firma_base64);
+            $this->ticketService->actualizarEstado($ticket, (int) $request->input('status_id', 3), auth('staff')->id() ?? 1);
 
             return redirect()->back()
                 ->with('success', 'Firma guardada y ticket cerrado correctamente. Recuerda llenar la hoja de reporte desde la sección "Por facturar".');
@@ -169,10 +195,15 @@ class TicketController extends Controller
         return redirect()->back()->with('error', 'No se recibió ninguna firma.');
     }
 
+    public function requestSignature(Request $request, $id): RedirectResponse
+    {
+        return $this->guardarFirma($request, $id);
+    }
+
     /**
      * Actualiza el cuerpo de un mensaje del hilo.
      */
-    public function actualizarHilo(Request $request, $id)
+    public function actualizarHilo(Request $request, $id): RedirectResponse
     {
         $request->validate(['body' => 'required|string']);
 
@@ -187,7 +218,7 @@ class TicketController extends Controller
     /**
      * Elimina un mensaje del hilo.
      */
-    public function eliminarHilo($id)
+    public function eliminarHilo($id): RedirectResponse
     {
         $entrada = ThreadEntry::findOrFail($id);
         $entrada->delete();
@@ -198,15 +229,16 @@ class TicketController extends Controller
     /**
      * Elimina un ticket por completo.
      */
-    public function destroy($id)
+    public function eliminar($id): RedirectResponse
     {
         $ticket = Ticket::findOrFail($id);
-
-        // El hilo (Thread) y mensajes (ThreadEntry) podrían necesitar eliminarse
-        // si no hay cascada en la base de datos, pero si asume cascada o se eliminan
-        // los hijos desde el modelo.
         $ticket->delete();
 
         return redirect()->route('agent.tickets.index')->with('success', 'Ticket eliminado permanentemente.');
+    }
+
+    public function destroy($id): RedirectResponse
+    {
+        return $this->eliminar($id);
     }
 }

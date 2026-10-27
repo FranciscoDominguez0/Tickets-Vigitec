@@ -11,6 +11,11 @@ class DirectoryController extends Controller
 {
     public function index(Request $request)
     {
+        return $this->listar($request);
+    }
+
+    public function listar(Request $request)
+    {
         $departamentoId = $request->input('did');
         $busqueda = $request->input('q');
 

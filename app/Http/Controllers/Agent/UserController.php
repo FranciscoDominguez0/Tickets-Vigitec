@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Services\UserService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -42,9 +43,23 @@ class UserController extends Controller
     /**
      * Almacena un nuevo usuario en el sistema.
      */
-    public function guardar(StoreUserRequest $solicitud): RedirectResponse
+    public function guardar(StoreUserRequest $solicitud): RedirectResponse|JsonResponse
     {
         $usuario = $this->servicioUsuario->registrarUsuario($solicitud->validated());
+
+        if ($solicitud->wantsJson() || $solicitud->ajax()) {
+            return response()->json([
+                'exito' => true,
+                'mensaje' => 'Usuario registrado correctamente.',
+                'usuario' => [
+                    'id' => $usuario->id,
+                    'nombre_completo' => $usuario->nombre_completo,
+                    'email' => $usuario->email,
+                    'phone' => $usuario->phone,
+                    'company' => $usuario->company,
+                ],
+            ], 201);
+        }
 
         return redirect()
             ->route('agent.users.show', $usuario->id)

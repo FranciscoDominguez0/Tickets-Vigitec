@@ -147,11 +147,11 @@
                 <h1 class="h3 text-white mb-1 fw-bold">Directorio de Usuarios</h1>
                 <p class="text-muted mb-0 small">Gestión y consulta de clientes asociados a tickets de soporte</p>
             </div>
-            <div>
-                <a href="{{ route('agent.users.create') }}" class="btn btn-danger fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center gap-2" style="background-color: #ef4444; border-color: #ef4444; border-radius: 8px;">
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-danger fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCrearUsuario" style="background-color: #ef4444; border-color: #ef4444; border-radius: 8px;">
                     <i class="bi bi-person-plus-fill"></i>
                     <span>Nuevo Usuario</span>
-                </a>
+                </button>
             </div>
         </div>
 
@@ -358,4 +358,7 @@
             @endif
         </div>
     </div>
+
+    <!-- Componente Reutilizable: Modal para Crear Usuario -->
+    <x-modal-usuario />
 </x-agent.layout>

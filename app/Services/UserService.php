@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\Organization;
 use App\Models\User;
 use App\Repositories\UserRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use InvalidArgumentException;
 
@@ -55,19 +57,42 @@ class UserService
             $estado = in_array((string) $datos['status'], ['inactive', '0'], true) ? 'inactive' : 'active';
         }
 
+        $organizacionId = ! empty($datos['organization_id']) ? (int) $datos['organization_id'] : null;
+        $departamentoId = ! empty($datos['department_id']) ? (int) $datos['department_id'] : null;
+        $empresaId = ! empty($datos['empresa_id']) ? (int) $datos['empresa_id'] : (auth('staff')->user()->empresa_id ?? 1);
+
+        $compania = $datos['company'] ?? null;
+        if (empty($compania) && $organizacionId) {
+            $organizacion = Organization::find($organizacionId);
+            if ($organizacion) {
+                $compania = $organizacion->name;
+            }
+        }
+
         $datosFormateados = [
             'firstname' => trim($datos['firstname']),
             'lastname' => trim($datos['lastname']),
             'email' => strtolower(trim($datos['email'])),
             'phone' => $datos['phone'] ?? null,
-            'company' => $datos['company'] ?? null,
+            'company' => $compania,
+            'organization_id' => $organizacionId,
+            'department_id' => $departamentoId,
             'address' => $datos['address'] ?? null,
             'status' => $estado,
             'password' => Hash::make($password),
-            'empresa_id' => auth('staff')->user()->empresa_id ?? 1,
+            'empresa_id' => $empresaId,
         ];
 
-        return $this->repositorio->crear($datosFormateados);
+        $usuario = $this->repositorio->crear($datosFormateados);
+
+        if ($organizacionId) {
+            DB::table('user_organizations')->updateOrInsert(
+                ['user_id' => $usuario->id, 'organization_id' => $organizacionId],
+                ['empresa_id' => $empresaId, 'created_at' => now()]
+            );
+        }
+
+        return $usuario;
     }
 
     /**
@@ -85,6 +110,14 @@ class UserService
             'company' => $datos['company'] ?? null,
             'address' => $datos['address'] ?? null,
         ];
+
+        if (array_key_exists('organization_id', $datos)) {
+            $datosActualizar['organization_id'] = ! empty($datos['organization_id']) ? (int) $datos['organization_id'] : null;
+        }
+
+        if (array_key_exists('department_id', $datos)) {
+            $datosActualizar['department_id'] = ! empty($datos['department_id']) ? (int) $datos['department_id'] : null;
+        }
 
         if (isset($datos['status'])) {
             $datosActualizar['status'] = in_array((string) $datos['status'], ['inactive', '0'], true) ? 'inactive' : 'active';
