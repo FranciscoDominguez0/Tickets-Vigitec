@@ -91,13 +91,7 @@
             </div>
         </div>
 
-        <!-- Alertas de sesión -->
-        @if (session('exito'))
-            <div class="alert alert-success d-flex align-items-center gap-2 mb-4 border-0 rounded-3 shadow-sm" style="background: rgba(34, 197, 94, 0.15); color: #4ade80;">
-                <i class="bi bi-check-circle-fill fs-5"></i>
-                <span>{{ session('exito') }}</span>
-            </div>
-        @endif
+
 
         <!-- Tarjeta de perfil principal -->
         <div class="profile-card mb-4">

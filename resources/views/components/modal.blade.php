@@ -243,6 +243,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 }
 
+                if (res.organizacion) {
+                    window.dispatchEvent(new CustomEvent('organizacion-creada', { detail: res.organizacion }));
+                    const orgSelect = document.querySelector('select[name="organization_id"]');
+                    if (orgSelect) {
+                        const opt = new Option(res.organizacion.name || res.organizacion.nombre, res.organizacion.id, true, true);
+                        orgSelect.add(opt);
+                    }
+                }
+
                 form.reset();
             })
             .catch(err => {

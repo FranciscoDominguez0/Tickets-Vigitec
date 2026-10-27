@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Department;
+use App\Models\Organization;
 use App\Models\Priority;
 use App\Models\Staff;
 use App\Models\Ticket;
@@ -158,6 +159,60 @@ class AgentUserTest extends TestCase
             'id' => $cliente->id,
             'firstname' => 'NombreModificado',
             'email' => 'modificado@test.com',
+        ]);
+    }
+
+    public function test_agente_puede_ver_formulario_de_edicion_con_organizaciones_existentes(): void
+    {
+        $org = Organization::create([
+            'name' => 'Organización Existente Alpha',
+            'empresa_id' => 1,
+        ]);
+
+        $cliente = User::factory()->create([
+            'organization_id' => $org->id,
+        ]);
+
+        $response = $this->actingAs($this->agente, 'staff')
+            ->get(route('agent.users.edit', $cliente->id));
+
+        $response->assertStatus(200);
+        $response->assertSee('Editar Usuario');
+        $response->assertSee('name="organization_id"', false);
+        $response->assertSee('Organización Existente Alpha');
+    }
+
+    public function test_agente_puede_asignar_organizacion_existente_al_editar_usuario(): void
+    {
+        $org = Organization::create([
+            'name' => 'Empresa Asignada S.A.',
+            'empresa_id' => 1,
+        ]);
+
+        $cliente = User::factory()->create([
+            'organization_id' => null,
+            'company' => null,
+        ]);
+
+        $response = $this->actingAs($this->agente, 'staff')
+            ->put(route('agent.users.update', $cliente->id), [
+                'firstname' => $cliente->firstname,
+                'lastname' => $cliente->lastname,
+                'email' => $cliente->email,
+                'organization_id' => $org->id,
+            ]);
+
+        $response->assertRedirect(route('agent.users.show', $cliente->id));
+
+        $this->assertDatabaseHas('users', [
+            'id' => $cliente->id,
+            'organization_id' => $org->id,
+            'company' => 'Empresa Asignada S.A.',
+        ]);
+
+        $this->assertDatabaseHas('user_organizations', [
+            'user_id' => $cliente->id,
+            'organization_id' => $org->id,
         ]);
     }
 

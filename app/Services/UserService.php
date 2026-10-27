@@ -107,12 +107,32 @@ class UserService
             'lastname' => trim($datos['lastname']),
             'email' => strtolower(trim($datos['email'])),
             'phone' => $datos['phone'] ?? null,
-            'company' => $datos['company'] ?? null,
             'address' => $datos['address'] ?? null,
         ];
 
+        if (array_key_exists('company', $datos)) {
+            $datosActualizar['company'] = $datos['company'];
+        }
+
         if (array_key_exists('organization_id', $datos)) {
-            $datosActualizar['organization_id'] = ! empty($datos['organization_id']) ? (int) $datos['organization_id'] : null;
+            $orgId = ! empty($datos['organization_id']) ? (int) $datos['organization_id'] : null;
+            $datosActualizar['organization_id'] = $orgId;
+
+            if ($orgId) {
+                $org = Organization::find($orgId);
+                if ($org) {
+                    $datosActualizar['company'] = $org->name;
+                }
+                DB::table('user_organizations')->updateOrInsert(
+                    ['user_id' => $usuario->id, 'organization_id' => $orgId],
+                    ['empresa_id' => $usuario->empresa_id ?? 1, 'created_at' => now()]
+                );
+            } else {
+                DB::table('user_organizations')->where('user_id', $usuario->id)->delete();
+                if (empty($datos['company'])) {
+                    $datosActualizar['company'] = null;
+                }
+            }
         }
 
         if (array_key_exists('department_id', $datos)) {

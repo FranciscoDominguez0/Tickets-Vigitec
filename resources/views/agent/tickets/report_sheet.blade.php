@@ -72,12 +72,7 @@
             <h6 class="mb-0 fw-bold text-white"><i class="bi bi-hdd-stack me-2"></i> Datos del Reporte</h6>
         </div>
         <div class="card-body p-4" style="background-color: #000;">
-            @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
-            @if(session('error'))
-                <div class="alert alert-danger">{{ session('error') }}</div>
-            @endif
+
             @if($errors->any())
                 <div class="alert alert-danger">
                     <ul class="mb-0">

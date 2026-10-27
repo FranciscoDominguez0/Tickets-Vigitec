@@ -10,6 +10,11 @@ class Ticket extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'created' => 'datetime',
+        'updated' => 'datetime',
+    ];
+
     public function thread()
     {
         return $this->hasOne(Thread::class);

@@ -90,7 +90,14 @@
 
                     <div class="col-12 col-md-6">
                         <label class="form-label">Organización / Empresa</label>
-                        <input type="text" name="company" class="form-control @error('company') is-invalid @enderror" value="{{ old('company') }}" placeholder="Ej. Mi Empresa S.A.">
+                        <select name="organization_id" class="form-select @error('organization_id') is-invalid @enderror">
+                            <option value="">-- Sin organización / Particular --</option>
+                            @foreach ($organizaciones as $org)
+                                <option value="{{ $org->id }}" {{ old('organization_id') == $org->id ? 'selected' : '' }}>
+                                    {{ $org->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
 
                     <div class="col-12 col-md-6">

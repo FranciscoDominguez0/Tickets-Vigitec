@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Agent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
+use App\Models\Organization;
 use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -37,7 +38,9 @@ class UserController extends Controller
      */
     public function crear(): View
     {
-        return view('agent.users.create');
+        $organizaciones = Organization::orderBy('name')->get();
+
+        return view('agent.users.create', compact('organizaciones'));
     }
 
     /**
@@ -82,8 +85,9 @@ class UserController extends Controller
     public function editar(int $id): View
     {
         $usuario = $this->servicioUsuario->obtenerPorId($id);
+        $organizaciones = Organization::orderBy('name')->get();
 
-        return view('agent.users.edit', compact('usuario'));
+        return view('agent.users.edit', compact('usuario', 'organizaciones'));
     }
 
     /**

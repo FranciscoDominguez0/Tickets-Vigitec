@@ -2,13 +2,18 @@
     'id' => 'modalCrearUsuario',
     'titulo' => 'Registrar Nuevo Usuario',
     'accion' => route('agent.users.store'),
+    'organizaciones' => null,
     'modoAjax' => false,
 ])
+
+@php
+    $listaOrganizaciones = $organizaciones ?? \App\Models\Organization::orderBy('name')->get();
+@endphp
 
 <x-modal 
     :id="$id"
     :titulo="$titulo"
-    subtitulo="Ingresa los datos personales del usuario/cliente"
+    subtitulo="Ingresa los datos personales del usuario y asigna su organización"
     icono="bi-person-plus-fill"
     colorIcono="text-danger"
     :accion="$accion"
@@ -41,12 +46,22 @@
         </div>
 
         <div class="col-12 col-md-6">
+            <label class="form-label">Organización / Empresa</label>
+            <select name="organization_id" class="form-select">
+                <option value="">-- Sin organización / Particular --</option>
+                @foreach ($listaOrganizaciones as $org)
+                    <option value="{{ $org->id }}">{{ $org->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-12 col-md-6">
             <label class="form-label">Contraseña de Acceso</label>
             <input type="password" name="password" class="form-control" placeholder="Mínimo 6 caracteres (Opcional)">
             <div class="form-hint">Si se deja vacía, se asignará por defecto <code>password123</code>.</div>
         </div>
 
-        <div class="col-12 col-md-6">
+        <div class="col-12">
             <label class="form-label">Dirección Física</label>
             <input type="text" name="address" class="form-control" placeholder="Ciudad, edificio, oficina...">
         </div>

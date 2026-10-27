@@ -1,14 +1,14 @@
 <!-- Toast Notifications -->
 <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 9999; top: 20px !important; right: 20px !important;">
     
-    @if(session('success'))
+    @if(session('success') || session('exito') || session('status'))
         <div class="toast custom-toast toast-success align-items-center show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
             <div class="d-flex">
                 <div class="toast-icon">
                     <i class="bi bi-check-circle-fill"></i>
                 </div>
                 <div class="toast-body fw-medium">
-                    {{ session('success') }}
+                    {{ session('success') ?? session('exito') ?? session('status') }}
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
@@ -31,14 +31,14 @@
         </div>
     @endif
 
-    @if(session('warning'))
+    @if(session('warning') || session('advertencia'))
         <div class="toast custom-toast toast-warning align-items-center show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
             <div class="d-flex">
                 <div class="toast-icon">
                     <i class="bi bi-exclamation-circle-fill"></i>
                 </div>
                 <div class="toast-body fw-medium text-dark">
-                    {{ session('warning') }}
+                    {{ session('warning') ?? session('advertencia') }}
                 </div>
                 <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>

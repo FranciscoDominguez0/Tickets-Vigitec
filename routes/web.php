@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Agent\DirectoryController;
 use App\Http\Controllers\Agent\MapController;
+use App\Http\Controllers\Agent\OrganizationController;
 use App\Http\Controllers\Agent\TicketController;
 use App\Http\Controllers\Agent\TicketReportController;
 use App\Http\Controllers\Agent\UserController;
@@ -115,19 +116,26 @@ Route::prefix('agent')->group(function () {
             return view('agent.inventory.index');
         })->name('agent.inventory.index');
 
+        // Organizaciones
+        Route::get('/users/orgs', [OrganizationController::class, 'listar'])->name('agent.users.orgs');
+        Route::get('/organizations', [OrganizationController::class, 'listar'])->name('agent.organizations.index');
+        Route::post('/organizations', [OrganizationController::class, 'guardar'])->name('agent.organizations.store');
+        Route::get('/organizations/{id}', [OrganizationController::class, 'mostrar'])->whereNumber('id')->name('agent.organizations.show');
+        Route::put('/organizations/{id}', [OrganizationController::class, 'actualizar'])->whereNumber('id')->name('agent.organizations.update');
+        Route::delete('/organizations/{id}', [OrganizationController::class, 'eliminar'])->whereNumber('id')->name('agent.organizations.destroy');
+        Route::post('/organizations/{id}/members', [OrganizationController::class, 'vincularUsuario'])->whereNumber('id')->name('agent.organizations.members.store');
+        Route::delete('/organizations/{id}/members/{userId}', [OrganizationController::class, 'desvincularUsuario'])->whereNumber('id')->whereNumber('userId')->name('agent.organizations.members.destroy');
+
         // Usuarios
         Route::get('/users', fn () => redirect()->route('agent.users.directory'))->name('agent.users.index');
         Route::get('/users/directory', [UserController::class, 'listar'])->name('agent.users.directory');
         Route::get('/users/create', [UserController::class, 'crear'])->name('agent.users.create');
         Route::post('/users', [UserController::class, 'guardar'])->name('agent.users.store');
-        Route::get('/users/{id}', [UserController::class, 'mostrar'])->name('agent.users.show');
-        Route::get('/users/{id}/edit', [UserController::class, 'editar'])->name('agent.users.edit');
-        Route::put('/users/{id}', [UserController::class, 'actualizar'])->name('agent.users.update');
-        Route::post('/users/{id}/toggle-status', [UserController::class, 'cambiarEstado'])->name('agent.users.toggle_status');
-        Route::delete('/users/{id}', [UserController::class, 'eliminar'])->name('agent.users.destroy');
-        Route::get('/users/orgs', function () {
-            return view('agent.users.orgs');
-        })->name('agent.users.orgs');
+        Route::get('/users/{id}', [UserController::class, 'mostrar'])->whereNumber('id')->name('agent.users.show');
+        Route::get('/users/{id}/edit', [UserController::class, 'editar'])->whereNumber('id')->name('agent.users.edit');
+        Route::put('/users/{id}', [UserController::class, 'actualizar'])->whereNumber('id')->name('agent.users.update');
+        Route::post('/users/{id}/toggle-status', [UserController::class, 'cambiarEstado'])->whereNumber('id')->name('agent.users.toggle_status');
+        Route::delete('/users/{id}', [UserController::class, 'eliminar'])->whereNumber('id')->name('agent.users.destroy');
 
         // Perfil
         Route::get('/profile', function () {

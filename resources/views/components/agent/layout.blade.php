@@ -172,7 +172,7 @@
                     <!-- Usuarios -->
                     <li class="sidebar-group">
                         @php
-                            $isUsersRoute = request()->routeIs('agent.users.*');
+                            $isUsersRoute = request()->routeIs('agent.users.*', 'agent.organizations.*');
                         @endphp
                         <button type="button" class="sidebar-link sidebar-toggle {{ $isUsersRoute ? 'expanded' : '' }}" data-subnav="users-subnav" aria-expanded="{{ $isUsersRoute ? 'true' : 'false' }}">
                             <span class="icon">
@@ -203,11 +203,11 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('agent.users.orgs') }}" class="sidebar-link {{ request()->routeIs('agent.users.orgs') ? 'active' : '' }}">
+                                <a href="{{ route('agent.users.orgs') }}" class="sidebar-link {{ request()->routeIs('agent.users.orgs', 'agent.organizations.*') ? 'active' : '' }}">
                                     <span class="icon">
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <rect x="4" y="8" width="16" height="10" rx="2" stroke="{{ request()->routeIs('agent.users.orgs') ? '#ffffff' : '#64748b' }}" stroke-width="1.6"/>
-                                            <path d="M9 8V6C9 4.89543 9.89543 4 11 4H13C14.1046 4 15 4.89543 15 6V8" stroke="{{ request()->routeIs('agent.users.orgs') ? '#ffffff' : '#64748b' }}" stroke-width="1.6" stroke-linecap="round"/>
+                                            <rect x="4" y="8" width="16" height="10" rx="2" stroke="{{ request()->routeIs('agent.users.orgs', 'agent.organizations.*') ? '#ffffff' : '#64748b' }}" stroke-width="1.6"/>
+                                            <path d="M9 8V6C9 4.89543 9.89543 4 11 4H13C14.1046 4 15 4.89543 15 6V8" stroke="{{ request()->routeIs('agent.users.orgs', 'agent.organizations.*') ? '#ffffff' : '#64748b' }}" stroke-width="1.6" stroke-linecap="round"/>
                                         </svg>
                                     </span>
                                     Organizaciones

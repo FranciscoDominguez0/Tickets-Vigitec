@@ -80,6 +80,12 @@ class User extends Authenticatable
         return $this->belongsTo(Organization::class, 'organization_id');
     }
 
+    public function organizaciones()
+    {
+        return $this->belongsToMany(Organization::class, 'user_organizations', 'user_id', 'organization_id')
+            ->withPivot('created_at');
+    }
+
     public function getNombreCompletoAttribute(): string
     {
         $nombre = trim("{$this->firstname} {$this->lastname}");
