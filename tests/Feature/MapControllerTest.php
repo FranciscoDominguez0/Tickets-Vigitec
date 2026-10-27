@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use Illuminate\Support\Facades\DB;
 use App\Models\Staff;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
 class MapControllerTest extends TestCase
 {
@@ -35,7 +36,7 @@ class MapControllerTest extends TestCase
             'lng' => -79.52,
         ]);
         $response->assertStatus(200);
-        
+
         $this->assertDatabaseHas('staff_locations', [
             'staff_id' => $this->staff->id,
             'lat' => 8.98,
@@ -48,11 +49,11 @@ class MapControllerTest extends TestCase
         DB::table('ticket_status')->insert([
             ['id' => 4, 'name' => 'En proceso', 'color' => '#ffffff'],
         ]);
-        
+
         // Disable foreign key checks for manual insertion to avoid dealing with missing departments/users
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('departments')->insert(['id' => 1, 'name' => 'IT', 'empresa_id' => 1]);
-        $user = \App\Models\User::factory()->create(['empresa_id' => 1]);
+        $user = User::factory()->create(['empresa_id' => 1]);
 
         DB::table('tickets')->insert([
             'id' => 1,
@@ -64,7 +65,7 @@ class MapControllerTest extends TestCase
             'user_id' => $user->id,
         ]);
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        
+
         DB::table('staff_locations')->insert([
             'staff_id' => $this->staff->id,
             'lat' => 10.0,
@@ -72,7 +73,7 @@ class MapControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->staff, 'staff')->getJson(route('agent.map.locations'));
-        
+
         $response->assertStatus(200);
         $response->assertJsonStructure(['ok', 'locations']);
         $locations = $response->json('locations');

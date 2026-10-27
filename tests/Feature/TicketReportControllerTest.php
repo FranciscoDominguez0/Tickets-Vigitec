@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use App\Models\Staff;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
 class TicketReportControllerTest extends TestCase
 {
@@ -18,14 +19,14 @@ class TicketReportControllerTest extends TestCase
         parent::setUp();
         DB::table('empresas')->insert(['id' => 1, 'nombre' => 'Test', 'estado' => 'activa']);
         $this->staff = Staff::factory()->create(['empresa_id' => 1]);
-        
+
         DB::table('ticket_status')->insert([
             ['id' => 3, 'name' => 'Cerrado', 'color' => '#000000'],
         ]);
-        
+
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('departments')->insert(['id' => 1, 'name' => 'IT', 'empresa_id' => 1]);
-        $user = \App\Models\User::factory()->create(['empresa_id' => 1]);
+        $user = User::factory()->create(['empresa_id' => 1]);
 
         DB::table('tickets')->insert([
             'id' => 1,
@@ -79,7 +80,7 @@ class TicketReportControllerTest extends TestCase
             'description' => 'Task 1',
             'price' => 50.00,
         ]);
-        
+
         $this->assertDatabaseHas('ticket_report_items', [
             'description' => 'Task 2',
             'price' => 100.50,
@@ -105,7 +106,7 @@ class TicketReportControllerTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        
+
         $this->assertDatabaseHas('ticket_reports', [
             'ticket_id' => 1,
             'billing_status' => 'visita_tecnica',

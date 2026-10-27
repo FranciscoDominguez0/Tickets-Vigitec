@@ -18,8 +18,11 @@ class AgentTicketTest extends TestCase
     use DatabaseTransactions;
 
     protected $departamento;
+
     protected $prioridad;
+
     protected $estado;
+
     protected $estadoCerrado;
 
     protected function setUp(): void
