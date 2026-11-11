@@ -70,4 +70,12 @@ class Staff extends Authenticatable
     {
         return $this->hasMany(Ticket::class, 'staff_id');
     }
+
+    /**
+     * Determina si el miembro del personal tiene rol de administrador.
+     */
+    public function esAdmin(): bool
+    {
+        return in_array($this->role, ['admin', 'superadmin'], true);
+    }
 }

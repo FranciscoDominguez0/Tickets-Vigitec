@@ -262,6 +262,11 @@
                     </button>
                     
                     <div class="ms-auto d-flex align-items-center">
+                        @if(auth('staff')->check() && auth('staff')->user()->esAdmin())
+                            <a href="{{ route('agent.settings.pages', ['t' => 'pages']) }}" class="btn btn-sm btn-danger d-inline-flex align-items-center gap-1 fw-bold px-3 py-1 me-3 shadow-sm" style="background-color: #ef4444; border-color: #ef4444; border-radius: 20px;">
+                                <i class="bi bi-gear-fill"></i> Administrador
+                            </a>
+                        @endif
                         <span class="me-3 text-white">Hola, {{ auth('staff')->user()->firstname ?? 'Agente' }}</span>
                     </div>
                 </div>

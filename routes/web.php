@@ -4,6 +4,7 @@ use App\Http\Controllers\Agent\DirectoryController;
 use App\Http\Controllers\Agent\MapController;
 use App\Http\Controllers\Agent\OrganizationController;
 use App\Http\Controllers\Agent\ProfileController;
+use App\Http\Controllers\Agent\SettingController;
 use App\Http\Controllers\Agent\TicketController;
 use App\Http\Controllers\Agent\TicketReportController;
 use App\Http\Controllers\Agent\UserController;
@@ -142,5 +143,9 @@ Route::prefix('agent')->group(function () {
         Route::get('/profile', [ProfileController::class, 'mostrar'])->name('agent.profile.index');
         Route::put('/profile', [ProfileController::class, 'actualizar'])->name('agent.profile.update');
         Route::put('/profile/password', [ProfileController::class, 'cambiarContrasena'])->name('agent.profile.password');
+
+        // Panel de Administración / Configuración
+        Route::get('/settings', [SettingController::class, 'mostrar'])->name('agent.settings.pages');
+        Route::post('/settings/pages', [SettingController::class, 'guardarPaginas'])->name('agent.settings.pages.store');
     });
 });

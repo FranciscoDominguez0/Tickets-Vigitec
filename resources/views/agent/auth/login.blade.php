@@ -169,8 +169,17 @@
             transform: translateY(-1px) !important;
         }
     </style>
+    @php
+        $logoPersonalizado = \App\Models\AppSetting::obtener('company.logo');
+        $modoLogo = \App\Models\AppSetting::obtener('company.logo_mode', 'default');
+        $urlLogo = ($modoLogo === 'custom' && $logoPersonalizado) ? asset('storage/' . $logoPersonalizado) : asset('img/vigitec-logo.webp');
+
+        $fondoPersonalizado = \App\Models\AppSetting::obtener('login.background');
+        $modoFondo = \App\Models\AppSetting::obtener('login.background_mode', 'default');
+        $urlFondo = ($modoFondo === 'custom' && $fondoPersonalizado) ? asset('storage/' . $fondoPersonalizado) : asset('img/agent-background.webp');
+    @endphp
 </head>
-<body class="agent-login" style="background-image:url('{{ asset('img/agent-background.webp') }}'); background-size: cover; background-position: center;">
+<body class="agent-login" style="background-image:url('{{ $urlFondo }}'); background-size: cover; background-position: center;">
     <div class="back-to-user-login" style="position:fixed;top:10px;left:10px;z-index:9999;">
         <a href="{{ route('login') }}" class="back-btn" style="display:inline-flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:#fff;text-decoration:none;font-weight:600;font-size:14px;line-height:1;">
             <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;flex:0 0 auto;">
@@ -185,7 +194,7 @@
         <!-- PANEL DE LOGIN (GLASSMORPHISM) -->
         <div class="agent-login-panel">
             <div class="agent-login-brand">
-                <img src="{{ asset('img/vigitec-logo.webp') }}" alt="{{ config('app.name', 'Tickets') }}" loading="eager" fetchpriority="high" decoding="async">
+                <img src="{{ $urlLogo }}" alt="{{ config('app.name', 'Tickets') }}" loading="eager" fetchpriority="high" decoding="async">
             </div>
             <div class="agent-login-subtext">Acceso de Agentes</div>
             
@@ -259,7 +268,7 @@
 
         // ── Extractor Inteligente de Colores de Fondo ──
         (function() {
-            var bgUrl = "{{ asset('img/agent-background.webp') }}";
+            var bgUrl = "{{ $urlFondo }}";
             
             function extractColors(url) {
                 var img = new Image();
