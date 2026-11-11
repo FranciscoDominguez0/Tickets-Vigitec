@@ -23,31 +23,64 @@
             overflow-x: hidden;
         }
 
+        /* Barra de navegación superior (separada del sidebar) */
         .scp-admin-navbar {
             position: fixed;
             top: 0;
-            left: 0;
-            width: 100%;
+            left: 280px;
+            width: calc(100% - 280px);
             height: 60px;
-            z-index: 1001;
+            z-index: 1020;
             background-color: #000000;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 0 1.25rem;
+            padding: 0 1.5rem;
+            transition: left 0.25s ease, width 0.25s ease;
         }
 
-        .sidebar {
+        /* Barra lateral (Sidebar) de altura completa e independiente */
+        .sidebar.admin-sidebar-panel {
             position: fixed;
-            top: 60px;
+            top: 0;
             left: 0;
             bottom: 0;
             width: 280px;
             min-width: 280px;
             max-width: 280px;
-            background-color: #000000;
-            padding: 16px 12px 36px;
+            background: radial-gradient(ellipse 260px 140px at 50% 0%, rgba(220, 38, 38, 0.28) 0%, rgba(0, 0, 0, 0) 100%), #000000;
+            padding: 0 0 36px 0;
             overflow-y: auto;
-            z-index: 1000;
+            z-index: 1030;
             border-right: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Encabezado del sidebar */
+        .sidebar-brand-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-brand-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: rgba(255, 255, 255, 0.35);
+        }
+
+        .sidebar-brand-text {
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
         }
 
         .sidebar-section-title {
@@ -55,7 +88,7 @@
             text-transform: uppercase;
             letter-spacing: .08em;
             color: #64748b;
-            margin: 10px 0 12px 6px;
+            margin: 12px 0 10px 10px;
             font-weight: 700;
         }
 
@@ -70,7 +103,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 9px 12px;
+            padding: 8px 12px;
             border-radius: 8px;
             color: #9ca3af;
             text-decoration: none;
@@ -93,20 +126,26 @@
             color: #f1f5f9;
         }
 
-        .sidebar-link span.icon,
-        .sidebar .sidebar-toggle span.icon {
+        /* Contenedor de iconos tipo squircle */
+        .sidebar-icon {
             display: inline-flex;
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             justify-content: center;
             align-items: center;
-            border-radius: 9px;
-            background: rgba(148, 163, 184, 0.12);
-            border: 1px solid rgba(148, 163, 184, 0.18);
-            flex: 0 0 30px;
-            font-size: 16px;
+            border-radius: 8px;
+            background: rgba(148, 163, 184, 0.1);
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            flex: 0 0 28px;
+            font-size: 14px;
             color: inherit;
-            transition: transform .15s ease, background .2s ease, border-color .2s ease;
+            transition: all .15s ease;
+        }
+
+        .sidebar-link:hover .sidebar-icon,
+        .sidebar .sidebar-toggle:hover .sidebar-icon {
+            border-color: rgba(255, 255, 255, 0.28);
+            color: #ffffff;
         }
 
         .sidebar-toggle .arrow {
@@ -116,6 +155,7 @@
             width: 16px;
             height: 16px;
             transition: transform 0.2s ease;
+            color: inherit;
         }
 
         .sidebar-toggle.expanded .arrow {
@@ -125,7 +165,7 @@
         /* Submenús con línea vertical guía */
         .sidebar-subnav {
             list-style: none;
-            margin: 4px 0 6px 16px;
+            margin: 4px 0 6px 14px;
             padding-left: 12px;
             border-left: 1px solid rgba(148, 163, 184, 0.22);
             max-height: 0;
@@ -142,11 +182,11 @@
         }
 
         .sidebar-subnav .sidebar-link {
-            padding: 7px 10px;
-            font-size: 0.86rem;
+            padding: 6px 10px;
+            font-size: 0.85rem;
             color: #9ca3af;
             margin-bottom: 2px;
-            min-height: 38px;
+            min-height: 36px;
             border-radius: 8px;
         }
 
@@ -161,6 +201,12 @@
             color: #ffffff;
             border-left: 2px solid #ef4444;
             padding-left: 8px;
+        }
+
+        .sidebar-subnav .sidebar-link.active .sidebar-icon {
+            background: rgba(239, 68, 68, 0.35);
+            border-color: rgba(239, 68, 68, 0.6);
+            color: #ffffff;
         }
 
         /* Botón destacado Panel de Control (Rojo vibrante según diseño) */
@@ -179,7 +225,7 @@
 
         .panel-control-toggle .icon-panel-control {
             background: rgba(255, 255, 255, 0.18) !important;
-            border-color: rgba(255, 255, 255, 0.28) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
             color: #ffffff !important;
         }
 
@@ -194,12 +240,16 @@
         }
 
         @media (max-width: 991px) {
-            .sidebar {
+            .scp-admin-navbar {
+                left: 0;
+                width: 100%;
+            }
+            .sidebar.admin-sidebar-panel {
                 transform: translateX(-100%);
                 transition: transform 0.3s ease;
-                box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
+                box-shadow: 0 14px 32px rgba(0, 0, 0, 0.6);
             }
-            .sidebar.show {
+            .sidebar.admin-sidebar-panel.show {
                 transform: translateX(0);
             }
             .main-shell {
@@ -212,19 +262,17 @@
     @stack('styles')
 </head>
 <body class="scp-panel {{ (auth('staff')->check() && !auth('staff')->user()->dark_mode) ? '' : 'dark-mode' }}">
-    <!-- NAVBAR SUPERIOR ADMINISTRADOR -->
+    <!-- NAVBAR SUPERIOR ADMINISTRADOR (Área de contenido) -->
     <nav class="navbar navbar-dark scp-admin-navbar">
-        <div class="container-fluid d-flex align-items-center justify-content-between">
+        <div class="container-fluid d-flex align-items-center justify-content-between px-0">
             <div class="d-flex align-items-center gap-2">
-                <button class="btn scp-menu-toggle text-white p-1" id="scpSidebarToggle" type="button" aria-label="Alternar menú lateral" style="background: none; border: none; font-size: 1.35rem;">
+                <!-- Botón móvil para mostrar/ocultar el menú lateral -->
+                <button class="btn scp-menu-toggle text-white p-1 d-lg-none" id="scpSidebarToggle" type="button" aria-label="Alternar menú lateral" style="background: none; border: none; font-size: 1.35rem;">
                     <i class="bi bi-list"></i>
                 </button>
-                <span class="navbar-brand scp-brand-title mb-0 fs-6 fw-bold text-white d-flex align-items-center gap-2">
-                    Sistema de Tickets
-                </span>
             </div>
             
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3 ms-auto">
                 <a href="{{ route('agent.dashboard') }}" class="scp-admin-pill scp-admin-pill-lg d-none d-md-inline-flex align-items-center gap-1" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; text-decoration: none; font-weight: 600; font-size: 0.85rem; padding: 6px 14px; border-radius: 999px; transition: all 0.2s;">
                     <i class="bi bi-arrow-left"></i> Volver a Agentes
                 </a>
@@ -272,201 +320,8 @@
     </nav>
 
     <div class="layout">
-        <!-- BARRA LATERAL (SIDEBAR) ADMINISTRADOR -->
-        <aside class="sidebar">
-            <div class="sidebar-section">
-                <div class="sidebar-section-title">PANEL ADMIN</div>
-                
-                <ul class="sidebar-nav">
-                    @php
-                        $esGrupoConfiguracion = request()->routeIs('admin.settings.*');
-                        $esGrupoPanel = request()->routeIs('admin.logs', 'admin.audit');
-                        $esGrupoCorreos = request()->routeIs('admin.email', 'admin.banlist', 'admin.emailtest');
-                        $esGrupoPersonal = request()->routeIs('admin.staff', 'admin.roles', 'admin.departments');
-                    @endphp
-
-                    <!-- 1. Configuración -->
-                    <li class="sidebar-group mb-1">
-                        <button type="button" class="sidebar-toggle {{ $esGrupoConfiguracion ? 'expanded' : '' }}" data-subnav="admin-settings-subnav" aria-expanded="{{ $esGrupoConfiguracion ? 'true' : 'false' }}">
-                            <span class="icon"><i class="bi bi-gear"></i></span>
-                            <span class="sidebar-label">Configuración</span>
-                            <span class="arrow ms-auto">
-                                <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M7 5L12 10L7 15" stroke="{{ $esGrupoConfiguracion ? '#ffffff' : '#9ca3af' }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </span>
-                        </button>
-                        <ul id="admin-settings-subnav" class="sidebar-subnav {{ $esGrupoConfiguracion ? 'open' : '' }}">
-                            <li>
-                                <a href="{{ route('admin.settings.pages') }}" class="sidebar-link {{ request()->routeIs('admin.settings.pages') ? 'active' : '' }}">
-                                    <span class="icon"><i class="bi bi-building"></i></span>
-                                    <span>Perfil de la empresa</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.settings.billing') }}" class="sidebar-link {{ request()->routeIs('admin.settings.billing') ? 'active' : '' }}">
-                                    <span class="icon"><i class="bi bi-receipt"></i></span>
-                                    <span>Facturación</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.settings.tickets') }}" class="sidebar-link {{ request()->routeIs('admin.settings.tickets') ? 'active' : '' }}">
-                                    <span class="icon"><i class="bi bi-ticket-perforated"></i></span>
-                                    <span>Solicitudes</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.settings.tasks') }}" class="sidebar-link {{ request()->routeIs('admin.settings.tasks') ? 'active' : '' }}">
-                                    <span class="icon"><i class="bi bi-check2-square"></i></span>
-                                    <span>Tareas</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.settings.agents') }}" class="sidebar-link {{ request()->routeIs('admin.settings.agents') ? 'active' : '' }}">
-                                    <span class="icon"><i class="bi bi-person-badge"></i></span>
-                                    <span>Agentes</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.settings.users') }}" class="sidebar-link {{ request()->routeIs('admin.settings.users') ? 'active' : '' }}">
-                                    <span class="icon"><i class="bi bi-people"></i></span>
-                                    <span>Usuarios</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    <!-- 2. Panel de Control (Rojo destacado como en la captura) -->
-                    <li class="sidebar-group my-2">
-                        <button type="button" class="sidebar-toggle panel-control-toggle {{ $esGrupoPanel ? 'expanded' : '' }}" data-subnav="admin-panel-subnav" aria-expanded="{{ $esGrupoPanel ? 'true' : 'false' }}">
-                            <span class="icon icon-panel-control"><i class="bi bi-graph-up"></i></span>
-                            <span class="sidebar-label fw-bold">Panel de Control</span>
-                            <span class="arrow ms-auto">
-                                <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M7 5L12 10L7 15" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </span>
-                        </button>
-                        <ul id="admin-panel-subnav" class="sidebar-subnav {{ $esGrupoPanel ? 'open' : '' }}">
-                            <li>
-                                <a href="{{ route('admin.logs') }}" class="sidebar-link {{ request()->routeIs('admin.logs') ? 'active' : '' }}">
-                                    <span class="icon"><i class="bi bi-terminal"></i></span>
-                                    <span>Logs</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.audit') }}" class="sidebar-link {{ request()->routeIs('admin.audit') ? 'active' : '' }}">
-                                    <span class="icon"><i class="bi bi-shield-check"></i></span>
-                                    <span>Auditoría</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    <!-- 3. Notificaciones -->
-                    <li class="mb-1">
-                        <a href="{{ route('admin.notifications') }}" class="sidebar-link {{ request()->routeIs('admin.notifications') ? 'active' : '' }}">
-                            <span class="icon"><i class="bi bi-bell"></i></span>
-                            <span>Notificaciones</span>
-                        </a>
-                    </li>
-
-                    <!-- 4. Temas -->
-                    <li class="mb-1">
-                        <a href="{{ route('admin.helptopics') }}" class="sidebar-link {{ request()->routeIs('admin.helptopics') ? 'active' : '' }}">
-                            <span class="icon"><i class="bi bi-list-check"></i></span>
-                            <span>Temas</span>
-                        </a>
-                    </li>
-
-                    <!-- 5. Tickets Borrados -->
-                    <li class="mb-1">
-                        <a href="{{ route('admin.deleted_tickets') }}" class="sidebar-link {{ request()->routeIs('admin.deleted_tickets') ? 'active' : '' }}">
-                            <span class="icon"><i class="bi bi-trash-fill"></i></span>
-                            <span>Tickets Borrados</span>
-                        </a>
-                    </li>
-
-                    <!-- 6. Correos Electrónicos -->
-                    <li class="sidebar-group mb-1">
-                        <button type="button" class="sidebar-toggle {{ $esGrupoCorreos ? 'expanded' : '' }}" data-subnav="admin-emails-subnav" aria-expanded="{{ $esGrupoCorreos ? 'true' : 'false' }}">
-                            <span class="icon"><i class="bi bi-envelope"></i></span>
-                            <span class="sidebar-label">Correos Electrónicos</span>
-                            <span class="arrow ms-auto">
-                                <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M7 5L12 10L7 15" stroke="{{ $esGrupoCorreos ? '#ffffff' : '#9ca3af' }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </span>
-                        </button>
-                        <ul id="admin-emails-subnav" class="sidebar-subnav {{ $esGrupoCorreos ? 'open' : '' }}">
-                            <li>
-                                <a href="{{ route('admin.email') }}" class="sidebar-link {{ request()->routeIs('admin.email') ? 'active' : '' }}">
-                                    <span class="icon"><i class="bi bi-inbox"></i></span>
-                                    <span>Correos</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.banlist') }}" class="sidebar-link {{ request()->routeIs('admin.banlist') ? 'active' : '' }}">
-                                    <span class="icon"><i class="bi bi-slash-circle"></i></span>
-                                    <span>Lista de prohibidos</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.emailtest') }}" class="sidebar-link {{ request()->routeIs('admin.emailtest') ? 'active' : '' }}">
-                                    <span class="icon"><i class="bi bi-activity"></i></span>
-                                    <span>Diagnóstico</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    <!-- 7. Agentes -->
-                    <li class="sidebar-group mb-1">
-                        <button type="button" class="sidebar-toggle {{ $esGrupoPersonal ? 'expanded' : '' }}" data-subnav="admin-agents-subnav" aria-expanded="{{ $esGrupoPersonal ? 'true' : 'false' }}">
-                            <span class="icon"><i class="bi bi-people"></i></span>
-                            <span class="sidebar-label">Agentes</span>
-                            <span class="arrow ms-auto">
-                                <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M7 5L12 10L7 15" stroke="{{ $esGrupoPersonal ? '#ffffff' : '#9ca3af' }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </span>
-                        </button>
-                        <ul id="admin-agents-subnav" class="sidebar-subnav {{ $esGrupoPersonal ? 'open' : '' }}">
-                            <li>
-                                <a href="{{ route('admin.staff') }}" class="sidebar-link {{ request()->routeIs('admin.staff') ? 'active' : '' }}">
-                                    <span class="icon"><i class="bi bi-person-badge"></i></span>
-                                    <span>Agentes</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.roles') }}" class="sidebar-link {{ request()->routeIs('admin.roles') ? 'active' : '' }}">
-                                    <span class="icon"><i class="bi bi-shield-lock"></i></span>
-                                    <span>Roles</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.departments') }}" class="sidebar-link {{ request()->routeIs('admin.departments') ? 'active' : '' }}">
-                                    <span class="icon"><i class="bi bi-diagram-3"></i></span>
-                                    <span>Departamentos</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    </li>
-
-                    <!-- 8. Salir -->
-                    <li class="mt-3 pt-2 border-top" style="border-color: rgba(255, 255, 255, 0.08) !important;">
-                        <form method="POST" action="{{ route('agent.logout') }}" id="admin-logout-form">
-                            @csrf
-                            <button type="submit" class="sidebar-link w-100 text-start" style="background: none; border: none; cursor: pointer;">
-                                <span class="icon"><i class="bi bi-box-arrow-right" style="color: #f87171 !important;"></i></span>
-                                <span style="color: #9ca3af;">Salir</span>
-                            </button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-        </aside>
+        <!-- BARRA LATERAL ADMINISTRADOR COMO COMPONENTE INDEPENDIENTE -->
+        <x-agent.admin-sidebar />
 
         <!-- CONTENIDO PRINCIPAL -->
         <main class="main-shell">
@@ -492,7 +347,6 @@
                     e.preventDefault();
                     const targetId = this.getAttribute('data-subnav');
                     const targetMenu = document.getElementById(targetId);
-                    const arrowPath = this.querySelector('.arrow svg path');
                     
                     this.classList.toggle('expanded');
                     const isExpanded = this.classList.contains('expanded');
@@ -501,19 +355,25 @@
                     if (targetMenu) {
                         targetMenu.classList.toggle('open', isExpanded);
                     }
-                    
-                    if (arrowPath && !this.classList.contains('panel-control-toggle')) {
-                        arrowPath.setAttribute('stroke', isExpanded ? '#ffffff' : '#9ca3af');
-                    }
                 });
             });
 
-            // Toggle lateral en dispositivos móviles
+            // Toggle lateral en dispositivos móviles y botón de cabecera
             const btnMenuMovil = document.getElementById('scpSidebarToggle');
-            const sidebar = document.querySelector('.sidebar');
+            const btnSidebarHeader = document.getElementById('adminSidebarToggleBtn');
+            const sidebar = document.querySelector('.sidebar.admin-sidebar-panel');
+            
             if (btnMenuMovil && sidebar) {
                 btnMenuMovil.addEventListener('click', function() {
                     sidebar.classList.toggle('show');
+                });
+            }
+
+            if (btnSidebarHeader && sidebar) {
+                btnSidebarHeader.addEventListener('click', function() {
+                    if (window.innerWidth <= 991) {
+                        sidebar.classList.toggle('show');
+                    }
                 });
             }
         });

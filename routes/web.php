@@ -5,13 +5,13 @@ use App\Http\Controllers\Admin\CorreoController;
 use App\Http\Controllers\Admin\NotificacionController;
 use App\Http\Controllers\Admin\PanelControlController;
 use App\Http\Controllers\Admin\PersonalController;
+use App\Http\Controllers\Admin\RolController;
 use App\Http\Controllers\Admin\TemaAyudaController;
 use App\Http\Controllers\Admin\TicketBorradoController;
 use App\Http\Controllers\Agent\DirectoryController;
 use App\Http\Controllers\Agent\MapController;
 use App\Http\Controllers\Agent\OrganizationController;
 use App\Http\Controllers\Agent\ProfileController;
-use App\Http\Controllers\Agent\SettingController;
 use App\Http\Controllers\Agent\TicketController;
 use App\Http\Controllers\Agent\TicketReportController;
 use App\Http\Controllers\Agent\UserController;
@@ -189,6 +189,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:staff', 'admin'])->gro
 
     // 7. Agentes
     Route::get('/staff', [PersonalController::class, 'agentes'])->name('staff');
-    Route::get('/roles', [PersonalController::class, 'roles'])->name('roles');
+    Route::get('/roles', [RolController::class, 'listar'])->name('roles');
+    Route::post('/roles', [RolController::class, 'guardar'])->name('roles.store');
+    Route::post('/roles/mass-process', [RolController::class, 'procesarMasivo'])->name('roles.mass');
+    Route::get('/roles/{nombre}/permissions', [RolController::class, 'mostrarPermisos'])->name('roles.permissions');
+    Route::post('/roles/{nombre}/permissions', [RolController::class, 'guardarPermisos'])->name('roles.permissions.store');
     Route::get('/departments', [PersonalController::class, 'departamentos'])->name('departments');
 });

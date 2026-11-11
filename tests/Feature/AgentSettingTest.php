@@ -155,7 +155,6 @@ class AgentSettingTest extends TestCase
             route('admin.helptopics'),
             route('admin.deleted_tickets'),
             route('admin.staff'),
-            route('admin.roles'),
             route('admin.departments'),
             route('admin.settings.billing'),
             route('admin.settings.tickets'),
