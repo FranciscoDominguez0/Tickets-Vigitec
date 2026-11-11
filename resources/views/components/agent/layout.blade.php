@@ -17,7 +17,7 @@
     
     @stack('styles')
 </head>
-<body class="dark-mode"> <!-- Assume dark mode by default based on legacy preference -->
+<body class="{{ (auth('staff')->check() && !auth('staff')->user()->dark_mode) ? '' : 'dark-mode' }}">
     <div class="layout">
         <!-- SIDEBAR AGENTES -->
         <aside class="sidebar">

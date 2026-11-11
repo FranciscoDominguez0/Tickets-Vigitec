@@ -3,6 +3,7 @@
 use App\Http\Controllers\Agent\DirectoryController;
 use App\Http\Controllers\Agent\MapController;
 use App\Http\Controllers\Agent\OrganizationController;
+use App\Http\Controllers\Agent\ProfileController;
 use App\Http\Controllers\Agent\TicketController;
 use App\Http\Controllers\Agent\TicketReportController;
 use App\Http\Controllers\Agent\UserController;
@@ -138,8 +139,8 @@ Route::prefix('agent')->group(function () {
         Route::delete('/users/{id}', [UserController::class, 'eliminar'])->whereNumber('id')->name('agent.users.destroy');
 
         // Perfil
-        Route::get('/profile', function () {
-            return view('agent.profile.index');
-        })->name('agent.profile.index');
+        Route::get('/profile', [ProfileController::class, 'mostrar'])->name('agent.profile.index');
+        Route::put('/profile', [ProfileController::class, 'actualizar'])->name('agent.profile.update');
+        Route::put('/profile/password', [ProfileController::class, 'cambiarContrasena'])->name('agent.profile.password');
     });
 });
