@@ -279,54 +279,56 @@
                 
                 <ul class="sidebar-nav">
                     @php
-                        $t = request()->query('t', 'pages');
-                        $isSettingsTab = in_array($t, ['pages', 'billing', 'tickets', 'tasks', 'agents', 'users']);
+                        $esGrupoConfiguracion = request()->routeIs('admin.settings.*');
+                        $esGrupoPanel = request()->routeIs('admin.logs', 'admin.audit');
+                        $esGrupoCorreos = request()->routeIs('admin.email', 'admin.banlist', 'admin.emailtest');
+                        $esGrupoPersonal = request()->routeIs('admin.staff', 'admin.roles', 'admin.departments');
                     @endphp
 
                     <!-- 1. Configuración -->
                     <li class="sidebar-group mb-1">
-                        <button type="button" class="sidebar-toggle {{ $isSettingsTab ? 'expanded' : '' }}" data-subnav="admin-settings-subnav" aria-expanded="{{ $isSettingsTab ? 'true' : 'false' }}">
+                        <button type="button" class="sidebar-toggle {{ $esGrupoConfiguracion ? 'expanded' : '' }}" data-subnav="admin-settings-subnav" aria-expanded="{{ $esGrupoConfiguracion ? 'true' : 'false' }}">
                             <span class="icon"><i class="bi bi-gear"></i></span>
                             <span class="sidebar-label">Configuración</span>
                             <span class="arrow ms-auto">
                                 <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M7 5L12 10L7 15" stroke="{{ $isSettingsTab ? '#ffffff' : '#9ca3af' }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M7 5L12 10L7 15" stroke="{{ $esGrupoConfiguracion ? '#ffffff' : '#9ca3af' }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
                             </span>
                         </button>
-                        <ul id="admin-settings-subnav" class="sidebar-subnav {{ $isSettingsTab ? 'open' : '' }}">
+                        <ul id="admin-settings-subnav" class="sidebar-subnav {{ $esGrupoConfiguracion ? 'open' : '' }}">
                             <li>
-                                <a href="{{ route('agent.settings.pages', ['t' => 'pages']) }}" class="sidebar-link {{ $t === 'pages' ? 'active' : '' }}">
+                                <a href="{{ route('admin.settings.pages') }}" class="sidebar-link {{ request()->routeIs('admin.settings.pages') ? 'active' : '' }}">
                                     <span class="icon"><i class="bi bi-building"></i></span>
                                     <span>Perfil de la empresa</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('agent.settings.pages', ['t' => 'billing']) }}" class="sidebar-link {{ $t === 'billing' ? 'active' : '' }}">
+                                <a href="{{ route('admin.settings.billing') }}" class="sidebar-link {{ request()->routeIs('admin.settings.billing') ? 'active' : '' }}">
                                     <span class="icon"><i class="bi bi-receipt"></i></span>
                                     <span>Facturación</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('agent.settings.pages', ['t' => 'tickets']) }}" class="sidebar-link {{ $t === 'tickets' ? 'active' : '' }}">
+                                <a href="{{ route('admin.settings.tickets') }}" class="sidebar-link {{ request()->routeIs('admin.settings.tickets') ? 'active' : '' }}">
                                     <span class="icon"><i class="bi bi-ticket-perforated"></i></span>
                                     <span>Solicitudes</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('agent.settings.pages', ['t' => 'tasks']) }}" class="sidebar-link {{ $t === 'tasks' ? 'active' : '' }}">
+                                <a href="{{ route('admin.settings.tasks') }}" class="sidebar-link {{ request()->routeIs('admin.settings.tasks') ? 'active' : '' }}">
                                     <span class="icon"><i class="bi bi-check2-square"></i></span>
                                     <span>Tareas</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('agent.settings.pages', ['t' => 'agents']) }}" class="sidebar-link {{ $t === 'agents' ? 'active' : '' }}">
+                                <a href="{{ route('admin.settings.agents') }}" class="sidebar-link {{ request()->routeIs('admin.settings.agents') ? 'active' : '' }}">
                                     <span class="icon"><i class="bi bi-person-badge"></i></span>
                                     <span>Agentes</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('agent.settings.pages', ['t' => 'users']) }}" class="sidebar-link {{ $t === 'users' ? 'active' : '' }}">
+                                <a href="{{ route('admin.settings.users') }}" class="sidebar-link {{ request()->routeIs('admin.settings.users') ? 'active' : '' }}">
                                     <span class="icon"><i class="bi bi-people"></i></span>
                                     <span>Usuarios</span>
                                 </a>
@@ -335,11 +337,8 @@
                     </li>
 
                     <!-- 2. Panel de Control (Rojo destacado como en la captura) -->
-                    @php
-                        $isPanelTab = in_array($t, ['logs', 'audit']);
-                    @endphp
                     <li class="sidebar-group my-2">
-                        <button type="button" class="sidebar-toggle panel-control-toggle {{ $isPanelTab ? 'expanded' : '' }}" data-subnav="admin-panel-subnav" aria-expanded="{{ $isPanelTab ? 'true' : 'false' }}">
+                        <button type="button" class="sidebar-toggle panel-control-toggle {{ $esGrupoPanel ? 'expanded' : '' }}" data-subnav="admin-panel-subnav" aria-expanded="{{ $esGrupoPanel ? 'true' : 'false' }}">
                             <span class="icon icon-panel-control"><i class="bi bi-graph-up"></i></span>
                             <span class="sidebar-label fw-bold">Panel de Control</span>
                             <span class="arrow ms-auto">
@@ -348,15 +347,15 @@
                                 </svg>
                             </span>
                         </button>
-                        <ul id="admin-panel-subnav" class="sidebar-subnav {{ $isPanelTab ? 'open' : '' }}">
+                        <ul id="admin-panel-subnav" class="sidebar-subnav {{ $esGrupoPanel ? 'open' : '' }}">
                             <li>
-                                <a href="{{ route('agent.settings.pages', ['t' => 'logs']) }}" class="sidebar-link {{ $t === 'logs' ? 'active' : '' }}">
+                                <a href="{{ route('admin.logs') }}" class="sidebar-link {{ request()->routeIs('admin.logs') ? 'active' : '' }}">
                                     <span class="icon"><i class="bi bi-terminal"></i></span>
                                     <span>Logs</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('agent.settings.pages', ['t' => 'audit']) }}" class="sidebar-link {{ $t === 'audit' ? 'active' : '' }}">
+                                <a href="{{ route('admin.audit') }}" class="sidebar-link {{ request()->routeIs('admin.audit') ? 'active' : '' }}">
                                     <span class="icon"><i class="bi bi-shield-check"></i></span>
                                     <span>Auditoría</span>
                                 </a>
@@ -366,7 +365,7 @@
 
                     <!-- 3. Notificaciones -->
                     <li class="mb-1">
-                        <a href="{{ route('agent.settings.pages', ['t' => 'notifications']) }}" class="sidebar-link {{ $t === 'notifications' ? 'active' : '' }}">
+                        <a href="{{ route('admin.notifications') }}" class="sidebar-link {{ request()->routeIs('admin.notifications') ? 'active' : '' }}">
                             <span class="icon"><i class="bi bi-bell"></i></span>
                             <span>Notificaciones</span>
                         </a>
@@ -374,7 +373,7 @@
 
                     <!-- 4. Temas -->
                     <li class="mb-1">
-                        <a href="{{ route('agent.settings.pages', ['t' => 'helptopics']) }}" class="sidebar-link {{ $t === 'helptopics' ? 'active' : '' }}">
+                        <a href="{{ route('admin.helptopics') }}" class="sidebar-link {{ request()->routeIs('admin.helptopics') ? 'active' : '' }}">
                             <span class="icon"><i class="bi bi-list-check"></i></span>
                             <span>Temas</span>
                         </a>
@@ -382,41 +381,38 @@
 
                     <!-- 5. Tickets Borrados -->
                     <li class="mb-1">
-                        <a href="{{ route('agent.settings.pages', ['t' => 'deleted_tickets']) }}" class="sidebar-link {{ $t === 'deleted_tickets' ? 'active' : '' }}">
+                        <a href="{{ route('admin.deleted_tickets') }}" class="sidebar-link {{ request()->routeIs('admin.deleted_tickets') ? 'active' : '' }}">
                             <span class="icon"><i class="bi bi-trash-fill"></i></span>
                             <span>Tickets Borrados</span>
                         </a>
                     </li>
 
                     <!-- 6. Correos Electrónicos -->
-                    @php
-                        $isEmailsTab = in_array($t, ['emails', 'banlist', 'emailtest']);
-                    @endphp
                     <li class="sidebar-group mb-1">
-                        <button type="button" class="sidebar-toggle {{ $isEmailsTab ? 'expanded' : '' }}" data-subnav="admin-emails-subnav" aria-expanded="{{ $isEmailsTab ? 'true' : 'false' }}">
+                        <button type="button" class="sidebar-toggle {{ $esGrupoCorreos ? 'expanded' : '' }}" data-subnav="admin-emails-subnav" aria-expanded="{{ $esGrupoCorreos ? 'true' : 'false' }}">
                             <span class="icon"><i class="bi bi-envelope"></i></span>
                             <span class="sidebar-label">Correos Electrónicos</span>
                             <span class="arrow ms-auto">
                                 <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M7 5L12 10L7 15" stroke="{{ $isEmailsTab ? '#ffffff' : '#9ca3af' }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M7 5L12 10L7 15" stroke="{{ $esGrupoCorreos ? '#ffffff' : '#9ca3af' }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
                             </span>
                         </button>
-                        <ul id="admin-emails-subnav" class="sidebar-subnav {{ $isEmailsTab ? 'open' : '' }}">
+                        <ul id="admin-emails-subnav" class="sidebar-subnav {{ $esGrupoCorreos ? 'open' : '' }}">
                             <li>
-                                <a href="{{ route('agent.settings.pages', ['t' => 'emails']) }}" class="sidebar-link {{ $t === 'emails' ? 'active' : '' }}">
+                                <a href="{{ route('admin.email') }}" class="sidebar-link {{ request()->routeIs('admin.email') ? 'active' : '' }}">
                                     <span class="icon"><i class="bi bi-inbox"></i></span>
                                     <span>Correos</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('agent.settings.pages', ['t' => 'banlist']) }}" class="sidebar-link {{ $t === 'banlist' ? 'active' : '' }}">
+                                <a href="{{ route('admin.banlist') }}" class="sidebar-link {{ request()->routeIs('admin.banlist') ? 'active' : '' }}">
                                     <span class="icon"><i class="bi bi-slash-circle"></i></span>
                                     <span>Lista de prohibidos</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('agent.settings.pages', ['t' => 'emailtest']) }}" class="sidebar-link {{ $t === 'emailtest' ? 'active' : '' }}">
+                                <a href="{{ route('admin.emailtest') }}" class="sidebar-link {{ request()->routeIs('admin.emailtest') ? 'active' : '' }}">
                                     <span class="icon"><i class="bi bi-activity"></i></span>
                                     <span>Diagnóstico</span>
                                 </a>
@@ -425,39 +421,37 @@
                     </li>
 
                     <!-- 7. Agentes -->
-                    @php
-                        $isAgentsTab = in_array($t, ['staff', 'roles', 'departments']);
-                    @endphp
                     <li class="sidebar-group mb-1">
-                        <button type="button" class="sidebar-toggle {{ $isAgentsTab ? 'expanded' : '' }}" data-subnav="admin-agents-subnav" aria-expanded="{{ $isAgentsTab ? 'true' : 'false' }}">
+                        <button type="button" class="sidebar-toggle {{ $esGrupoPersonal ? 'expanded' : '' }}" data-subnav="admin-agents-subnav" aria-expanded="{{ $esGrupoPersonal ? 'true' : 'false' }}">
                             <span class="icon"><i class="bi bi-people"></i></span>
                             <span class="sidebar-label">Agentes</span>
                             <span class="arrow ms-auto">
                                 <svg width="12" height="12" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M7 5L12 10L7 15" stroke="{{ $isAgentsTab ? '#ffffff' : '#9ca3af' }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M7 5L12 10L7 15" stroke="{{ $esGrupoPersonal ? '#ffffff' : '#9ca3af' }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
                             </span>
                         </button>
-                        <ul id="admin-agents-subnav" class="sidebar-subnav {{ $isAgentsTab ? 'open' : '' }}">
+                        <ul id="admin-agents-subnav" class="sidebar-subnav {{ $esGrupoPersonal ? 'open' : '' }}">
                             <li>
-                                <a href="{{ route('agent.settings.pages', ['t' => 'staff']) }}" class="sidebar-link {{ $t === 'staff' ? 'active' : '' }}">
+                                <a href="{{ route('admin.staff') }}" class="sidebar-link {{ request()->routeIs('admin.staff') ? 'active' : '' }}">
                                     <span class="icon"><i class="bi bi-person-badge"></i></span>
                                     <span>Agentes</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('agent.settings.pages', ['t' => 'roles']) }}" class="sidebar-link {{ $t === 'roles' ? 'active' : '' }}">
+                                <a href="{{ route('admin.roles') }}" class="sidebar-link {{ request()->routeIs('admin.roles') ? 'active' : '' }}">
                                     <span class="icon"><i class="bi bi-shield-lock"></i></span>
                                     <span>Roles</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('agent.settings.pages', ['t' => 'departments']) }}" class="sidebar-link {{ $t === 'departments' ? 'active' : '' }}">
+                                <a href="{{ route('admin.departments') }}" class="sidebar-link {{ request()->routeIs('admin.departments') ? 'active' : '' }}">
                                     <span class="icon"><i class="bi bi-diagram-3"></i></span>
                                     <span>Departamentos</span>
                                 </a>
                             </li>
                         </ul>
+                    </li>
                     </li>
 
                     <!-- 8. Salir -->

@@ -1,5 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\ConfiguracionController;
+use App\Http\Controllers\Admin\CorreoController;
+use App\Http\Controllers\Admin\NotificacionController;
+use App\Http\Controllers\Admin\PanelControlController;
+use App\Http\Controllers\Admin\PersonalController;
+use App\Http\Controllers\Admin\TemaAyudaController;
+use App\Http\Controllers\Admin\TicketBorradoController;
 use App\Http\Controllers\Agent\DirectoryController;
 use App\Http\Controllers\Agent\MapController;
 use App\Http\Controllers\Agent\OrganizationController;
@@ -144,8 +151,44 @@ Route::prefix('agent')->group(function () {
         Route::put('/profile', [ProfileController::class, 'actualizar'])->name('agent.profile.update');
         Route::put('/profile/password', [ProfileController::class, 'cambiarContrasena'])->name('agent.profile.password');
 
-        // Panel de Administración / Configuración
-        Route::get('/settings', [SettingController::class, 'mostrar'])->name('agent.settings.pages');
-        Route::post('/settings/pages', [SettingController::class, 'guardarPaginas'])->name('agent.settings.pages.store');
+        // Redirección de compatibilidad para panel de administración desde /agent
+        Route::get('/settings', fn () => redirect()->route('admin.settings.pages'))->name('agent.settings.pages');
+        Route::post('/settings/pages', [ConfiguracionController::class, 'guardarPerfilEmpresa'])->name('agent.settings.pages.store');
     });
+});
+
+// Rutas del Panel Administrador (/admin/...)
+Route::prefix('admin')->name('admin.')->middleware(['auth:staff', 'admin'])->group(function () {
+    // 1. Configuración
+    Route::get('/settings', [ConfiguracionController::class, 'perfilEmpresa'])->name('settings.pages');
+    Route::post('/settings/pages', [ConfiguracionController::class, 'guardarPerfilEmpresa'])->name('settings.pages.store');
+    Route::get('/settings/billing', [ConfiguracionController::class, 'facturacion'])->name('settings.billing');
+    Route::get('/settings/tickets', [ConfiguracionController::class, 'solicitudes'])->name('settings.tickets');
+    Route::get('/settings/tasks', [ConfiguracionController::class, 'tareas'])->name('settings.tasks');
+    Route::get('/settings/agents', [ConfiguracionController::class, 'agentes'])->name('settings.agents');
+    Route::get('/settings/users', [ConfiguracionController::class, 'usuarios'])->name('settings.users');
+
+    // 2. Panel de Control (Logs y Auditoría)
+    Route::get('/logs', [PanelControlController::class, 'registros'])->name('logs');
+    Route::get('/audit', [PanelControlController::class, 'auditoria'])->name('audit');
+
+    // 3. Notificaciones
+    Route::get('/notifications', [NotificacionController::class, 'listar'])->name('notifications');
+
+    // 4. Temas de Ayuda
+    Route::get('/helptopics', [TemaAyudaController::class, 'listar'])->name('helptopics');
+
+    // 5. Tickets Borrados
+    Route::get('/deleted-tickets', [TicketBorradoController::class, 'listar'])->name('deleted_tickets');
+
+    // 6. Correos Electrónicos
+    Route::get('/email', [CorreoController::class, 'listar'])->name('email');
+    Route::get('/emails', fn () => redirect()->route('admin.email'));
+    Route::get('/banlist', [CorreoController::class, 'listaProhibidos'])->name('banlist');
+    Route::get('/emailtest', [CorreoController::class, 'diagnostico'])->name('emailtest');
+
+    // 7. Agentes
+    Route::get('/staff', [PersonalController::class, 'agentes'])->name('staff');
+    Route::get('/roles', [PersonalController::class, 'roles'])->name('roles');
+    Route::get('/departments', [PersonalController::class, 'departamentos'])->name('departments');
 });

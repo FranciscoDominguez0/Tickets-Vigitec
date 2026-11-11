@@ -189,7 +189,7 @@
         </ul>
 
         <!-- Formulario de Configuración -->
-        <form action="{{ route('agent.settings.pages.store') }}" method="POST" enctype="multipart/form-data" id="form-settings-pages">
+        <form action="{{ route('admin.settings.pages.store') }}" method="POST" enctype="multipart/form-data" id="form-settings-pages">
             @csrf
             <input type="hidden" name="active_tab" id="active_tab" value="{{ $pestañaActiva }}">
 
@@ -348,7 +348,7 @@
                 <button type="submit" class="btn btn-danger fw-bold px-4 py-2" style="background-color: #ef4444; border-color: #ef4444; border-radius: 8px;">
                     <i class="bi bi-check-lg me-1"></i> Guardar cambios
                 </button>
-                <a href="{{ route('agent.settings.pages', ['t' => 'pages']) }}" class="btn btn-outline-secondary px-3 py-2 fw-semibold" style="border-radius: 8px;">
+                <a href="{{ route('admin.settings.pages', ['tab' => $pestañaActiva]) }}" class="btn btn-outline-secondary px-3 py-2 fw-semibold" style="border-radius: 8px;">
                     Restaurar
                 </a>
             </div>
