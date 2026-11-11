@@ -141,19 +141,17 @@
     @endpush
 
     <div class="container-fluid px-0">
-        <!-- Encabezado de página -->
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
-            <div>
-                <h1 class="h3 text-white mb-1 fw-bold">Directorio de Usuarios</h1>
-                <p class="text-muted mb-0 small">Gestión y consulta de clientes asociados a tickets de soporte</p>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <button type="button" class="btn btn-danger fw-bold px-3 py-2 shadow-sm d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCrearUsuario" style="background-color: #ef4444; border-color: #ef4444; border-radius: 8px;">
+        <!-- Componente de encabezado reutilizable -->
+        <x-agent.page-header title="Directorio de Usuarios">
+            Gestión y consulta de clientes asociados a tickets de soporte
+
+            <x-slot name="actions">
+                <button type="button" class="btn-new d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalCrearUsuario" style="cursor: pointer;">
                     <i class="bi bi-person-plus-fill"></i>
                     <span>Nuevo Usuario</span>
                 </button>
-            </div>
-        </div>
+            </x-slot>
+        </x-agent.page-header>
 
 
 
