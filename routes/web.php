@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ConfiguracionController;
 use App\Http\Controllers\Admin\CorreoController;
+use App\Http\Controllers\Admin\DepartamentoController;
 use App\Http\Controllers\Admin\NotificacionController;
 use App\Http\Controllers\Admin\PanelControlController;
 use App\Http\Controllers\Admin\PersonalController;
@@ -19,6 +20,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -151,9 +153,38 @@ Route::prefix('agent')->group(function () {
         Route::put('/profile', [ProfileController::class, 'actualizar'])->name('agent.profile.update');
         Route::put('/profile/password', [ProfileController::class, 'cambiarContrasena'])->name('agent.profile.password');
 
-        // Redirección de compatibilidad para panel de administración desde /agent
-        Route::get('/settings', fn () => redirect()->route('admin.settings.pages'))->name('agent.settings.pages');
-        Route::post('/settings/pages', [ConfiguracionController::class, 'guardarPerfilEmpresa'])->name('agent.settings.pages.store');
+        // Redirecciones de compatibilidad hacia el Panel Administrador (/admin/...)
+        Route::get('/settings', function (Request $solicitud) {
+            $pestaña = $solicitud->query('t', 'pages');
+
+            return match ($pestaña) {
+                'billing', 'pagoempresa' => redirect()->route('admin.settings.billing'),
+                'tickets', 'priority' => redirect()->route('admin.settings.tickets'),
+                'tasks' => redirect()->route('admin.settings.tasks'),
+                'agents' => redirect()->route('admin.settings.agents'),
+                'users' => redirect()->route('admin.settings.users'),
+                'emails', 'email' => redirect()->route('admin.email'),
+                'banlist' => redirect()->route('admin.banlist'),
+                default => redirect()->route('admin.settings.pages'),
+            };
+        })->name('agent.settings.pages');
+
+        Route::get('/pagoempresa', fn () => redirect()->route('admin.settings.billing'));
+        Route::get('/billing', fn () => redirect()->route('admin.settings.billing'));
+        Route::get('/empresa', fn () => redirect()->route('admin.settings.pages'));
+        Route::get('/priority', fn () => redirect()->route('admin.settings.tickets'));
+        Route::get('/email', fn () => redirect()->route('admin.email'));
+        Route::get('/emails', fn () => redirect()->route('admin.email'));
+        Route::get('/emaillog', fn () => redirect()->route('admin.email'));
+        Route::get('/banlist', fn () => redirect()->route('admin.banlist'));
+        Route::get('/emailtest', fn () => redirect()->route('admin.emailtest'));
+        Route::get('/logs', fn () => redirect()->route('admin.logs'));
+        Route::get('/audit', fn () => redirect()->route('admin.audit'));
+        Route::get('/staff', fn () => redirect()->route('admin.staff'));
+        Route::get('/roles', fn () => redirect()->route('admin.roles'));
+        Route::get('/departments', fn () => redirect()->route('admin.departments'));
+        Route::get('/helptopics', fn () => redirect()->route('admin.helptopics'));
+        Route::get('/deleted-tickets', fn () => redirect()->route('admin.deleted_tickets'));
     });
 });
 
@@ -184,6 +215,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:staff', 'admin'])->gro
     // 6. Correos Electrónicos
     Route::get('/email', [CorreoController::class, 'listar'])->name('email');
     Route::get('/emails', fn () => redirect()->route('admin.email'));
+    Route::get('/emaillog', fn () => redirect()->route('admin.email'));
     Route::get('/banlist', [CorreoController::class, 'listaProhibidos'])->name('banlist');
     Route::get('/emailtest', [CorreoController::class, 'diagnostico'])->name('emailtest');
 
@@ -194,5 +226,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:staff', 'admin'])->gro
     Route::post('/roles/mass-process', [RolController::class, 'procesarMasivo'])->name('roles.mass');
     Route::get('/roles/{nombre}/permissions', [RolController::class, 'mostrarPermisos'])->name('roles.permissions');
     Route::post('/roles/{nombre}/permissions', [RolController::class, 'guardarPermisos'])->name('roles.permissions.store');
-    Route::get('/departments', [PersonalController::class, 'departamentos'])->name('departments');
+    Route::get('/departments', [DepartamentoController::class, 'listar'])->name('departments');
+    Route::post('/departments', [DepartamentoController::class, 'guardar'])->name('departments.store');
+    Route::put('/departments/{id}', [DepartamentoController::class, 'actualizar'])->whereNumber('id')->name('departments.update');
+    Route::post('/departments/mass-process', [DepartamentoController::class, 'procesarMasivo'])->name('departments.mass');
 });

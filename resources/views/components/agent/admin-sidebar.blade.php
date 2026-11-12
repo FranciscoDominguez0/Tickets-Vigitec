@@ -174,7 +174,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{{ route('admin.roles', 'admin.roles.*') }}" class="sidebar-link {{ request()->routeIs('admin.roles', 'admin.roles.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.roles') }}" class="sidebar-link {{ request()->routeIs('admin.roles', 'admin.roles.*') ? 'active' : '' }}">
                             <span class="sidebar-icon"><i class="bi bi-shield-lock"></i></span>
                             <span>Roles</span>
                         </a>

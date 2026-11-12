@@ -155,7 +155,6 @@ class AgentSettingTest extends TestCase
             route('admin.helptopics'),
             route('admin.deleted_tickets'),
             route('admin.staff'),
-            route('admin.departments'),
             route('admin.settings.billing'),
             route('admin.settings.tickets'),
             route('admin.settings.tasks'),
@@ -185,5 +184,44 @@ class AgentSettingTest extends TestCase
             ->get('/agent/settings');
 
         $response->assertRedirect(route('admin.settings.pages'));
+    }
+
+    public function test_rutas_administrativas_en_agente_redireccionan_a_admin(): void
+    {
+        $this->actingAs($this->administrador, 'staff')
+            ->get('/agent/settings?t=emails')
+            ->assertRedirect(route('admin.email'));
+
+        $this->actingAs($this->administrador, 'staff')
+            ->get('/agent/settings?t=billing')
+            ->assertRedirect(route('admin.settings.billing'));
+
+        $this->actingAs($this->administrador, 'staff')
+            ->get('/agent/emaillog')
+            ->assertRedirect(route('admin.email'));
+
+        $this->actingAs($this->administrador, 'staff')
+            ->get('/agent/pagoempresa')
+            ->assertRedirect(route('admin.settings.billing'));
+
+        $this->actingAs($this->administrador, 'staff')
+            ->get('/agent/billing')
+            ->assertRedirect(route('admin.settings.billing'));
+
+        $this->actingAs($this->administrador, 'staff')
+            ->get('/agent/empresa')
+            ->assertRedirect(route('admin.settings.pages'));
+
+        $this->actingAs($this->administrador, 'staff')
+            ->get('/agent/priority')
+            ->assertRedirect(route('admin.settings.tickets'));
+
+        $this->actingAs($this->administrador, 'staff')
+            ->get('/agent/roles')
+            ->assertRedirect(route('admin.roles'));
+
+        $this->actingAs($this->administrador, 'staff')
+            ->get('/admin/emaillog')
+            ->assertRedirect(route('admin.email'));
     }
 }

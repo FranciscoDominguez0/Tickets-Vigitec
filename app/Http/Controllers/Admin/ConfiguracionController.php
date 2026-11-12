@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Agent\ActualizarConfiguracionEmpresaRequest;
+use App\Http\Requests\Admin\ActualizarConfiguracionEmpresaRequest;
 use App\Models\AppSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -35,7 +35,7 @@ class ConfiguracionController extends Controller
 
         $objetivo = 'pages';
 
-        return view('agent.settings.pages', compact(
+        return view('admin.settings.pages', compact(
             'nombreEmpresa',
             'sitioWeb',
             'telefono',
@@ -184,4 +184,3 @@ class ConfiguracionController extends Controller
         ]);
     }
 }
-
