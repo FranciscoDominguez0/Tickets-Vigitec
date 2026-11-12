@@ -20,6 +20,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Client\TicketController as ClientTicketController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -43,39 +44,14 @@ Route::middleware('guest')->group(function () {
 });
 Route::post('logout', [LoginController::class, 'cerrarSesion'])->name('logout');
 
-// Dashboard de ejemplo (protegido)
+// Rutas del Portal de Clientes (protegidas)
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        $email = auth()->user()->email;
-        $logoutUrl = route('logout');
-        $csrf = csrf_field();
-
-        return <<<HTML
-        <!DOCTYPE html>
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <title>Dashboard Cliente</title>
-            <style>
-                body { font-family: system-ui, -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f8fafc; }
-                .card { background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-align: center; }
-                .btn { background: #ef4444; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-weight: 500; margin-top: 1.5rem; transition: background 0.2s; }
-                .btn:hover { background: #dc2626; }
-            </style>
-        </head>
-        <body>
-            <div class="card">
-                <h2 style="margin-top: 0; color: #1e293b;">¡Bienvenido!</h2>
-                <p style="color: #64748b;">$email</p>
-                <form action="$logoutUrl" method="POST">
-                    $csrf
-                    <button type="submit" class="btn">Cerrar Sesión</button>
-                </form>
-            </div>
-        </body>
-        </html>
-        HTML;
-    })->name('dashboard');
+    Route::get('/dashboard', [ClientTicketController::class, 'listar'])->name('dashboard');
+    Route::get('/tickets', [ClientTicketController::class, 'listar'])->name('client.tickets.index');
+    Route::get('/tickets/create', [ClientTicketController::class, 'crear'])->name('client.tickets.create');
+    Route::post('/tickets', [ClientTicketController::class, 'guardar'])->name('client.tickets.store');
+    Route::get('/tickets/{id}', [ClientTicketController::class, 'mostrar'])->name('client.tickets.show');
+    Route::post('/tickets/{id}/reply', [ClientTicketController::class, 'responder'])->name('client.tickets.reply');
 });
 
 // Rutas de Autenticación (Agentes/Staff)

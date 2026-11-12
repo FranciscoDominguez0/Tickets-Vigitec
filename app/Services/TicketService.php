@@ -242,4 +242,117 @@ class TicketService
     {
         return $this->guardarFirmaDesdeBase64($ticket, $base64Image);
     }
+
+    /**
+     * Crea un nuevo ticket solicitado directamente por un cliente.
+     */
+    public function crearTicketCliente(
+        int $usuarioId,
+        int $empresaId,
+        int $departamentoId,
+        string $asunto,
+        string $cuerpo,
+        ?int $temaId = null,
+        ?string $anydesk = null,
+        array $adjuntos = []
+    ): Ticket {
+        $numeroTicket = $this->generarNumeroTicket($empresaId);
+
+        $ticket = $this->ticketRepository->crear([
+            'ticket_number' => $numeroTicket,
+            'empresa_id' => $empresaId,
+            'user_id' => $usuarioId,
+            'dept_id' => $departamentoId,
+            'topic_id' => $temaId,
+            'status_id' => 1, // Abierto
+            'priority_id' => 1, // Baja/Normal
+            'subject' => $asunto,
+            'anydesk' => $anydesk,
+            'created' => now(),
+            'updated' => now(),
+        ]);
+
+        $hilo = $ticket->thread()->create([
+            'empresa_id' => $empresaId,
+            'created' => now(),
+        ]);
+
+        $entrada = $hilo->entries()->create([
+            'empresa_id' => $empresaId,
+            'user_id' => $usuarioId,
+            'body' => $cuerpo,
+            'is_internal' => 0,
+            'created' => now(),
+            'updated' => now(),
+        ]);
+
+        if (! empty($adjuntos)) {
+            foreach ($adjuntos as $archivo) {
+                if ($archivo instanceof UploadedFile) {
+                    $ruta = $archivo->store('tickets/attachments', 'public');
+
+                    $entrada->attachments()->create([
+                        'empresa_id' => $empresaId,
+                        'filename' => $archivo->hashName(),
+                        'original_filename' => $archivo->getClientOriginalName(),
+                        'mimetype' => $archivo->getMimeType(),
+                        'size' => $archivo->getSize(),
+                        'path' => $ruta,
+                        'created' => now(),
+                    ]);
+                }
+            }
+        }
+
+        return $ticket;
+    }
+
+    /**
+     * Agrega una respuesta del cliente al hilo del ticket.
+     */
+    public function responderCliente(
+        Ticket $ticket,
+        int $usuarioId,
+        string $cuerpo,
+        array $adjuntos = []
+    ): ThreadEntry {
+        $hilo = $ticket->thread;
+        if (! $hilo) {
+            $hilo = $ticket->thread()->create([
+                'empresa_id' => $ticket->empresa_id,
+                'created' => now(),
+            ]);
+        }
+
+        $entrada = $hilo->entries()->create([
+            'empresa_id' => $ticket->empresa_id,
+            'user_id' => $usuarioId,
+            'body' => $cuerpo,
+            'is_internal' => 0,
+            'created' => now(),
+            'updated' => now(),
+        ]);
+
+        if (! empty($adjuntos)) {
+            foreach ($adjuntos as $archivo) {
+                if ($archivo instanceof UploadedFile) {
+                    $ruta = $archivo->store('tickets/attachments', 'public');
+
+                    $entrada->attachments()->create([
+                        'empresa_id' => $ticket->empresa_id,
+                        'filename' => $archivo->hashName(),
+                        'original_filename' => $archivo->getClientOriginalName(),
+                        'mimetype' => $archivo->getMimeType(),
+                        'size' => $archivo->getSize(),
+                        'path' => $ruta,
+                        'created' => now(),
+                    ]);
+                }
+            }
+        }
+
+        $ticket->update(['updated' => now()]);
+
+        return $entrada;
+    }
 }

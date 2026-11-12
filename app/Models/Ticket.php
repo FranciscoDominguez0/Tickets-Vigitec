@@ -49,4 +49,14 @@ class Ticket extends Model
     {
         return $this->hasOne(TicketReport::class);
     }
+
+    public function helpTopic()
+    {
+        return $this->belongsTo(HelpTopic::class, 'topic_id');
+    }
+
+    public function empresa()
+    {
+        return $this->belongsTo(Empresa::class);
+    }
 }

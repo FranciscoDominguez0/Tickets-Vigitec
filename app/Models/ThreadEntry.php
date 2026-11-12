@@ -19,4 +19,14 @@ class ThreadEntry extends Model
     {
         return $this->hasMany(Attachment::class, 'thread_entry_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function staff()
+    {
+        return $this->belongsTo(Staff::class);
+    }
 }
