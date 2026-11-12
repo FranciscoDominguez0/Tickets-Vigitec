@@ -86,20 +86,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success border-0 rounded-3 mb-4 d-flex align-items-center gap-2" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
-            <i class="bi bi-check-circle-fill fs-5"></i>
-            <div>{{ session('success') }}</div>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger border-0 rounded-3 mb-4 d-flex align-items-center gap-2" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
-            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-            <div>{{ session('error') }}</div>
-        </div>
-    @endif
-
     <div class="row g-4">
         <!-- Formulario de Prueba -->
         <div class="col-lg-8">

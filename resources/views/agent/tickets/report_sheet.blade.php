@@ -243,10 +243,9 @@
                     <a href="{{ route('agent.tickets.report_sheet', ['id' => $ticket->id, 'action' => 'edit']) }}" class="btn btn-outline-primary rounded-pill px-4" style="border-color: #3b82f6; color: #3b82f6; font-weight: 500;">
                         <i class="bi bi-pencil-square me-1"></i> Editar Reporte
                     </a>
-                    <!-- NOTE: assuming a route to download exists, otherwise placeholder -->
-                    <button type="button" class="btn btn-danger rounded-pill px-4" style="background-color: #ef4444; border: none; font-weight: 500;">
+                    <a href="{{ route('agent.tickets.pdf', $ticket->id) }}" class="btn btn-danger rounded-pill px-4" style="background-color: #ef4444; border: none; font-weight: 500;">
                         <i class="bi bi-file-earmark-pdf me-1"></i> Descargar PDF
-                    </button>
+                    </a>
                 </div>
             @endif
         </div>

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DataTransferObjects\Ticket\TicketData;
+use App\Models\Staff;
 use App\Models\Thread;
 use App\Models\ThreadEntry;
 use App\Models\Ticket;
@@ -21,7 +22,8 @@ class TicketService
         protected TicketRepository $ticketRepository,
         protected DepartmentRepository $departmentRepository,
         protected PriorityRepository $priorityRepository,
-        protected UserRepository $userRepository
+        protected UserRepository $userRepository,
+        protected TicketNotificacionService $ticketNotificacionService
     ) {}
 
     /**
@@ -58,6 +60,8 @@ class TicketService
         if (! empty($cuerpoInicial)) {
             $this->crearHiloInicial($ticket, $cuerpoInicial, $staffId ?? 1);
         }
+
+        $this->ticketNotificacionService->notificarCreacion($ticket, $cuerpoInicial);
 
         return $ticket;
     }
@@ -185,13 +189,23 @@ class TicketService
      */
     public function actualizarEstado(Ticket $ticket, int $statusId, ?int $staffId = null): Ticket
     {
+        $estadoAnteriorId = (int) ($ticket->getOriginal('status_id') ?: $ticket->status_id);
+        $estadoAnterior = TicketStatus::find($estadoAnteriorId);
+        $nombreEstadoAnterior = $estadoAnterior ? $estadoAnterior->name : 'Abierto';
+
         $ticket->status_id = $statusId;
 
-        if ($statusId == 3) {
-            $ticket->closed = now();
-        }
-
         $nuevoEstado = TicketStatus::find($statusId);
+        $nombreEstado = strtolower((string) optional($nuevoEstado)->name);
+        $esCerrado = in_array($nombreEstado, ['cerrado', 'resuelto'], true) || ($statusId == 5);
+
+        if ($esCerrado) {
+            $ticket->closed = now();
+            $ticket->closed_at = now();
+        } else {
+            $ticket->closed = null;
+            $ticket->closed_at = null;
+        }
 
         if ($nuevoEstado && in_array($nuevoEstado->name, ['En camino', 'En proceso'])) {
             if (! $ticket->staff_id || $ticket->staff_id == 0) {
@@ -209,6 +223,23 @@ class TicketService
         }
 
         $ticket->save();
+
+        if ($estadoAnteriorId > 0 && $estadoAnteriorId !== $statusId) {
+            $nombreResponsable = null;
+            if ($staffId) {
+                $staff = Staff::find($staffId);
+                if ($staff) {
+                    $nombreResponsable = trim($staff->firstname.' '.$staff->lastname);
+                }
+            }
+
+            $this->ticketNotificacionService->notificarCambioEstado(
+                $ticket,
+                $nombreEstadoAnterior,
+                $nuevoEstado ? $nuevoEstado->name : 'Estado #'.$statusId,
+                $nombreResponsable
+            );
+        }
 
         return $ticket;
     }
@@ -303,6 +334,8 @@ class TicketService
                 }
             }
         }
+
+        $this->ticketNotificacionService->notificarCreacion($ticket, $cuerpo);
 
         return $ticket;
     }

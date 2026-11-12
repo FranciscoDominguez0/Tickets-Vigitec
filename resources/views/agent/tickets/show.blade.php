@@ -152,7 +152,12 @@
         @if($ticket->client_signature)
         <!-- Firma del cliente -->
         <div class="mt-4" style="background-color: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 1.25rem;">
-            <h6 class="mb-3 fw-bold text-white" style="font-size: 0.85rem;">Firma del cliente</h6>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0 fw-bold text-white" style="font-size: 0.85rem;"><i class="bi bi-pen me-1"></i> Firma de Conformidad del Cliente</h6>
+                <a href="{{ route('agent.tickets.pdf', $ticket->id) }}" class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1 rounded-pill px-3">
+                    <i class="bi bi-file-earmark-pdf-fill"></i> Descargar Acta PDF
+                </a>
+            </div>
             <div style="border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; background-color: #0b0f19; width: fit-content; padding: 10px 20px;">
                 <img src="{{ asset('storage/' . $ticket->client_signature) }}" alt="Firma del cliente" style="max-height: 120px; filter: invert(1);">
             </div>

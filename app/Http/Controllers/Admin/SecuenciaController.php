@@ -43,8 +43,6 @@ class SecuenciaController extends Controller
             'next' => (int) $solicitud->validated('next'),
             'increment' => (int) $solicitud->validated('increment'),
             'padding' => (int) $solicitud->validated('padding'),
-            'created' => now(),
-            'updated' => now(),
         ]);
 
         return redirect()->back()
@@ -64,7 +62,6 @@ class SecuenciaController extends Controller
             'next' => (int) $solicitud->validated('next'),
             'increment' => (int) $solicitud->validated('increment'),
             'padding' => (int) $solicitud->validated('padding'),
-            'updated' => now(),
         ]);
 
         return redirect()->back()

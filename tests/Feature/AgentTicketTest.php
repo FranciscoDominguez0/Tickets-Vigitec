@@ -533,4 +533,34 @@ class AgentTicketTest extends TestCase
         $this->assertArrayHasKey('mine', $estadisticas);
         $this->assertArrayHasKey('billing', $estadisticas);
     }
+
+    public function test_agente_puede_responder_ticket_especifico_y_redirige_con_exito(): void
+    {
+        $agente = Staff::factory()->create(['empresa_id' => 1]);
+        $usuario = User::factory()->create(['empresa_id' => 1]);
+
+        $ticket = Ticket::create([
+            'ticket_number' => 'TCK-15',
+            'user_id' => $usuario->id,
+            'dept_id' => $this->departamento->id,
+            'priority_id' => $this->prioridad->id,
+            'status_id' => $this->estado->id,
+            'subject' => 'Ticket específico de prueba',
+            'empresa_id' => 1,
+            'created' => now(),
+        ]);
+
+        $respuesta = $this->actingAs($agente, 'staff')->post("/agent/ticket/{$ticket->id}/reply", [
+            'response_body' => '<p>Estimado cliente, estamos atendiendo su caso con prontitud.</p>',
+        ]);
+
+        $respuesta->assertRedirect(route('agent.tickets.show', $ticket->id));
+        $respuesta->assertSessionHas('success', 'Respuesta enviada correctamente.');
+
+        $this->assertDatabaseHas('thread_entries', [
+            'thread_id' => $ticket->fresh()->thread->id,
+            'body' => '<p>Estimado cliente, estamos atendiendo su caso con prontitud.</p>',
+            'staff_id' => $agente->id,
+        ]);
+    }
 }

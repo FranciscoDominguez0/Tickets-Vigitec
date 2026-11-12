@@ -1,4 +1,4 @@
-        @if($ticket->status_id == 3)
+        @if($ticket->estaCerrado())
         <!-- Mensaje de Ticket Cerrado -->
         <div class="mt-4 text-center py-5" style="border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px; background-color: #0b0f19;">
             <div style="font-size: 1.5rem; color: #94a3b8; margin-bottom: 0.5rem;"><i class="bi bi-lock-fill"></i></div>
@@ -27,7 +27,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('agent.tickets.reply', $ticket->id) }}" method="POST" enctype="multipart/form-data" id="ticket-reply-form">
+            <form action="{{ route('agent.tickets.reply', $ticket->id) }}" method="POST" enctype="multipart/form-data" id="ticket-reply-form" novalidate>
                 @csrf
                 <div class="rich-text-container mb-3">
                     <!-- Barra de Herramientas WYSIWYG -->
@@ -60,24 +60,34 @@
                     </div>
                     
                     <div id="rich-editor" class="form-control rich-text-editor" contenteditable="true" style="min-height: 150px; overflow-y: auto; outline: none;">{!! old('response_body') !!}</div>
-                    <textarea name="response_body" id="hidden-response-body" class="d-none" required>{{ old('response_body') }}</textarea>
+                    <textarea name="response_body" id="hidden-response-body" class="d-none">{{ old('response_body') }}</textarea>
                 </div>
 
-                <div class="dropzone-area mb-4 cursor-pointer" onclick="document.getElementById('file-upload').click()">
+                <!-- Alerta de validación en tiempo real para el cuerpo -->
+                <div id="alerta-cuerpo-vacio" class="alert alert-danger d-none py-2 px-3 small border-0 mb-3" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">
+                    <i class="bi bi-exclamation-circle-fill me-1"></i> Por favor, escribe un mensaje de respuesta antes de enviar.
+                </div>
+
+                <div class="dropzone-area mb-3 cursor-pointer" onclick="document.getElementById('file-upload').click()">
                     <div class="dz-icon mx-auto mb-2">
                         <i class="bi bi-paperclip"></i>
                     </div>
                     <p class="mb-1 text-muted" id="upload-text">Arrastra o <span class="text-primary">selecciona archivos</span></p>
-                    <small class="text-muted" style="font-size: 0.75rem;">PDF, JPG, PNG, DOC, Vídeo (Máx. 10MB)</small>
-                    <input type="file" name="attachments[]" multiple class="d-none" id="file-upload" onchange="updateFileList(this)">
+                    <small class="text-muted" style="font-size: 0.75rem;">PDF, JPG, PNG, DOC, Vídeo (Máx. 10MB por archivo, máx. 5 archivos)</small>
+                    <input type="file" name="attachments[]" multiple class="d-none" id="file-upload">
                 </div>
 
-                <div class="response-actions">
-                    <button type="submit" class="btn btn-respond me-2">
-                        <i class="bi bi-send"></i> Responder
+                <!-- Resumen de archivos seleccionados -->
+                <div id="resumen-adjuntos-agente" class="mb-3 d-none">
+                    <ul class="list-group list-group-flush small rounded border border-secondary" id="lista-adjuntos-agente" style="background: #111;"></ul>
+                </div>
+
+                <div class="response-actions d-flex align-items-center gap-2">
+                    <button type="submit" class="btn btn-respond" id="btn-enviar-respuesta">
+                        <i class="bi bi-send me-1"></i> <span id="texto-btn-responder">Responder</span>
                     </button>
-                    <button type="button" class="btn btn-close-ticket">
-                        <i class="bi bi-check-lg"></i> Cerrar
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" data-bs-toggle="modal" data-bs-target="#closeTicketModal">
+                        <i class="bi bi-check-lg me-1"></i> Cerrar Ticket
                     </button>
                 </div>
             </form>
@@ -87,21 +97,56 @@
 
     @push('scripts')
         <script>
-        function updateFileList(input) {
-            const textElement = document.getElementById('upload-text');
-            if (input.files && input.files.length > 0) {
-                const count = input.files.length;
-                textElement.innerHTML = `<span class="text-primary fw-bold">${count} archivo(s) seleccionado(s)</span>`;
-            } else {
-                textElement.innerHTML = `Arrastra o <span class="text-primary">selecciona archivos</span>`;
-            }
-        }
-
         document.addEventListener('DOMContentLoaded', function () {
-            const dropzone = document.querySelector('.dropzone-area');
             const fileInput = document.getElementById('file-upload');
+            const dropzone = document.querySelector('.dropzone-area');
+            const uploadText = document.getElementById('upload-text');
+            const contenedorResumen = document.getElementById('resumen-adjuntos-agente');
+            const listaAdjuntos = document.getElementById('lista-adjuntos-agente');
 
-            if(dropzone) {
+            function formatearBytes(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+                return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            }
+
+            function actualizarListaArchivos() {
+                if (!fileInput || !fileInput.files) return;
+                const archivos = fileInput.files;
+
+                if (archivos.length === 0) {
+                    if (uploadText) uploadText.innerHTML = `Arrastra o <span class="text-primary">selecciona archivos</span>`;
+                    if (contenedorResumen) contenedorResumen.classList.add('d-none');
+                    if (listaAdjuntos) listaAdjuntos.innerHTML = '';
+                    return;
+                }
+
+                if (uploadText) {
+                    uploadText.innerHTML = `<span class="text-primary fw-bold">${archivos.length} archivo(s) seleccionado(s)</span>`;
+                }
+
+                if (listaAdjuntos && contenedorResumen) {
+                    listaAdjuntos.innerHTML = '';
+                    contenedorResumen.classList.remove('d-none');
+
+                    for (let i = 0; i < archivos.length; i++) {
+                        const item = document.createElement('li');
+                        item.className = 'list-group-item bg-dark text-white d-flex justify-content-between align-items-center py-1 px-3 border-secondary';
+                        const esExcedido = archivos[i].size > (10 * 1024 * 1024);
+                        item.innerHTML = `
+                            <span class="${esExcedido ? 'text-danger fw-bold' : ''} text-truncate me-2">${archivos[i].name}</span>
+                            <span class="badge ${esExcedido ? 'bg-danger' : 'bg-secondary'}">${formatearBytes(archivos[i].size)}</span>
+                        `;
+                        listaAdjuntos.appendChild(item);
+                    }
+                }
+            }
+
+            if (fileInput) {
+                fileInput.addEventListener('change', actualizarListaArchivos);
+            }
+
+            if (dropzone) {
                 dropzone.addEventListener('dragover', (e) => {
                     e.preventDefault();
                     dropzone.style.borderColor = '#3b82f6';
@@ -121,7 +166,7 @@
                     
                     if (e.dataTransfer.files.length) {
                         fileInput.files = e.dataTransfer.files;
-                        updateFileList(fileInput);
+                        actualizarListaArchivos();
                     }
                 });
             }
@@ -130,6 +175,9 @@
             const editor = document.getElementById('rich-editor');
             const hiddenTextarea = document.getElementById('hidden-response-body');
             const form = document.getElementById('ticket-reply-form');
+            const alertaVacio = document.getElementById('alerta-cuerpo-vacio');
+            const btnEnviar = document.getElementById('btn-enviar-respuesta');
+            const textoBtn = document.getElementById('texto-btn-responder');
             const toolbarButtons = document.querySelectorAll('.btn-toolbar[data-command]');
             
             // Botones especiales
@@ -142,7 +190,16 @@
             const btnFontSize = document.getElementById('btn-fontsize');
             const btnTable = document.getElementById('btn-table');
 
-            if (editor) {
+            if (editor && hiddenTextarea) {
+                // Sincronizar en tiempo real cuando el agente escribe
+                editor.addEventListener('input', function() {
+                    hiddenTextarea.value = editor.innerHTML;
+                    if (alertaVacio && editor.innerText.trim() !== '') {
+                        alertaVacio.classList.add('d-none');
+                        editor.style.borderColor = '';
+                    }
+                });
+
                 // Ejecutar comandos básicos
                 toolbarButtons.forEach(button => {
                     button.addEventListener('click', function(e) {
@@ -150,6 +207,7 @@
                         const command = this.getAttribute('data-command');
                         const value = this.getAttribute('data-value') || null;
                         document.execCommand(command, false, value);
+                        hiddenTextarea.value = editor.innerHTML;
                         editor.focus();
                     });
                 });
@@ -159,7 +217,10 @@
                     btnLink.addEventListener('click', function(e) {
                         e.preventDefault();
                         const url = prompt('Introduce la URL del enlace:', 'https://');
-                        if (url) document.execCommand('createLink', false, url);
+                        if (url) {
+                            document.execCommand('createLink', false, url);
+                            hiddenTextarea.value = editor.innerHTML;
+                        }
                         editor.focus();
                     });
                 }
@@ -169,7 +230,10 @@
                     btnImage.addEventListener('click', function(e) {
                         e.preventDefault();
                         const url = prompt('Introduce la URL de la imagen:', 'https://');
-                        if (url) document.execCommand('insertImage', false, url);
+                        if (url) {
+                            document.execCommand('insertImage', false, url);
+                            hiddenTextarea.value = editor.innerHTML;
+                        }
                         editor.focus();
                     });
                 }
@@ -180,10 +244,10 @@
                         e.preventDefault();
                         const url = prompt('Introduce la URL del video de YouTube:');
                         if (url) {
-                            // Convertir a embed simple si es posible
                             let embedUrl = url.replace('watch?v=', 'embed/');
                             const html = `<iframe width="560" height="315" src="${embedUrl}" frameborder="0" allowfullscreen></iframe><br>`;
                             document.execCommand('insertHTML', false, html);
+                            hiddenTextarea.value = editor.innerHTML;
                         }
                         editor.focus();
                     });
@@ -195,6 +259,7 @@
                         e.preventDefault();
                         const html = `<pre style="background: #111; padding: 10px; border-radius: 5px; color: #0f0;"><code>Escribe tu código aquí...</code></pre><br>`;
                         document.execCommand('insertHTML', false, html);
+                        hiddenTextarea.value = editor.innerHTML;
                         editor.focus();
                     });
                 }
@@ -204,7 +269,10 @@
                     btnColor.addEventListener('click', function(e) {
                         e.preventDefault();
                         const color = prompt('Introduce el color (ej. red, #ff0000):', '#ef4444');
-                        if (color) document.execCommand('foreColor', false, color);
+                        if (color) {
+                            document.execCommand('foreColor', false, color);
+                            hiddenTextarea.value = editor.innerHTML;
+                        }
                         editor.focus();
                     });
                 }
@@ -214,7 +282,10 @@
                     btnFontSize.addEventListener('click', function(e) {
                         e.preventDefault();
                         const size = prompt('Tamaño (1-7):', '4');
-                        if (size >= 1 && size <= 7) document.execCommand('fontSize', false, size);
+                        if (size >= 1 && size <= 7) {
+                            document.execCommand('fontSize', false, size);
+                            hiddenTextarea.value = editor.innerHTML;
+                        }
                         editor.focus();
                     });
                 }
@@ -225,6 +296,7 @@
                         e.preventDefault();
                         const html = `<table border="1" style="width: 100%; border-collapse: collapse; border-color: #333;"><tr><td>Celda 1</td><td>Celda 2</td></tr><tr><td>Celda 3</td><td>Celda 4</td></tr></table><br>`;
                         document.execCommand('insertHTML', false, html);
+                        hiddenTextarea.value = editor.innerHTML;
                         editor.focus();
                     });
                 }
@@ -256,15 +328,28 @@
                     });
                 }
 
-                // Sincronizar contenido antes de enviar el formulario
+                // Sincronizar contenido y validar antes de enviar el formulario
                 if (form) {
                     form.addEventListener('submit', function(e) {
-                        if (editor.innerText.trim() === '') {
+                        const contenidoTexto = editor.innerText.trim();
+                        const contenidoHtml = editor.innerHTML.trim();
+
+                        if (contenidoTexto === '' && (contenidoHtml === '' || contenidoHtml === '<br>')) {
                             e.preventDefault();
-                            alert('El cuerpo de la respuesta es obligatorio.');
-                            return;
+                            if (alertaVacio) alertaVacio.classList.remove('d-none');
+                            editor.style.borderColor = '#ef4444';
+                            editor.focus();
+                            return false;
                         }
+
+                        // Sincronizar campo oculto
                         hiddenTextarea.value = editor.innerHTML;
+
+                        // Estado de carga en botón
+                        if (btnEnviar && textoBtn) {
+                            btnEnviar.disabled = true;
+                            textoBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Enviando...';
+                        }
                     });
                 }
             }

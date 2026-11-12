@@ -86,6 +86,7 @@ Route::prefix('agent')->group(function () {
         Route::post('/ticket/{id}/transfer', [TicketController::class, 'transferir'])->name('agent.tickets.transfer');
         Route::post('/ticket/{id}/status', [TicketController::class, 'estado'])->name('agent.tickets.status');
         Route::post('/ticket/{id}/request-signature', [TicketController::class, 'guardarFirma'])->name('agent.tickets.request_signature');
+        Route::get('/ticket/{id}/pdf', [TicketController::class, 'descargarPdf'])->name('agent.tickets.pdf');
         Route::delete('/ticket/{id}', [TicketController::class, 'eliminar'])->name('agent.tickets.destroy');
 
         // Hilo del ticket

@@ -87,94 +87,57 @@
             padding: 4px 10px;
             border-radius: 20px;
         }
-
-        .modal-dark .modal-content {
-            background-color: #16191d;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #ffffff;
-            border-radius: 14px;
-        }
-
-        .modal-dark .modal-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .modal-dark .modal-footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .modal-dark .form-control,
-        .modal-dark .form-select {
-            background-color: #121417;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #ffffff;
-        }
-
-        .modal-dark .form-control:focus,
-        .modal-dark .form-select:focus {
-            background-color: #121417;
-            border-color: #ef4444;
-            color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
-        }
     </style>
     @endpush
 
     <!-- Hero Header -->
     <div class="banlist-hero">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
             <div class="d-flex align-items-center gap-3">
                 <div class="banlist-hero-icon">
                     <i class="bi bi-slash-circle"></i>
                 </div>
                 <div>
                     <h1 class="h4 fw-bold text-white mb-1">Lista de Prohibidos (Banlist)</h1>
-                    <p class="text-secondary small mb-0">Bloquea direcciones de correo electrónico o dominios completos para impedir la creación de tickets no deseados o spam.</p>
+                    <p class="text-secondary small mb-0">Bloquea correos o dominios no deseados para prevenir spam y solicitudes no autorizadas en el sistema.</p>
                 </div>
             </div>
-            <button type="button" class="btn btn-danger rounded-pill px-4 py-2 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNuevoBloqueo" style="background-color: #ef4444; border-color: #ef4444;">
-                <i class="bi bi-plus-lg me-1"></i> Agregar Bloqueo
-            </button>
+            <div>
+                <button type="button" class="btn btn-danger rounded-pill px-3 py-2 fw-semibold shadow-sm small" style="background-color: #ef4444; border-color: #ef4444;" data-bs-toggle="modal" data-bs-target="#modalNuevoBloqueo">
+                    <i class="bi bi-plus-lg me-1"></i> Prohibir Correo / Dominio
+                </button>
+            </div>
         </div>
     </div>
-
-    @if(session('success'))
-        <div class="alert alert-success border-0 rounded-3 mb-4 d-flex align-items-center gap-2" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
-            <i class="bi bi-check-circle-fill"></i>
-            <div>{{ session('success') }}</div>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger border-0 rounded-3 mb-4 d-flex align-items-center gap-2" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <div>{{ session('error') }}</div>
-        </div>
-    @endif
 
     <!-- Barra de Control -->
     <div class="banlist-control-bar d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge rounded-pill bg-dark border border-secondary px-3 py-2 text-secondary">
+                <i class="bi bi-shield-x me-1"></i> Reglas de Bloqueo
+            </span>
+        </div>
         <div class="text-secondary small fw-semibold">
-            Total de reglas activas/registradas: <strong class="text-white">{{ $prohibidos->count() }}</strong>
+            Total de registros: <strong class="text-white">{{ $prohibidos->count() }}</strong>
         </div>
     </div>
 
-    <!-- Tabla de Prohibidos -->
+    <!-- Tabla Banlist -->
     <div class="banlist-table-wrapper">
         @if($prohibidos->isEmpty())
             <div class="p-5 text-center text-muted">
-                <i class="bi bi-shield-check fs-1 mb-2 d-block opacity-50"></i>
-                <h5 class="fw-bold text-white">No hay direcciones o dominios prohibidos</h5>
-                <p class="small text-secondary mb-3">La lista de prohibición está vacía. Cualquier remitente legítimo puede generar solicitudes.</p>
+                <i class="bi bi-shield-check fs-1 mb-2 d-block opacity-50 text-success"></i>
+                <h5 class="fw-bold text-white">No hay elementos prohibidos</h5>
+                <p class="small text-secondary mb-3">Tu sistema no tiene direcciones de correo o dominios bloqueados actualmente.</p>
                 <button type="button" class="btn btn-outline-danger rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalNuevoBloqueo">
-                    Bloquear un correo o dominio
+                    Agregar regla de prohibición
                 </button>
             </div>
         @else
             <table class="banlist-table">
                 <thead>
                     <tr>
-                        <th>Dirección / Dominio Prohibido</th>
+                        <th>Elemento Bloqueado</th>
                         <th>Tipo</th>
                         <th>Notas / Motivo</th>
                         <th>Estado</th>
@@ -218,13 +181,14 @@
                                         </button>
                                     </form>
 
-                                    <form action="{{ route('admin.banlist.destroy', $prohibido->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Deseas eliminar este registro de la lista de prohibidos?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0 rounded-circle" title="Eliminar regla">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-danger border-0 rounded-circle btn-eliminar-bloqueo" 
+                                            title="Eliminar regla"
+                                            data-action="{{ route('admin.banlist.destroy', $prohibido->id) }}"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalEliminarBloqueo">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -234,44 +198,48 @@
         @endif
     </div>
 
-    <!-- Modal Nuevo Bloqueo -->
-    <div class="modal fade modal-dark" id="modalNuevoBloqueo" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form action="{{ route('admin.banlist.store') }}" method="POST">
-                    @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold text-white">Prohibir Correo o Dominio</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-secondary">Tipo de Regla *</label>
-                            <select name="type" id="tipoBloqueo" class="form-select" required>
-                                <option value="email" selected>Dirección de Correo Específica</option>
-                                <option value="domain">Dominio Completo (@dominio.com)</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-secondary" id="labelValorBloqueo">Dirección de Correo *</label>
-                            <input type="text" name="value" id="inputValorBloqueo" class="form-control" placeholder="ejemplo@spam.com" required>
-                            <div class="form-text text-secondary small" id="ayudaValorBloqueo">Ingresa el correo completo que deseas bloquear.</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-secondary">Notas o Motivo del Bloqueo</label>
-                            <textarea name="notes" class="form-control" rows="3" placeholder="Razón del bloqueo o referencia..."></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold" style="background-color: #ef4444; border-color: #ef4444;">Bloquear</button>
-                    </div>
-                </form>
-            </div>
+    <!-- Modal Nuevo Bloqueo usando x-agent.modal -->
+    <x-agent.modal 
+        id="modalNuevoBloqueo" 
+        titulo="Prohibir Correo o Dominio" 
+        subtitulo="Evita que remitentes específicos o dominios completos generen tickets" 
+        icono="bi-slash-circle" 
+        colorIcono="text-danger" 
+        accion="{{ route('admin.banlist.store') }}" 
+        metodo="POST" 
+        textoBoton="Registrar Prohibición" 
+        colorBoton="btn-danger" 
+        iconoBoton="bi-shield-x"
+        tamano="modal-md"
+    >
+        <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary">Tipo de Regla *</label>
+            <select name="type" id="tipoBloqueo" class="form-select" required>
+                <option value="email" selected>Dirección de Correo Específica</option>
+                <option value="domain">Dominio Completo (@dominio.com)</option>
+            </select>
         </div>
-    </div>
+
+        <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary" id="labelValorBloqueo">Dirección de Correo *</label>
+            <input type="text" name="value" id="inputValorBloqueo" class="form-control" placeholder="ejemplo@spam.com" required>
+            <div class="form-text text-secondary small" id="ayudaValorBloqueo">Ingresa el correo completo que deseas bloquear.</div>
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label small fw-bold text-secondary">Notas / Motivo del Bloqueo</label>
+            <textarea name="notes" class="form-control" rows="3" placeholder="Ej: Remitente de publicidad masiva o actividad maliciosa recurrente."></textarea>
+        </div>
+    </x-agent.modal>
+
+    <!-- Modal Eliminar Bloqueo usando x-delete-modal -->
+    <x-delete-modal
+        id="modalEliminarBloqueo"
+        title="Eliminar Regla de Prohibición"
+        message="¿Estás seguro de que deseas eliminar este registro de la lista de prohibidos? El correo o dominio volverá a ser admitido por el sistema."
+        submitText="Eliminar Regla"
+        formAction="#"
+    />
 
     @push('scripts')
     <script>
@@ -294,8 +262,19 @@
                     }
                 });
             }
+
+            // Configuración dinámica del modal de eliminación
+            const botonesEliminar = document.querySelectorAll('.btn-eliminar-bloqueo');
+            const formularioEliminar = document.getElementById('modalEliminarBloqueo-form');
+
+            botonesEliminar.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (formularioEliminar) {
+                        formularioEliminar.action = this.dataset.action;
+                    }
+                });
+            });
         });
     </script>
     @endpush
 </x-agent.admin-layout>
-

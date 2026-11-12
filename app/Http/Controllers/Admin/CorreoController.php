@@ -63,8 +63,6 @@ class CorreoController extends Controller
             'smtp_secure' => $solicitud->validated('smtp_secure') ?: 'none',
             'smtp_user' => $solicitud->validated('smtp_user'),
             'smtp_pass' => $solicitud->validated('smtp_pass'),
-            'created' => now(),
-            'updated' => now(),
         ]);
 
         return redirect()->route('admin.email')
@@ -95,7 +93,6 @@ class CorreoController extends Controller
             'smtp_port' => $solicitud->validated('smtp_port'),
             'smtp_secure' => $solicitud->validated('smtp_secure') ?: 'none',
             'smtp_user' => $solicitud->validated('smtp_user'),
-            'updated' => now(),
         ];
 
         if ($solicitud->filled('smtp_pass')) {
@@ -117,7 +114,7 @@ class CorreoController extends Controller
         $cuenta = EmailAccount::where('empresa_id', $empresaId)->findOrFail($id);
 
         EmailAccount::where('empresa_id', $empresaId)->update(['is_default' => 0]);
-        $cuenta->update(['is_default' => 1, 'updated' => now()]);
+        $cuenta->update(['is_default' => 1]);
 
         return redirect()->route('admin.email')
             ->with('success', 'La cuenta "'.$cuenta->email.'" ha sido establecida como predeterminada.');
@@ -176,8 +173,6 @@ class CorreoController extends Controller
             'domain' => $dominio,
             'notes' => $solicitud->validated('notes'),
             'is_active' => 1,
-            'created' => now(),
-            'updated' => now(),
         ]);
 
         return redirect()->route('admin.banlist')
@@ -194,7 +189,6 @@ class CorreoController extends Controller
 
         $bloqueo->update([
             'is_active' => ! $bloqueo->is_active,
-            'updated' => now(),
         ]);
 
         $estadoTexto = $bloqueo->is_active ? 'activada' : 'desactivada';

@@ -80,73 +80,39 @@
             align-items: center;
             gap: 4px;
         }
-
-        .modal-dark .modal-content {
-            background-color: #16191d;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #ffffff;
-            border-radius: 14px;
-        }
-
-        .modal-dark .modal-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .modal-dark .modal-footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .modal-dark .form-control,
-        .modal-dark .form-select {
-            background-color: #121417;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #ffffff;
-        }
-
-        .modal-dark .form-control:focus,
-        .modal-dark .form-select:focus {
-            background-color: #121417;
-            border-color: #ef4444;
-            color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
-        }
     </style>
     @endpush
 
     <!-- Hero Header -->
     <div class="emails-hero">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
             <div class="d-flex align-items-center gap-3">
                 <div class="emails-hero-icon">
-                    <i class="bi bi-envelope"></i>
+                    <i class="bi bi-envelope-at"></i>
                 </div>
                 <div>
                     <h1 class="h4 fw-bold text-white mb-1">Cuentas de Correo Electrónico</h1>
-                    <p class="text-secondary small mb-0">Configura y administra las cuentas de correo del sistema para notificaciones y soporte.</p>
+                    <p class="text-secondary small mb-0">Administra las cuentas de correo del sistema para el envío de notificaciones y recepción de tickets.</p>
                 </div>
             </div>
-            <button type="button" class="btn btn-danger rounded-pill px-4 py-2 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNuevaCuenta" style="background-color: #ef4444; border-color: #ef4444;">
-                <i class="bi bi-plus-lg me-1"></i> Nueva Cuenta
-            </button>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ route('admin.emailtest') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold small">
+                    <i class="bi bi-activity me-1"></i> Probar Conectividad
+                </a>
+                <button type="button" class="btn btn-danger rounded-pill px-3 py-2 fw-semibold shadow-sm small" style="background-color: #ef4444; border-color: #ef4444;" data-bs-toggle="modal" data-bs-target="#modalNuevaCuenta">
+                    <i class="bi bi-plus-lg me-1"></i> Nueva Cuenta
+                </button>
+            </div>
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success border-0 rounded-3 mb-4 d-flex align-items-center gap-2" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
-            <i class="bi bi-check-circle-fill"></i>
-            <div>{{ session('success') }}</div>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger border-0 rounded-3 mb-4 d-flex align-items-center gap-2" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <div>{{ session('error') }}</div>
-        </div>
-    @endif
-
     <!-- Barra de Control -->
     <div class="emails-control-bar d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge rounded-pill bg-dark border border-secondary px-3 py-2 text-secondary">
+                <i class="bi bi-inbox me-1"></i> Cuentas Activas
+            </span>
+        </div>
         <div class="text-secondary small fw-semibold">
             Total de cuentas registradas: <strong class="text-white">{{ $cuentas->count() }}</strong>
         </div>
@@ -219,203 +185,254 @@
                             <td class="text-end">
                                 <div class="d-inline-flex gap-1">
                                     <button type="button" 
-                                            class="btn btn-sm btn-outline-light border-0 rounded-circle" 
+                                            class="btn btn-sm btn-outline-light border-0 rounded-circle btn-editar-cuenta" 
                                             title="Editar"
+                                            data-id="{{ $cuenta->id }}"
+                                            data-action="{{ route('admin.email.update', $cuenta->id) }}"
+                                            data-email="{{ $cuenta->email }}"
+                                            data-name="{{ $cuenta->name }}"
+                                            data-priority="{{ $cuenta->priority }}"
+                                            data-dept-id="{{ $cuenta->dept_id }}"
+                                            data-smtp-host="{{ $cuenta->smtp_host }}"
+                                            data-smtp-port="{{ $cuenta->smtp_port ?? 587 }}"
+                                            data-smtp-secure="{{ $cuenta->smtp_secure ?? 'none' }}"
+                                            data-smtp-user="{{ $cuenta->smtp_user }}"
+                                            data-is-default="{{ $cuenta->is_default ? '1' : '0' }}"
                                             data-bs-toggle="modal" 
-                                            data-bs-target="#modalEditarCuenta{{ $cuenta->id }}">
+                                            data-bs-target="#modalEditarCuenta">
                                         <i class="bi bi-pencil"></i>
                                     </button>
 
-                                    <form action="{{ route('admin.email.destroy', $cuenta->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta cuenta de correo?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0 rounded-circle" title="Eliminar">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-danger border-0 rounded-circle btn-eliminar-cuenta" 
+                                            title="Eliminar cuenta"
+                                            data-action="{{ route('admin.email.destroy', $cuenta->id) }}"
+                                            data-email="{{ $cuenta->email }}"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalEliminarCuenta">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
-
-                        <!-- Modal Editar Cuenta -->
-                        <div class="modal fade modal-dark" id="modalEditarCuenta{{ $cuenta->id }}" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <form action="{{ route('admin.email.update', $cuenta->id) }}" method="POST">
-                                        @csrf
-                                        @method('PUT')
-                                        <div class="modal-header">
-                                            <h5 class="modal-title fw-bold text-white">Editar Cuenta de Correo: {{ $cuenta->email }}</h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                                        </div>
-                                        <div class="modal-body p-4">
-                                            <div class="row g-3 mb-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label small fw-bold text-secondary">Correo Electrónico *</label>
-                                                    <input type="email" name="email" class="form-control" value="{{ old('email', $cuenta->email) }}" required>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label small fw-bold text-secondary">Nombre del Remitente *</label>
-                                                    <input type="text" name="name" class="form-control" value="{{ old('name', $cuenta->name) }}" required>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label small fw-bold text-secondary">Prioridad *</label>
-                                                    <select name="priority" class="form-select" required>
-                                                        @foreach(['Baja', 'Normal', 'Alta', 'Urgente'] as $prio)
-                                                            <option value="{{ $prio }}" {{ old('priority', $cuenta->priority) == $prio ? 'selected' : '' }}>{{ $prio }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label small fw-bold text-secondary">Departamento Asociado</label>
-                                                    <select name="dept_id" class="form-select">
-                                                        <option value="">— Sin asignar —</option>
-                                                        @foreach($departamentos as $dept)
-                                                            <option value="{{ $dept->id }}" {{ old('dept_id', $cuenta->dept_id) == $dept->id ? 'selected' : '' }}>{{ $dept->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <h6 class="fw-bold text-danger border-bottom border-secondary pb-2 mb-3 mt-4">
-                                                <i class="bi bi-send-check me-1"></i> Configuración Servidor Saliente (SMTP)
-                                            </h6>
-
-                                            <div class="row g-3">
-                                                <div class="col-md-8">
-                                                    <label class="form-label small fw-bold text-secondary">Host Servidor SMTP</label>
-                                                    <input type="text" name="smtp_host" class="form-control" value="{{ old('smtp_host', $cuenta->smtp_host) }}" placeholder="smtp.ejemplo.com">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label class="form-label small fw-bold text-secondary">Puerto SMTP</label>
-                                                    <input type="number" name="smtp_port" class="form-control" value="{{ old('smtp_port', $cuenta->smtp_port ?? 587) }}">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label class="form-label small fw-bold text-secondary">Seguridad</label>
-                                                    <select name="smtp_secure" class="form-select">
-                                                        <option value="none" {{ old('smtp_secure', $cuenta->smtp_secure) == 'none' ? 'selected' : '' }}>Ninguna</option>
-                                                        <option value="tls" {{ old('smtp_secure', $cuenta->smtp_secure) == 'tls' ? 'selected' : '' }}>TLS / STARTTLS</option>
-                                                        <option value="ssl" {{ old('smtp_secure', $cuenta->smtp_secure) == 'ssl' ? 'selected' : '' }}>SSL</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label class="form-label small fw-bold text-secondary">Usuario SMTP</label>
-                                                    <input type="text" name="smtp_user" class="form-control" value="{{ old('smtp_user', $cuenta->smtp_user) }}">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label class="form-label small fw-bold text-secondary">Contraseña SMTP</label>
-                                                    <input type="password" name="smtp_pass" class="form-control" placeholder="Dejar en blanco para conservar">
-                                                </div>
-                                                <div class="col-12 mt-3">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" name="is_default" value="1" id="edit_is_default{{ $cuenta->id }}" {{ $cuenta->is_default ? 'checked' : '' }}>
-                                                        <label class="form-check-label text-secondary small" for="edit_is_default{{ $cuenta->id }}">
-                                                            Marcar como cuenta de correo predeterminada del sistema
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                                            <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold" style="background-color: #ef4444; border-color: #ef4444;">Guardar Cambios</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
                     @endforeach
                 </tbody>
             </table>
         @endif
     </div>
 
-    <!-- Modal Nueva Cuenta -->
-    <div class="modal fade modal-dark" id="modalNuevaCuenta" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <form action="{{ route('admin.email.store') }}" method="POST">
-                    @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold text-white">Registrar Nueva Cuenta de Correo</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold text-secondary">Correo Electrónico *</label>
-                                <input type="email" name="email" class="form-control" placeholder="soporte@empresa.com" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold text-secondary">Nombre del Remitente *</label>
-                                <input type="text" name="name" class="form-control" placeholder="Mesa de Ayuda" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold text-secondary">Prioridad *</label>
-                                <select name="priority" class="form-select" required>
-                                    <option value="Normal" selected>Normal</option>
-                                    <option value="Baja">Baja</option>
-                                    <option value="Alta">Alta</option>
-                                    <option value="Urgente">Urgente</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label small fw-bold text-secondary">Departamento Asociado</label>
-                                <select name="dept_id" class="form-select">
-                                    <option value="">— Sin asignar —</option>
-                                    @foreach($departamentos as $dept)
-                                        <option value="{{ $dept->id }}">{{ $dept->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <h6 class="fw-bold text-danger border-bottom border-secondary pb-2 mb-3 mt-4">
-                            <i class="bi bi-send-check me-1"></i> Configuración Servidor Saliente (SMTP)
-                        </h6>
-
-                        <div class="row g-3">
-                            <div class="col-md-8">
-                                <label class="form-label small fw-bold text-secondary">Host Servidor SMTP</label>
-                                <input type="text" name="smtp_host" class="form-control" placeholder="smtp.ejemplo.com">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold text-secondary">Puerto SMTP</label>
-                                <input type="number" name="smtp_port" class="form-control" value="587">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold text-secondary">Seguridad</label>
-                                <select name="smtp_secure" class="form-select">
-                                    <option value="tls" selected>TLS / STARTTLS</option>
-                                    <option value="ssl">SSL</option>
-                                    <option value="none">Ninguna</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold text-secondary">Usuario SMTP</label>
-                                <input type="text" name="smtp_user" class="form-control" placeholder="usuario@ejemplo.com">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold text-secondary">Contraseña SMTP</label>
-                                <input type="password" name="smtp_pass" class="form-control">
-                            </div>
-                            <div class="col-12 mt-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="is_default" value="1" id="new_is_default">
-                                    <label class="form-check-label text-secondary small" for="new_is_default">
-                                        Marcar como cuenta de correo predeterminada del sistema
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold" style="background-color: #ef4444; border-color: #ef4444;">Crear Cuenta</button>
-                    </div>
-                </form>
+    <!-- Modal Registrar Cuenta usando componente x-agent.modal -->
+    <x-agent.modal 
+        id="modalNuevaCuenta" 
+        titulo="Registrar Nueva Cuenta de Correo" 
+        subtitulo="Configura una dirección de correo para emitir y recibir tickets" 
+        icono="bi-envelope-plus" 
+        colorIcono="text-danger" 
+        accion="{{ route('admin.email.store') }}" 
+        metodo="POST" 
+        textoBoton="Registrar Cuenta" 
+        colorBoton="btn-danger" 
+        iconoBoton="bi-check-circle"
+        tamano="modal-lg"
+    >
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-secondary">Correo Electrónico *</label>
+                <input type="email" name="email" class="form-control" placeholder="soporte@tuempresa.com" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-secondary">Nombre del Remitente *</label>
+                <input type="text" name="name" class="form-control" placeholder="Soporte Técnico" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-secondary">Prioridad por Defecto *</label>
+                <select name="priority" class="form-select" required>
+                    <option value="Baja">Baja</option>
+                    <option value="Normal" selected>Normal</option>
+                    <option value="Alta">Alta</option>
+                    <option value="Urgente">Urgente</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-secondary">Departamento Asociado</label>
+                <select name="dept_id" class="form-select">
+                    <option value="">— Sin asignar —</option>
+                    @foreach($departamentos as $dept)
+                        <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                    @endforeach
+                </select>
             </div>
         </div>
-    </div>
-</x-agent.admin-layout>
 
+        <h6 class="fw-bold text-danger border-bottom border-secondary pb-2 mb-3 mt-4">
+            <i class="bi bi-send-check me-1"></i> Configuración Servidor Saliente (SMTP)
+        </h6>
+
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label small fw-bold text-secondary">Host Servidor SMTP</label>
+                <input type="text" name="smtp_host" class="form-control" placeholder="smtp.ejemplo.com">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Puerto SMTP</label>
+                <input type="number" name="smtp_port" class="form-control" value="587">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Seguridad</label>
+                <select name="smtp_secure" class="form-select">
+                    <option value="none">Ninguna</option>
+                    <option value="tls" selected>TLS / STARTTLS</option>
+                    <option value="ssl">SSL</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Usuario SMTP</label>
+                <input type="text" name="smtp_user" class="form-control" placeholder="usuario@ejemplo.com">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Contraseña SMTP</label>
+                <input type="password" name="smtp_pass" class="form-control" placeholder="••••••••">
+            </div>
+            <div class="col-12 mt-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="is_default" value="1" id="nueva_is_default">
+                    <label class="form-check-label text-secondary small" for="nueva_is_default">
+                        Marcar como cuenta de correo predeterminada del sistema
+                    </label>
+                </div>
+            </div>
+        </div>
+    </x-agent.modal>
+
+    <!-- Modal Editar Cuenta usando componente x-agent.modal -->
+    <x-agent.modal 
+        id="modalEditarCuenta" 
+        titulo="Editar Cuenta de Correo" 
+        subtitulo="Modifica los parámetros de conexión y asignación" 
+        icono="bi-pencil-square" 
+        colorIcono="text-danger" 
+        accion="#" 
+        metodo="PUT" 
+        textoBoton="Guardar Cambios" 
+        colorBoton="btn-danger" 
+        iconoBoton="bi-check-circle"
+        tamano="modal-lg"
+    >
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-secondary">Correo Electrónico *</label>
+                <input type="email" name="email" id="edit_email" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-secondary">Nombre del Remitente *</label>
+                <input type="text" name="name" id="edit_name" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-secondary">Prioridad *</label>
+                <select name="priority" id="edit_priority" class="form-select" required>
+                    <option value="Baja">Baja</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Alta">Alta</option>
+                    <option value="Urgente">Urgente</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-secondary">Departamento Asociado</label>
+                <select name="dept_id" id="edit_dept_id" class="form-select">
+                    <option value="">— Sin asignar —</option>
+                    @foreach($departamentos as $dept)
+                        <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <h6 class="fw-bold text-danger border-bottom border-secondary pb-2 mb-3 mt-4">
+            <i class="bi bi-send-check me-1"></i> Configuración Servidor Saliente (SMTP)
+        </h6>
+
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label small fw-bold text-secondary">Host Servidor SMTP</label>
+                <input type="text" name="smtp_host" id="edit_smtp_host" class="form-control" placeholder="smtp.ejemplo.com">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Puerto SMTP</label>
+                <input type="number" name="smtp_port" id="edit_smtp_port" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Seguridad</label>
+                <select name="smtp_secure" id="edit_smtp_secure" class="form-select">
+                    <option value="none">Ninguna</option>
+                    <option value="tls">TLS / STARTTLS</option>
+                    <option value="ssl">SSL</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Usuario SMTP</label>
+                <input type="text" name="smtp_user" id="edit_smtp_user" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Contraseña SMTP</label>
+                <input type="password" name="smtp_pass" id="edit_smtp_pass" class="form-control" placeholder="Dejar en blanco para conservar">
+            </div>
+            <div class="col-12 mt-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="is_default" value="1" id="edit_is_default">
+                    <label class="form-check-label text-secondary small" for="edit_is_default">
+                        Marcar como cuenta de correo predeterminada del sistema
+                    </label>
+                </div>
+            </div>
+        </div>
+    </x-agent.modal>
+
+    <!-- Modal Eliminar Cuenta usando componente x-delete-modal -->
+    <x-delete-modal
+        id="modalEliminarCuenta"
+        title="Eliminar Cuenta de Correo"
+        message="¿Estás seguro de que deseas eliminar esta cuenta de correo? Esta acción no se puede deshacer y puede afectar la entrega de mensajes."
+        submitText="Eliminar Cuenta"
+        formAction="#"
+    />
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Llenado dinámico del modal de edición
+            const botonesEditar = document.querySelectorAll('.btn-editar-cuenta');
+            const formularioEditar = document.getElementById('modalEditarCuenta-formulario');
+
+            botonesEditar.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (formularioEditar) {
+                        formularioEditar.action = this.dataset.action;
+                    }
+                    document.getElementById('edit_email').value = this.dataset.email || '';
+                    document.getElementById('edit_name').value = this.dataset.name || '';
+                    document.getElementById('edit_priority').value = this.dataset.priority || 'Normal';
+                    document.getElementById('edit_dept_id').value = this.dataset.deptId || '';
+                    document.getElementById('edit_smtp_host').value = this.dataset.smtpHost || '';
+                    document.getElementById('edit_smtp_port').value = this.dataset.smtpPort || 587;
+                    document.getElementById('edit_smtp_secure').value = this.dataset.smtpSecure || 'none';
+                    document.getElementById('edit_smtp_user').value = this.dataset.smtpUser || '';
+                    document.getElementById('edit_smtp_pass').value = '';
+                    document.getElementById('edit_is_default').checked = this.dataset.isDefault === '1';
+                });
+            });
+
+            // Configuración dinámica del modal de eliminación
+            const botonesEliminar = document.querySelectorAll('.btn-eliminar-cuenta');
+            const formularioEliminar = document.getElementById('modalEliminarCuenta-form');
+
+            botonesEliminar.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (formularioEliminar) {
+                        formularioEliminar.action = this.dataset.action;
+                    }
+                });
+            });
+        });
+    </script>
+    @endpush
+</x-agent.admin-layout>

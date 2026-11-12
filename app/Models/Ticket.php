@@ -59,4 +59,18 @@ class Ticket extends Model
     {
         return $this->belongsTo(Empresa::class);
     }
+
+    /**
+     * Determina si el ticket se encuentra en estado cerrado o resuelto.
+     */
+    public function estaCerrado(): bool
+    {
+        if (! is_null($this->closed)) {
+            return true;
+        }
+
+        $nombreEstado = strtolower((string) optional($this->status)->name);
+
+        return in_array($nombreEstado, ['cerrado', 'resuelto'], true);
+    }
 }

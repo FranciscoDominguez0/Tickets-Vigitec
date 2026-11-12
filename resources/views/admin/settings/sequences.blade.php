@@ -67,78 +67,41 @@
         .seq-table tbody tr:hover td {
             background-color: rgba(255, 255, 255, 0.02);
         }
-
-        .modal-dark .modal-content {
-            background-color: #16191d;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #ffffff;
-            border-radius: 14px;
-        }
-
-        .modal-dark .modal-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .modal-dark .modal-footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .modal-dark .form-control {
-            background-color: #121417;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #ffffff;
-        }
-
-        .modal-dark .form-control:focus {
-            background-color: #121417;
-            border-color: #ef4444;
-            color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
-        }
     </style>
     @endpush
 
     <!-- Hero Header -->
     <div class="seq-hero">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
             <div class="d-flex align-items-center gap-3">
                 <div class="seq-hero-icon">
-                    <i class="bi bi-arrow-repeat"></i>
+                    <i class="bi bi-123"></i>
                 </div>
                 <div>
-                    <h1 class="h4 fw-bold text-white mb-1">Gestión de Secuencias Numéricas</h1>
-                    <p class="text-secondary small mb-0">Define secuencias incrementales y formato de relleno de ceros para la numeración consecutiva de tickets.</p>
+                    <h1 class="h4 fw-bold text-white mb-1">Secuencias Numéricas</h1>
+                    <p class="text-secondary small mb-0">Controla los contadores correlativos, rellenos de ceros y saltos para la numeración consecutiva de tickets.</p>
                 </div>
             </div>
-            <div class="d-flex gap-2">
-                <a href="{{ route('admin.settings.tickets') }}" class="btn btn-outline-light rounded-pill px-3 py-2 fw-semibold">
-                    <i class="bi bi-arrow-left me-1"></i> Solicitudes
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ route('admin.settings.tickets') }}" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold small">
+                    <i class="bi bi-arrow-left me-1"></i> Configuración de Solicitudes
                 </a>
-                <button type="button" class="btn btn-danger rounded-pill px-4 py-2 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalNuevaSecuencia" style="background-color: #ef4444; border-color: #ef4444;">
+                <button type="button" class="btn btn-danger rounded-pill px-3 py-2 fw-semibold shadow-sm small" style="background-color: #ef4444; border-color: #ef4444;" data-bs-toggle="modal" data-bs-target="#modalNuevaSecuencia">
                     <i class="bi bi-plus-lg me-1"></i> Nueva Secuencia
                 </button>
             </div>
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success border-0 rounded-3 mb-4 d-flex align-items-center gap-2" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);">
-            <i class="bi bi-check-circle-fill"></i>
-            <div>{{ session('success') }}</div>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger border-0 rounded-3 mb-4 d-flex align-items-center gap-2" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <div>{{ session('error') }}</div>
-        </div>
-    @endif
-
     <!-- Barra de Control -->
     <div class="seq-control-bar d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge rounded-pill bg-dark border border-secondary px-3 py-2 text-secondary">
+                <i class="bi bi-list-ol me-1"></i> Secuencias Registradas
+            </span>
+        </div>
         <div class="text-secondary small fw-semibold">
-            Total de secuencias registradas: <strong class="text-white">{{ $secuencias->count() }}</strong>
+            Total de secuencias: <strong class="text-white">{{ $secuencias->count() }}</strong>
         </div>
     </div>
 
@@ -146,9 +109,9 @@
     <div class="seq-table-wrapper">
         @if($secuencias->isEmpty())
             <div class="p-5 text-center text-muted">
-                <i class="bi bi-123 fs-1 mb-2 d-block opacity-50"></i>
-                <h5 class="fw-bold text-white">No hay secuencias numéricas creadas</h5>
-                <p class="small text-secondary mb-3">Puedes crear una secuencia para enumerar los tickets consecutivamente (ej: 000001, 000002...).</p>
+                <i class="bi bi-hash fs-1 mb-2 d-block opacity-50"></i>
+                <h5 class="fw-bold text-white">No hay secuencias numéricas registradas</h5>
+                <p class="small text-secondary mb-3">Crea una secuencia para establecer contadores automáticos para tickets.</p>
                 <button type="button" class="btn btn-outline-danger rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalNuevaSecuencia">
                     Crear primera secuencia
                 </button>
@@ -157,36 +120,38 @@
             <table class="seq-table">
                 <thead>
                     <tr>
-                        <th>Nombre</th>
-                        <th>Siguiente Número</th>
+                        <th>Nombre de la Secuencia</th>
+                        <th>Próximo Valor</th>
                         <th>Incremento</th>
                         <th>Relleno (Padding)</th>
-                        <th>Ejemplo Generado</th>
-                        <th>Uso en Solicitudes</th>
+                        <th>Siguiente Formateado</th>
+                        <th>Estado de Uso</th>
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($secuencias as $secuencia)
                         @php
-                            $enUso = ($secuenciaActivaId === (string)$secuencia->id);
+                            $enUso = ($secuenciaActivaId === (string) $secuencia->id);
                         @endphp
                         <tr>
                             <td>
                                 <div class="fw-bold text-white d-flex align-items-center gap-2">
-                                    <i class="bi bi-hash text-danger"></i>
+                                    <i class="bi bi-tag text-secondary"></i>
                                     {{ $secuencia->name }}
                                 </div>
                             </td>
                             <td>
-                                <strong class="text-white">{{ $secuencia->next }}</strong>
+                                <span class="fw-bold text-white">{{ number_format($secuencia->next) }}</span>
                             </td>
-                            <td>+{{ $secuencia->increment }}</td>
-                            <td>{{ $secuencia->padding > 0 ? $secuencia->padding . ' dígitos' : 'Sin relleno' }}</td>
                             <td>
-                                <code class="px-2 py-1 rounded bg-black text-danger fw-bold border border-secondary" style="font-size: 0.85rem;">
-                                    {{ $secuencia->obtenerNumeroFormateado() }}
-                                </code>
+                                <span class="text-secondary">+{{ $secuencia->increment }}</span>
+                            </td>
+                            <td>
+                                <span class="text-secondary">{{ $secuencia->padding }} dígitos</span>
+                            </td>
+                            <td>
+                                <code class="text-danger fw-bold bg-transparent p-0">{{ $secuencia->obtenerNumeroFormateado() }}</code>
                             </td>
                             <td>
                                 @if($enUso)
@@ -200,114 +165,148 @@
                             <td class="text-end">
                                 <div class="d-inline-flex gap-1">
                                     <button type="button" 
-                                            class="btn btn-sm btn-outline-light border-0 rounded-circle" 
+                                            class="btn btn-sm btn-outline-light border-0 rounded-circle btn-editar-secuencia" 
                                             title="Editar"
+                                            data-id="{{ $secuencia->id }}"
+                                            data-action="{{ route('admin.sequences.update', $secuencia->id) }}"
+                                            data-name="{{ $secuencia->name }}"
+                                            data-next="{{ $secuencia->next }}"
+                                            data-increment="{{ $secuencia->increment }}"
+                                            data-padding="{{ $secuencia->padding }}"
                                             data-bs-toggle="modal" 
-                                            data-bs-target="#modalEditarSecuencia{{ $secuencia->id }}">
+                                            data-bs-target="#modalEditarSecuencia">
                                         <i class="bi bi-pencil"></i>
                                     </button>
 
-                                    <form action="{{ route('admin.sequences.destroy', $secuencia->id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de eliminar esta secuencia numérica?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                                class="btn btn-sm btn-outline-danger border-0 rounded-circle" 
-                                                title="Eliminar" 
-                                                {{ $enUso ? 'disabled' : '' }}>
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-danger border-0 rounded-circle btn-eliminar-secuencia" 
+                                            title="Eliminar secuencia"
+                                            data-action="{{ route('admin.sequences.destroy', $secuencia->id) }}"
+                                            data-name="{{ $secuencia->name }}"
+                                            {{ $enUso ? 'disabled' : '' }}
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalEliminarSecuencia">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
-
-                        <!-- Modal Editar Secuencia -->
-                        <div class="modal fade modal-dark" id="modalEditarSecuencia{{ $secuencia->id }}" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <form action="{{ route('admin.sequences.update', $secuencia->id) }}" method="POST">
-                                        @csrf
-                                        @method('PUT')
-                                        <div class="modal-header">
-                                            <h5 class="modal-title fw-bold text-white">Editar Secuencia: {{ $secuencia->name }}</h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                                        </div>
-                                        <div class="modal-body p-4">
-                                            <div class="mb-3">
-                                                <label class="form-label small fw-bold text-secondary">Nombre de la Secuencia *</label>
-                                                <input type="text" name="name" class="form-control" value="{{ old('name', $secuencia->name) }}" required>
-                                            </div>
-
-                                            <div class="row g-3">
-                                                <div class="col-md-4">
-                                                    <label class="form-label small fw-bold text-secondary">Siguiente Número *</label>
-                                                    <input type="number" name="next" class="form-control" value="{{ old('next', $secuencia->next) }}" min="0" required>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label class="form-label small fw-bold text-secondary">Incremento *</label>
-                                                    <input type="number" name="increment" class="form-control" value="{{ old('increment', $secuencia->increment) }}" min="1" required>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label class="form-label small fw-bold text-secondary">Relleno Ceros (0-20)</label>
-                                                    <input type="number" name="padding" class="form-control" value="{{ old('padding', $secuencia->padding) }}" min="0" max="20" required>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                                            <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold" style="background-color: #ef4444; border-color: #ef4444;">Guardar Cambios</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
                     @endforeach
                 </tbody>
             </table>
         @endif
     </div>
 
-    <!-- Modal Nueva Secuencia -->
-    <div class="modal fade modal-dark" id="modalNuevaSecuencia" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form action="{{ route('admin.sequences.store') }}" method="POST">
-                    @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold text-white">Nueva Secuencia Numérica</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-secondary">Nombre de la Secuencia *</label>
-                            <input type="text" name="name" class="form-control" placeholder="Ej: Tickets Soporte 2026" required>
-                        </div>
+    <!-- Modal Nueva Secuencia usando x-agent.modal -->
+    <x-agent.modal 
+        id="modalNuevaSecuencia" 
+        titulo="Registrar Nueva Secuencia Numérica" 
+        subtitulo="Crea un correlativo para la generación secuencial de tickets" 
+        icono="bi-plus-circle" 
+        colorIcono="text-danger" 
+        accion="{{ route('admin.sequences.store') }}" 
+        metodo="POST" 
+        textoBoton="Guardar Secuencia" 
+        colorBoton="btn-danger" 
+        iconoBoton="bi-check-circle"
+        tamano="modal-md"
+    >
+        <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary">Nombre de la Secuencia *</label>
+            <input type="text" name="name" class="form-control" placeholder="Ej: General, Secuencia 2026" required>
+        </div>
 
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold text-secondary">Siguiente Número *</label>
-                                <input type="number" name="next" class="form-control" value="1" min="0" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold text-secondary">Incremento *</label>
-                                <input type="number" name="increment" class="form-control" value="1" min="1" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-bold text-secondary">Relleno Ceros (0-20)</label>
-                                <input type="number" name="padding" class="form-control" value="6" min="0" max="20" required>
-                            </div>
-                        </div>
-                        <div class="form-text text-secondary small mt-2">
-                            Un valor de relleno de 6 dígitos convertirá el número 1 en <code>000001</code>.
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger rounded-pill px-4 fw-semibold" style="background-color: #ef4444; border-color: #ef4444;">Crear Secuencia</button>
-                    </div>
-                </form>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Siguiente Número *</label>
+                <input type="number" name="next" class="form-control" value="1" min="0" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Incremento *</label>
+                <input type="number" name="increment" class="form-control" value="1" min="1" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Relleno Ceros (0-20)</label>
+                <input type="number" name="padding" class="form-control" value="6" min="0" max="20" required>
             </div>
         </div>
-    </div>
-</x-agent.admin-layout>
+    </x-agent.modal>
 
+    <!-- Modal Editar Secuencia usando x-agent.modal -->
+    <x-agent.modal 
+        id="modalEditarSecuencia" 
+        titulo="Editar Secuencia Numérica" 
+        subtitulo="Modifica los parámetros del contador correlativo" 
+        icono="bi-pencil-square" 
+        colorIcono="text-danger" 
+        accion="#" 
+        metodo="PUT" 
+        textoBoton="Guardar Cambios" 
+        colorBoton="btn-danger" 
+        iconoBoton="bi-check-circle"
+        tamano="modal-md"
+    >
+        <div class="mb-3">
+            <label class="form-label small fw-bold text-secondary">Nombre de la Secuencia *</label>
+            <input type="text" name="name" id="edit_seq_name" class="form-control" required>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Siguiente Número *</label>
+                <input type="number" name="next" id="edit_seq_next" class="form-control" min="0" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Incremento *</label>
+                <input type="number" name="increment" id="edit_seq_increment" class="form-control" min="1" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Relleno Ceros (0-20)</label>
+                <input type="number" name="padding" id="edit_seq_padding" class="form-control" min="0" max="20" required>
+            </div>
+        </div>
+    </x-agent.modal>
+
+    <!-- Modal Eliminar Secuencia usando x-delete-modal -->
+    <x-delete-modal
+        id="modalEliminarSecuencia"
+        title="Eliminar Secuencia Numérica"
+        message="¿Estás seguro de que deseas eliminar esta secuencia numérica? Esta acción no se puede deshacer."
+        submitText="Eliminar Secuencia"
+        formAction="#"
+    />
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Llenado dinámico del modal de edición de secuencia
+            const botonesEditar = document.querySelectorAll('.btn-editar-secuencia');
+            const formularioEditar = document.getElementById('modalEditarSecuencia-formulario');
+
+            botonesEditar.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (formularioEditar) {
+                        formularioEditar.action = this.dataset.action;
+                    }
+                    document.getElementById('edit_seq_name').value = this.dataset.name || '';
+                    document.getElementById('edit_seq_next').value = this.dataset.next || 1;
+                    document.getElementById('edit_seq_increment').value = this.dataset.increment || 1;
+                    document.getElementById('edit_seq_padding').value = this.dataset.padding || 6;
+                });
+            });
+
+            // Configuración dinámica del modal de eliminación
+            const botonesEliminar = document.querySelectorAll('.btn-eliminar-secuencia');
+            const formularioEliminar = document.getElementById('modalEliminarSecuencia-form');
+
+            botonesEliminar.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    if (formularioEliminar) {
+                        formularioEliminar.action = this.dataset.action;
+                    }
+                });
+            });
+        });
+    </script>
+    @endpush
+</x-agent.admin-layout>

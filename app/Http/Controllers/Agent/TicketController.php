@@ -11,9 +11,12 @@ use App\Models\Ticket;
 use App\Models\TicketStatus;
 use App\Repositories\DepartmentRepository;
 use App\Repositories\TicketRepository;
+use App\Services\TicketNotificacionService;
+use App\Services\TicketPdfService;
 use App\Services\TicketService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class TicketController extends Controller
@@ -21,7 +24,9 @@ class TicketController extends Controller
     public function __construct(
         protected TicketService $ticketService,
         protected TicketRepository $ticketRepository,
-        protected DepartmentRepository $departmentRepository
+        protected DepartmentRepository $departmentRepository,
+        protected TicketPdfService $ticketPdfService,
+        protected TicketNotificacionService $ticketNotificacionService
     ) {}
 
     /**
@@ -169,7 +174,10 @@ class TicketController extends Controller
 
         $this->ticketService->actualizarEstado($ticket, (int) $request->status_id, auth('staff')->id() ?? 1);
 
-        if ($request->status_id == 3) {
+        $nuevoEstado = TicketStatus::find((int) $request->status_id);
+        $esCerrado = $nuevoEstado && (in_array(strtolower($nuevoEstado->name), ['cerrado', 'resuelto'], true) || (int) $request->status_id === 5);
+
+        if ($esCerrado) {
             return redirect()->back()
                 ->with('success', 'Ticket cerrado. Recuerda llenar la hoja de reporte desde la sección "Por facturar".');
         }
@@ -185,14 +193,30 @@ class TicketController extends Controller
         $ticket = Ticket::findOrFail($id);
 
         if ($request->has('firma_base64') && ! empty($request->firma_base64)) {
+            $estadoCerrado = TicketStatus::where('name', 'Cerrado')->first();
+            $idCerrado = $estadoCerrado ? (int) $estadoCerrado->id : 5;
+
             $this->ticketService->guardarFirmaDesdeBase64($ticket, $request->firma_base64);
-            $this->ticketService->actualizarEstado($ticket, (int) $request->input('status_id', 3), auth('staff')->id() ?? 1);
+            $this->ticketService->actualizarEstado($ticket, $idCerrado, auth('staff')->id() ?? 1);
+
+            // Notificar por correo con el PDF y la firma adjunta
+            $this->ticketNotificacionService->notificarCierreConFirma($ticket);
 
             return redirect()->back()
-                ->with('success', 'Firma guardada y ticket cerrado correctamente. Recuerda llenar la hoja de reporte desde la sección "Por facturar".');
+                ->with('success', 'Firma guardada, ticket cerrado correctamente y notificaciones enviadas con el acta en PDF adjunta.');
         }
 
         return redirect()->back()->with('error', 'No se recibió ninguna firma.');
+    }
+
+    /**
+     * Descarga el acta de cierre del ticket en formato PDF con la firma digital.
+     */
+    public function descargarPdf($id): Response
+    {
+        $ticket = Ticket::findOrFail($id);
+
+        return $this->ticketPdfService->descargarPdfActaCierre($ticket);
     }
 
     public function requestSignature(Request $request, $id): RedirectResponse
