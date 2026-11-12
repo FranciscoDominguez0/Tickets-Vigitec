@@ -1,5 +1,5 @@
 @php
-    $esGrupoConfiguracion = request()->routeIs('admin.settings.*');
+    $esGrupoConfiguracion = request()->routeIs('admin.settings.*', 'admin.sequences', 'admin.sequences.*');
     $esGrupoPanel = request()->routeIs('admin.logs', 'admin.audit');
     $esGrupoCorreos = request()->routeIs('admin.email', 'admin.banlist', 'admin.emailtest');
     $esGrupoPersonal = request()->routeIs('admin.staff', 'admin.roles', 'admin.roles.*', 'admin.departments');

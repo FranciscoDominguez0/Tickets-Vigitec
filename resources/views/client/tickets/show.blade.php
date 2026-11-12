@@ -159,7 +159,7 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('client.tickets.reply', $ticket->id) }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('client.tickets.reply', $ticket->id) }}" method="POST" enctype="multipart/form-data" id="formResponderTicket">
                         @csrf
                         <div class="mb-3">
                             <label for="body" class="form-label fw-semibold text-secondary small text-uppercase">Tu Mensaje <span class="text-danger">*</span></label>
@@ -176,21 +176,28 @@
 
                         <div class="mb-3">
                             <label for="attachments" class="form-label fw-semibold text-secondary small text-uppercase">
-                                Adjuntar Archivos <span class="text-muted fw-normal">(Opcional)</span>
+                                Adjuntar Archivos <span class="text-muted fw-normal">(Opcional - Máx. 5 archivos de 10 MB c/u)</span>
                             </label>
                             <input class="form-control form-control-sm @error('attachments.*') is-invalid @enderror" 
                                    type="file" 
                                    id="attachments" 
                                    name="attachments[]" 
-                                   multiple>
+                                   multiple
+                                   accept="image/*,.pdf,.doc,.docx,.txt,.mp4">
                             @error('attachments.*')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
+
+                            <!-- Alerta de tamaño en respuesta -->
+                            <div id="alertaAdjuntosRespuesta" class="alert alert-danger border-0 rounded-3 mt-2 d-none py-2 px-3 small">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                <span id="mensajeAlertaRespuesta"></span>
+                            </div>
                         </div>
 
                         <div class="d-flex justify-content-end pt-2">
-                            <button type="submit" class="btn btn-danger px-4 py-2 rounded-pill fw-bold shadow-sm" style="background-color: #ef4444; border-color: #ef4444;">
-                                <i class="bi bi-send me-1"></i> Enviar Respuesta
+                            <button type="submit" id="btnEnviarRespuesta" class="btn btn-danger px-4 py-2 rounded-pill fw-bold shadow-sm" style="background-color: #ef4444; border-color: #ef4444;">
+                                <i class="bi bi-send me-1"></i> <span id="btnTextoRespuesta">Enviar Respuesta</span>
                             </button>
                         </div>
                     </form>
@@ -250,4 +257,85 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputAdjuntos = document.getElementById('attachments');
+            const alerta = document.getElementById('alertaAdjuntosRespuesta');
+            const mensajeAlerta = document.getElementById('mensajeAlertaRespuesta');
+            const btnEnviar = document.getElementById('btnEnviarRespuesta');
+            const btnTexto = document.getElementById('btnTextoRespuesta');
+            const formulario = document.getElementById('formResponderTicket');
+
+            const LIMITE_MAX_POR_ARCHIVO = 10 * 1024 * 1024; // 10 MB
+            const LIMITE_MAX_TOTAL = 30 * 1024 * 1024; // 30 MB
+            const MAX_ARCHIVOS = 5;
+
+            function formatearBytes(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+                return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            }
+
+            function validar() {
+                alerta.classList.add('d-none');
+                mensajeAlerta.textContent = '';
+                btnEnviar.disabled = false;
+
+                const archivos = inputAdjuntos.files;
+                if (!archivos || archivos.length === 0) return true;
+
+                if (archivos.length > MAX_ARCHIVOS) {
+                    mensajeAlerta.textContent = `Has seleccionado ${archivos.length} archivos. El máximo permitido es de ${MAX_ARCHIVOS} archivos.`;
+                    alerta.classList.remove('d-none');
+                    btnEnviar.disabled = true;
+                    return false;
+                }
+
+                let pesoTotal = 0;
+                let excedidos = [];
+
+                for (let i = 0; i < archivos.length; i++) {
+                    pesoTotal += archivos[i].size;
+                    if (archivos[i].size > LIMITE_MAX_POR_ARCHIVO) {
+                        excedidos.push(`${archivos[i].name} (${formatearBytes(archivos[i].size)})`);
+                    }
+                }
+
+                if (excedidos.length > 0) {
+                    mensajeAlerta.textContent = `Archivo(s) exceden el límite de 10 MB: ${excedidos.join(', ')}.`;
+                    alerta.classList.remove('d-none');
+                    btnEnviar.disabled = true;
+                    return false;
+                }
+
+                if (pesoTotal > LIMITE_MAX_TOTAL) {
+                    mensajeAlerta.textContent = `El peso total (${formatearBytes(pesoTotal)}) excede los 30 MB permitidos.`;
+                    alerta.classList.remove('d-none');
+                    btnEnviar.disabled = true;
+                    return false;
+                }
+
+                return true;
+            }
+
+            if (inputAdjuntos) {
+                inputAdjuntos.addEventListener('change', validar);
+            }
+
+            if (formulario) {
+                formulario.addEventListener('submit', function (e) {
+                    if (!validar()) {
+                        e.preventDefault();
+                        return false;
+                    }
+                    btnEnviar.disabled = true;
+                    btnTexto.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Enviando respuesta...';
+                });
+            }
+        });
+    </script>
+    @endpush
 </x-client.layout>
+

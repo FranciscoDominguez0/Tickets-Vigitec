@@ -9,7 +9,10 @@ use App\Models\ThreadEntry;
 use App\Models\Ticket;
 use App\Models\TicketStatus;
 use App\Models\User;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Http\Exceptions\PostTooLargeException;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class ClientTicketTest extends TestCase
@@ -297,5 +300,22 @@ class ClientTicketTest extends TestCase
         $respuesta->assertStatus(200);
         $respuesta->assertSee('Fallo urgente en servidor');
         $respuesta->assertDontSee('Solicitud de mouse nuevo');
+    }
+
+    public function test_maneja_excepcion_cuando_solicitud_supera_tamano_maximo(): void
+    {
+        $usuario = User::factory()->create(['empresa_id' => 1]);
+        $this->actingAs($usuario);
+
+        $solicitud = Request::create(route('client.tickets.store'), 'POST');
+        $solicitud->setLaravelSession(session()->driver());
+
+        $excepcion = new PostTooLargeException;
+        $manejador = app(ExceptionHandler::class);
+        $respuesta = $manejador->render($solicitud, $excepcion);
+
+        $this->assertEquals(302, $respuesta->getStatusCode());
+        $this->assertTrue(session()->has('error'));
+        $this->assertStringContainsString('supera el límite permitido por el servidor', (string) session('error'));
     }
 }

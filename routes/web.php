@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\NotificacionController;
 use App\Http\Controllers\Admin\PanelControlController;
 use App\Http\Controllers\Admin\PersonalController;
 use App\Http\Controllers\Admin\RolController;
+use App\Http\Controllers\Admin\SecuenciaController;
 use App\Http\Controllers\Admin\TemaAyudaController;
 use App\Http\Controllers\Admin\TicketBorradoController;
 use App\Http\Controllers\Agent\DirectoryController;
@@ -171,6 +172,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:staff', 'admin'])->gro
     Route::post('/settings/pages', [ConfiguracionController::class, 'guardarPerfilEmpresa'])->name('settings.pages.store');
     Route::get('/settings/billing', [ConfiguracionController::class, 'facturacion'])->name('settings.billing');
     Route::get('/settings/tickets', [ConfiguracionController::class, 'solicitudes'])->name('settings.tickets');
+    Route::post('/settings/tickets', [ConfiguracionController::class, 'guardarSolicitudes'])->name('settings.tickets.store');
+    Route::get('/settings/tickets/sequences', [SecuenciaController::class, 'listar'])->name('settings.sequences');
+    Route::get('/sequences', [SecuenciaController::class, 'listar'])->name('sequences');
+    Route::post('/sequences', [SecuenciaController::class, 'guardar'])->name('sequences.store');
+    Route::put('/sequences/{id}', [SecuenciaController::class, 'actualizar'])->whereNumber('id')->name('sequences.update');
+    Route::delete('/sequences/{id}', [SecuenciaController::class, 'eliminar'])->whereNumber('id')->name('sequences.destroy');
     Route::get('/settings/tasks', [ConfiguracionController::class, 'tareas'])->name('settings.tasks');
     Route::get('/settings/agents', [ConfiguracionController::class, 'agentes'])->name('settings.agents');
     Route::get('/settings/users', [ConfiguracionController::class, 'usuarios'])->name('settings.users');
@@ -190,10 +197,18 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:staff', 'admin'])->gro
 
     // 6. Correos Electrónicos
     Route::get('/email', [CorreoController::class, 'listar'])->name('email');
+    Route::post('/email', [CorreoController::class, 'guardar'])->name('email.store');
+    Route::put('/email/{id}', [CorreoController::class, 'actualizar'])->whereNumber('id')->name('email.update');
+    Route::post('/email/{id}/default', [CorreoController::class, 'marcarPredeterminada'])->whereNumber('id')->name('email.default');
+    Route::delete('/email/{id}', [CorreoController::class, 'eliminar'])->whereNumber('id')->name('email.destroy');
     Route::get('/emails', fn () => redirect()->route('admin.email'));
     Route::get('/emaillog', fn () => redirect()->route('admin.email'));
     Route::get('/banlist', [CorreoController::class, 'listaProhibidos'])->name('banlist');
+    Route::post('/banlist', [CorreoController::class, 'guardarProhibido'])->name('banlist.store');
+    Route::post('/banlist/{id}/toggle', [CorreoController::class, 'alternarEstadoProhibido'])->whereNumber('id')->name('banlist.toggle');
+    Route::delete('/banlist/{id}', [CorreoController::class, 'eliminarProhibido'])->whereNumber('id')->name('banlist.destroy');
     Route::get('/emailtest', [CorreoController::class, 'diagnostico'])->name('emailtest');
+    Route::post('/emailtest', [CorreoController::class, 'enviarPrueba'])->name('emailtest.send');
 
     // 7. Agentes
     Route::get('/staff', [PersonalController::class, 'agentes'])->name('staff');

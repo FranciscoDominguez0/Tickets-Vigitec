@@ -133,22 +133,18 @@ class AgentSettingTest extends TestCase
         Storage::disk('public')->assertExists($rutaGuardada);
     }
 
-    public function test_ruta_admin_email_renderiza_vista_en_blanco(): void
+    public function test_ruta_admin_email_renderiza_modulo_de_correos(): void
     {
         $response = $this->actingAs($this->administrador, 'staff')
             ->get(route('admin.email'));
 
         $response->assertStatus(200);
-        $response->assertSee('Correos Electrónicos');
-        $response->assertSee('En desarrollo');
-        $response->assertSee('admin/email');
+        $response->assertSee('Cuentas de Correo');
     }
 
     public function test_rutas_administrativas_en_blanco_responden_correctamente(): void
     {
         $rutas = [
-            route('admin.banlist'),
-            route('admin.emailtest'),
             route('admin.logs'),
             route('admin.audit'),
             route('admin.notifications'),
@@ -156,7 +152,6 @@ class AgentSettingTest extends TestCase
             route('admin.deleted_tickets'),
             route('admin.staff'),
             route('admin.settings.billing'),
-            route('admin.settings.tickets'),
             route('admin.settings.tasks'),
             route('admin.settings.agents'),
             route('admin.settings.users'),

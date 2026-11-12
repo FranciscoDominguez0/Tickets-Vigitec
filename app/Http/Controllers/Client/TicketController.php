@@ -115,7 +115,7 @@ class TicketController extends Controller
         );
 
         return redirect()->route('client.tickets.show', $ticket->id)
-            ->with('success', 'Tu ticket #' . $ticket->ticket_number . ' ha sido creado exitosamente.');
+            ->with('success', 'Tu ticket #'.$ticket->ticket_number.' ha sido creado exitosamente.');
     }
 
     /**

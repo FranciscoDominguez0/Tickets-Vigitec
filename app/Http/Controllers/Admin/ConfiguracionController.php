@@ -4,7 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ActualizarConfiguracionEmpresaRequest;
+use App\Http\Requests\Admin\ActualizarConfiguracionSolicitudesRequest;
 use App\Models\AppSetting;
+use App\Models\Department;
+use App\Models\HelpTopic;
+use App\Models\Priority;
+use App\Models\Sequence;
+use App\Models\TicketStatus;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -133,16 +139,80 @@ class ConfiguracionController extends Controller
     }
 
     /**
-     * Muestra la vista en blanco de solicitudes.
+     * Muestra la pantalla de configuración de Solicitudes y Numeración de Tickets.
      */
-    public function solicitudes(): View
+    public function solicitudes(Request $solicitud): View
     {
-        return view('admin.blank', [
-            'titulo' => 'Solicitudes',
-            'icono' => 'bi-ticket-perforated',
-            'seccion' => 'Configuración',
-            'descripcion' => 'Ajustes globales para la creación, ciclo de vida y resolución de solicitudes de soporte.',
-        ]);
+        $empresaId = (int) (auth('staff')->user()->empresa_id ?? 1);
+
+        $formatoNumero = (string) AppSetting::obtener('tickets.ticket_number_format', '######', $empresaId);
+        $secuenciaId = (string) AppSetting::obtener('tickets.ticket_sequence_id', '0', $empresaId);
+        $estadoPorDefecto = (string) AppSetting::obtener('tickets.default_ticket_status_id', '1', $empresaId);
+        $prioridadPorDefecto = (string) AppSetting::obtener('tickets.default_priority_id', '1', $empresaId);
+        $temaPorDefecto = (string) AppSetting::obtener('tickets.default_help_topic', '0', $empresaId);
+        $maxTicketsAbiertos = (string) AppSetting::obtener('tickets.max_open_tickets', '0', $empresaId);
+        $bloquearPorFirma = (bool) AppSetting::obtener('tickets.block_new_if_signature_pending', false, $empresaId);
+        $tamanoMaxArchivoMb = (string) AppSetting::obtener('tickets.ticket_max_file_mb', '10', $empresaId);
+        $maxSubidas = (string) AppSetting::obtener('tickets.ticket_max_uploads', '5', $empresaId);
+
+        $estados = TicketStatus::orderBy('order_by')->get();
+        $prioridades = Priority::orderBy('level')->get();
+        $temas = HelpTopic::where('empresa_id', $empresaId)->where('is_active', 1)->orderBy('name')->get();
+        $secuencias = Sequence::where('empresa_id', $empresaId)->orderBy('id')->get();
+        $departamentos = Department::where('empresa_id', $empresaId)->where('is_active', 1)->orderBy('name')->get();
+
+        // Generar un número de ejemplo basado en el formato o secuencia
+        $ejemploNumero = '610781';
+        if ($secuenciaId !== '0') {
+            $secuenciaSeleccionada = $secuencias->firstWhere('id', (int) $secuenciaId);
+            if ($secuenciaSeleccionada) {
+                $ejemploNumero = $secuenciaSeleccionada->obtenerNumeroFormateado();
+            }
+        } elseif (preg_match('/^#+$/', $formatoNumero)) {
+            $ejemploNumero = '';
+            for ($i = 0; $i < strlen($formatoNumero); $i++) {
+                $ejemploNumero .= (string) random_int(0, 9);
+            }
+        }
+
+        return view('admin.settings.tickets', compact(
+            'formatoNumero',
+            'secuenciaId',
+            'estadoPorDefecto',
+            'prioridadPorDefecto',
+            'temaPorDefecto',
+            'maxTicketsAbiertos',
+            'bloquearPorFirma',
+            'tamanoMaxArchivoMb',
+            'maxSubidas',
+            'estados',
+            'prioridades',
+            'temas',
+            'secuencias',
+            'departamentos',
+            'ejemploNumero'
+        ));
+    }
+
+    /**
+     * Guarda la configuración de Solicitudes y Numeración de Tickets.
+     */
+    public function guardarSolicitudes(ActualizarConfiguracionSolicitudesRequest $solicitud): RedirectResponse
+    {
+        $empresaId = (int) (auth('staff')->user()->empresa_id ?? 1);
+
+        AppSetting::establecer('tickets.ticket_number_format', trim((string) $solicitud->validated('ticket_number_format')), $empresaId);
+        AppSetting::establecer('tickets.ticket_sequence_id', (string) $solicitud->validated('ticket_sequence_id'), $empresaId);
+        AppSetting::establecer('tickets.default_ticket_status_id', (string) $solicitud->validated('default_ticket_status_id'), $empresaId);
+        AppSetting::establecer('tickets.default_priority_id', (string) $solicitud->validated('default_priority_id'), $empresaId);
+        AppSetting::establecer('tickets.default_help_topic', (string) ($solicitud->validated('default_help_topic') ?? '0'), $empresaId);
+        AppSetting::establecer('tickets.max_open_tickets', (string) ($solicitud->validated('max_open_tickets') ?? '0'), $empresaId);
+        AppSetting::establecer('tickets.block_new_if_signature_pending', $solicitud->boolean('block_new_if_signature_pending') ? '1' : '0', $empresaId);
+        AppSetting::establecer('tickets.ticket_max_file_mb', (string) $solicitud->validated('ticket_max_file_mb'), $empresaId);
+        AppSetting::establecer('tickets.ticket_max_uploads', (string) $solicitud->validated('ticket_max_uploads'), $empresaId);
+
+        return redirect()->route('admin.settings.tickets')
+            ->with('success', 'Configuración de Solicitudes y Números de Tickets guardada exitosamente.');
     }
 
     /**
