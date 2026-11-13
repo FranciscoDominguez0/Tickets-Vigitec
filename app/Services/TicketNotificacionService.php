@@ -210,4 +210,3 @@ class TicketNotificacionService
         Mail::to($destinatario)->send($mailable);
     }
 }
-

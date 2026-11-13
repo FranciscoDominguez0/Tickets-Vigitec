@@ -35,4 +35,3 @@ class PanelControlController extends Controller
         ]);
     }
 }
-

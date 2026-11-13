@@ -88,4 +88,3 @@ class Role extends Model
             ->count();
     }
 }
-

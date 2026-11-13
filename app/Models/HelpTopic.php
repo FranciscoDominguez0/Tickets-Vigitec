@@ -6,6 +6,7 @@ use App\Traits\Tenantable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class HelpTopic extends Model
 {
@@ -29,5 +30,19 @@ class HelpTopic extends Model
     {
         return $this->belongsTo(Department::class, 'dept_id');
     }
-}
 
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class, 'topic_id');
+    }
+
+    public function totalTickets(): int
+    {
+        return Ticket::where('topic_id', $this->id)->count();
+    }
+
+    public function estaEnUso(): bool
+    {
+        return Ticket::where('topic_id', $this->id)->exists();
+    }
+}

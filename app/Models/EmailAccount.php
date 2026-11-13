@@ -30,4 +30,3 @@ class EmailAccount extends Model
         return $this->belongsTo(Department::class, 'dept_id');
     }
 }
-

@@ -35,4 +35,3 @@ class RolePermission extends Model
         'is_enabled' => 'boolean',
     ];
 }
-

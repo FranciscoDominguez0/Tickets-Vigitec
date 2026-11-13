@@ -251,18 +251,21 @@ class TicketController extends Controller
     }
 
     /**
-     * Elimina un ticket por completo.
+     * Elimina un ticket por completo y lo archiva en el historial de tickets borrados.
      */
-    public function eliminar($id): RedirectResponse
+    public function eliminar(Request $request, $id): RedirectResponse
     {
         $ticket = Ticket::findOrFail($id);
-        $ticket->delete();
+        $motivo = trim((string) $request->input('motivo', $request->input('reason', 'Eliminado por el agente')));
+        $staffId = auth('staff')->id() ?? 1;
 
-        return redirect()->route('agent.tickets.index')->with('success', 'Ticket eliminado permanentemente.');
+        $this->ticketService->eliminarTicket($ticket, $motivo, $staffId);
+
+        return redirect()->route('agent.tickets.index')->with('success', 'Ticket eliminado correctamente y registrado en el historial de tickets borrados.');
     }
 
-    public function destroy($id): RedirectResponse
+    public function destroy(Request $request, $id): RedirectResponse
     {
-        return $this->eliminar($id);
+        return $this->eliminar($request, $id);
     }
 }

@@ -56,4 +56,3 @@ class CrearDepartamentoRequest extends FormRequest
         ];
     }
 }
-

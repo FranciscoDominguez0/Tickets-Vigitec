@@ -102,4 +102,3 @@ class AgentProfileTest extends TestCase
         $response->assertSessionHasErrors(['current_password'], errorBag: 'password');
     }
 }
-

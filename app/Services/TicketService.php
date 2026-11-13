@@ -7,6 +7,7 @@ use App\Models\Staff;
 use App\Models\Thread;
 use App\Models\ThreadEntry;
 use App\Models\Ticket;
+use App\Models\TicketDeletionRequest;
 use App\Models\TicketStatus;
 use App\Repositories\DepartmentRepository;
 use App\Repositories\PriorityRepository;
@@ -387,5 +388,127 @@ class TicketService
         $ticket->update(['updated' => now()]);
 
         return $entrada;
+    }
+
+    /**
+     * Elimina un ticket de la base de datos registrando su instantánea en el historial de borrados.
+     */
+    public function eliminarTicket(Ticket $ticket, string $motivo, int $staffId): TicketDeletionRequest
+    {
+        $empresaId = (int) ($ticket->empresa_id ?? 1);
+
+        $ticket->loadMissing(['user', 'department', 'priority', 'status', 'staff', 'thread.entries']);
+
+        $payload = [
+            'id' => $ticket->id,
+            'ticket_number' => $ticket->ticket_number,
+            'empresa_id' => $empresaId,
+            'user_id' => $ticket->user_id,
+            'staff_id' => $ticket->staff_id,
+            'dept_id' => $ticket->dept_id,
+            'status_id' => $ticket->status_id,
+            'priority_id' => $ticket->priority_id,
+            'subject' => $ticket->subject,
+            'anydesk' => $ticket->anydesk,
+            'client_signature' => $ticket->client_signature,
+            'close_message' => $ticket->close_message,
+            'created' => $ticket->created ? $ticket->created->toISOString() : null,
+            'closed' => $ticket->closed ? $ticket->closed->toISOString() : null,
+            'user_name' => optional($ticket->user)->name,
+            'user_email' => optional($ticket->user)->email,
+            'dept_name' => optional($ticket->department)->name,
+            'staff_name' => optional($ticket->staff)->firstname.' '.optional($ticket->staff)->lastname,
+            'thread_entries' => $ticket->thread && $ticket->thread->entries
+                ? $ticket->thread->entries->map(function ($entry) {
+                    return [
+                        'user_id' => $entry->user_id,
+                        'staff_id' => $entry->staff_id,
+                        'body' => $entry->body,
+                        'is_internal' => $entry->is_internal,
+                        'created' => $entry->created ? $entry->created->toISOString() : null,
+                    ];
+                })->toArray()
+                : [],
+        ];
+
+        $registro = TicketDeletionRequest::create([
+            'ticket_id' => $ticket->id,
+            'empresa_id' => $empresaId,
+            'ticket_number' => $ticket->ticket_number,
+            'ticket_subject' => $ticket->subject,
+            'requested_by' => $staffId,
+            'reason' => $motivo ?: 'Eliminado por el agente',
+            'status' => 'approved',
+            'ticket_payload' => $payload,
+            'created_at' => now(),
+            'resolved_at' => now(),
+            'resolved_by' => $staffId,
+        ]);
+
+        $ticket->delete();
+
+        return $registro;
+    }
+
+    /**
+     * Restaura un ticket eliminado a partir de la instantánea guardada en el historial.
+     */
+    public function restaurarTicket(int $idSolicitud, int $staffIdAdmin): Ticket
+    {
+        $solicitud = TicketDeletionRequest::findOrFail($idSolicitud);
+        $payload = $solicitud->ticket_payload ?? [];
+
+        $ticket = Ticket::create([
+            'ticket_number' => $solicitud->ticket_number,
+            'empresa_id' => $solicitud->empresa_id,
+            'user_id' => $payload['user_id'] ?? null,
+            'staff_id' => $payload['staff_id'] ?? null,
+            'dept_id' => $payload['dept_id'] ?? 1,
+            'status_id' => $payload['status_id'] ?? 1,
+            'priority_id' => $payload['priority_id'] ?? 1,
+            'subject' => $solicitud->ticket_subject,
+            'anydesk' => $payload['anydesk'] ?? null,
+            'client_signature' => $payload['client_signature'] ?? null,
+            'close_message' => $payload['close_message'] ?? null,
+            'created' => $payload['created'] ?? now(),
+            'updated' => now(),
+            'closed' => $payload['closed'] ?? null,
+        ]);
+
+        if (! empty($payload['thread_entries'])) {
+            $hilo = $ticket->thread()->create([
+                'empresa_id' => $solicitud->empresa_id,
+                'created' => now(),
+            ]);
+
+            foreach ($payload['thread_entries'] as $entryData) {
+                $hilo->entries()->create([
+                    'empresa_id' => $solicitud->empresa_id,
+                    'user_id' => $entryData['user_id'] ?? null,
+                    'staff_id' => $entryData['staff_id'] ?? null,
+                    'body' => $entryData['body'] ?? '',
+                    'is_internal' => $entryData['is_internal'] ?? 0,
+                    'created' => $entryData['created'] ?? now(),
+                    'updated' => now(),
+                ]);
+            }
+        }
+
+        $solicitud->update([
+            'status' => 'rejected', // Marcado como restaurado
+            'resolved_at' => now(),
+            'resolved_by' => $staffIdAdmin,
+        ]);
+
+        return $ticket;
+    }
+
+    /**
+     * Purga definitivamente el registro de borrado del historial.
+     */
+    public function purgarSolicitudBorrado(int $idSolicitud): void
+    {
+        $solicitud = TicketDeletionRequest::findOrFail($idSolicitud);
+        $solicitud->delete();
     }
 }

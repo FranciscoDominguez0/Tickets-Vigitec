@@ -3,8 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Department;
+use App\Models\Priority;
 use App\Models\Staff;
 use App\Models\Ticket;
+use App\Models\TicketStatus;
+use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -202,13 +205,13 @@ class AdminDepartmentTest extends TestCase
             'is_active' => true,
         ]);
 
-        $cliente = \App\Models\User::firstOrCreate(
+        $cliente = User::firstOrCreate(
             ['email' => 'cliente_dept_test@test.com'],
             ['firstname' => 'Cliente', 'lastname' => 'Test', 'password' => Hash::make('password123'), 'empresa_id' => 1]
         );
 
-        $prioridad = \App\Models\Priority::firstOrCreate(['id' => 1], ['name' => 'Baja', 'id' => 1]);
-        $estado = \App\Models\TicketStatus::firstOrCreate(['id' => 1], ['name' => 'Abierto', 'id' => 1]);
+        $prioridad = Priority::firstOrCreate(['id' => 1], ['name' => 'Baja', 'id' => 1]);
+        $estado = TicketStatus::firstOrCreate(['id' => 1], ['name' => 'Abierto', 'id' => 1]);
 
         // Crear ticket asignado
         Ticket::create([

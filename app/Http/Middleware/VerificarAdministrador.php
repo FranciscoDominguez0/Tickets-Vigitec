@@ -20,4 +20,3 @@ class VerificarAdministrador
         return $siguiente($solicitud);
     }
 }
-

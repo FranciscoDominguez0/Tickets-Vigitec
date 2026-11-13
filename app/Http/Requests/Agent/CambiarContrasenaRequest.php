@@ -32,4 +32,3 @@ class CambiarContrasenaRequest extends FormRequest
         ];
     }
 }
-

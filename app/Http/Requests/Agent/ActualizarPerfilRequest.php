@@ -42,4 +42,3 @@ class ActualizarPerfilRequest extends FormRequest
         ];
     }
 }
-

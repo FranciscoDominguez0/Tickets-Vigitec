@@ -49,4 +49,3 @@ class PersonalController extends Controller
         ]);
     }
 }
-

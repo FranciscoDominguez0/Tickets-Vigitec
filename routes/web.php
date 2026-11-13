@@ -192,9 +192,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:staff', 'admin'])->gro
 
     // 4. Temas de Ayuda
     Route::get('/helptopics', [TemaAyudaController::class, 'listar'])->name('helptopics');
+    Route::post('/helptopics', [TemaAyudaController::class, 'guardar'])->name('helptopics.store');
+    Route::put('/helptopics/{id}', [TemaAyudaController::class, 'actualizar'])->whereNumber('id')->name('helptopics.update');
+    Route::post('/helptopics/{id}/toggle', [TemaAyudaController::class, 'alternarEstado'])->whereNumber('id')->name('helptopics.toggle');
+    Route::delete('/helptopics/{id}', [TemaAyudaController::class, 'eliminar'])->whereNumber('id')->name('helptopics.destroy');
+    Route::post('/helptopics/mass-process', [TemaAyudaController::class, 'procesarMasivo'])->name('helptopics.mass');
 
     // 5. Tickets Borrados
     Route::get('/deleted-tickets', [TicketBorradoController::class, 'listar'])->name('deleted_tickets');
+    Route::post('/deleted-tickets/{id}/restore', [TicketBorradoController::class, 'restaurar'])->whereNumber('id')->name('deleted_tickets.restore');
+    Route::delete('/deleted-tickets/{id}/purge', [TicketBorradoController::class, 'purgar'])->whereNumber('id')->name('deleted_tickets.purge');
 
     // 6. Correos Electrónicos
     Route::get('/email', [CorreoController::class, 'listar'])->name('email');

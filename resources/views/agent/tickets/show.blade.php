@@ -171,9 +171,14 @@
         <x-delete-modal 
             id="deleteTicketModal" 
             title="Eliminar Ticket #{{ $ticket->ticket_number }}" 
-            message="¿Estás seguro de que deseas eliminar este ticket de forma permanente? Esta acción no se puede deshacer y se perderán todos los mensajes del hilo."
+            message="Al eliminar este ticket, se registrará en el historial administrativo de tickets borrados con el motivo indicado para fines de auditoría."
             formAction="{{ route('agent.tickets.destroy', $ticket->id) }}"
-        />
+            submitText="Confirmar Borrado">
+            <div class="mt-3 text-start">
+                <label for="motivo_borrado" class="form-label text-white small fw-bold">Motivo de eliminación <span class="text-danger">*</span></label>
+                <textarea name="motivo" id="motivo_borrado" class="form-control bg-black text-white border-secondary shadow-none" rows="3" placeholder="Indica el motivo de eliminación (ej: Duplicado, Cancelado por cliente, Error de carga)..." required></textarea>
+            </div>
+        </x-delete-modal>
         <!-- Modal de Cierre de Ticket -->
         <div class="modal fade" id="closeTicketModal" tabindex="-1" aria-labelledby="closeTicketModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">

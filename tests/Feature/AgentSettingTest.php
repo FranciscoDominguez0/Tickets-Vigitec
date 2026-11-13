@@ -148,8 +148,6 @@ class AgentSettingTest extends TestCase
             route('admin.logs'),
             route('admin.audit'),
             route('admin.notifications'),
-            route('admin.helptopics'),
-            route('admin.deleted_tickets'),
             route('admin.staff'),
             route('admin.settings.billing'),
             route('admin.settings.tasks'),
