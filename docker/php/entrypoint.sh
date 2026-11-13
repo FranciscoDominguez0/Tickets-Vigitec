@@ -13,6 +13,16 @@ chmod -R ug+rwX storage bootstrap/cache 2>/dev/null || true
 # Enlace simbólico de storage público
 php artisan storage:link --force 2>/dev/null || true
 
+# Esperar a que MySQL esté listo para recibir conexiones
+echo ">> Comprobando conexión a la base de datos..."
+MAX_TRIES=30
+COUNT=0
+until php -r "try { new PDO('mysql:host=' . (getenv('DB_HOST') ?: 'db') . ';port=' . (getenv('DB_PORT') ?: 3306) . ';dbname=' . (getenv('DB_DATABASE') ?: 'tickets_laravel'), getenv('DB_USERNAME') ?: 'tickets_user', getenv('DB_PASSWORD') ?: '12345678'); exit(0); } catch (Exception \$e) { exit(1); }" 2>/dev/null || [ $COUNT -eq $MAX_TRIES ]; do
+    echo ">> Esperando que MySQL esté listo... ($COUNT/$MAX_TRIES)"
+    sleep 2
+    COUNT=$((COUNT + 1))
+done
+
 # Migraciones automáticas (por defecto activadas)
 if [ "$RUN_MIGRATIONS" != "false" ]; then
     echo ">> Ejecutando migraciones..."
