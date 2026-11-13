@@ -6,7 +6,8 @@ if [ ! -f .env ]; then
     cp .env.example .env
 fi
 
-# Permisos de almacenamiento y caché
+# Permisos y creación de carpetas de almacenamiento y caché
+mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache/data storage/logs
 chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 chmod -R ug+rwX storage bootstrap/cache 2>/dev/null || true
 
