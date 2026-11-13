@@ -189,6 +189,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:staff', 'admin'])->gro
 
     // 3. Notificaciones
     Route::get('/notifications', [NotificacionController::class, 'listar'])->name('notifications');
+    Route::post('/notifications/send', [NotificacionController::class, 'enviar'])->name('notifications.send');
+    Route::post('/notifications/{id}/read', [NotificacionController::class, 'marcarLeida'])->whereNumber('id')->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificacionController::class, 'marcarTodasLeidas'])->name('notifications.read_all');
+    Route::delete('/notifications/{id}', [NotificacionController::class, 'eliminar'])->whereNumber('id')->name('notifications.destroy');
+    Route::post('/notifications/mass-process', [NotificacionController::class, 'procesarMasivo'])->name('notifications.mass');
+    Route::post('/notifications/recipients', [NotificacionController::class, 'guardarDestinatarios'])->name('notifications.recipients');
 
     // 4. Temas de Ayuda
     Route::get('/helptopics', [TemaAyudaController::class, 'listar'])->name('helptopics');

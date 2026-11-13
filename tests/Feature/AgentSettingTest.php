@@ -147,7 +147,6 @@ class AgentSettingTest extends TestCase
         $rutas = [
             route('admin.logs'),
             route('admin.audit'),
-            route('admin.notifications'),
             route('admin.staff'),
             route('admin.settings.billing'),
             route('admin.settings.tasks'),

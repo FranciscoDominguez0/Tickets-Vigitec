@@ -124,7 +124,9 @@ jobs:
             set -e
             git config --global --add safe.directory /var/www/Tickets-Vigitec || true
             cd /var/www/Tickets-Vigitec
-            git pull --ff-only origin main
+            chmod -R u+rwX .git 2>/dev/null || true
+            git fetch origin main
+            git reset --hard origin/main
             docker compose -f compose.yaml up -d --build
             docker image prune -f
 
