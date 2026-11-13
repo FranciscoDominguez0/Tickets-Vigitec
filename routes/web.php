@@ -226,6 +226,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:staff', 'admin'])->gro
 
     // 7. Agentes
     Route::get('/staff', [PersonalController::class, 'agentes'])->name('staff');
+    Route::post('/staff', [PersonalController::class, 'guardar'])->name('staff.store');
+    Route::put('/staff/{id}', [PersonalController::class, 'actualizar'])->whereNumber('id')->name('staff.update');
+    Route::post('/staff/{id}/toggle', [PersonalController::class, 'alternarEstado'])->whereNumber('id')->name('staff.toggle');
+    Route::post('/staff/{id}/reset-password', [PersonalController::class, 'restablecerClave'])->whereNumber('id')->name('staff.reset_password');
+    Route::delete('/staff/{id}', [PersonalController::class, 'eliminar'])->whereNumber('id')->name('staff.destroy');
+    Route::post('/staff/mass-process', [PersonalController::class, 'procesarMasivo'])->name('staff.mass');
     Route::get('/roles', [RolController::class, 'listar'])->name('roles');
     Route::post('/roles', [RolController::class, 'guardar'])->name('roles.store');
     Route::post('/roles/mass-process', [RolController::class, 'procesarMasivo'])->name('roles.mass');

@@ -66,9 +66,43 @@ class Staff extends Authenticatable
         return $this->belongsTo(Department::class, 'dept_id');
     }
 
+    public function departamento()
+    {
+        return $this->department();
+    }
+
+    public function departamentosAdicionales()
+    {
+        return $this->belongsToMany(Department::class, 'staff_departments', 'staff_id', 'dept_id');
+    }
+
     public function tickets()
     {
         return $this->hasMany(Ticket::class, 'staff_id');
+    }
+
+    /**
+     * Retorna el nombre completo del agente.
+     */
+    public function nombreCompleto(): string
+    {
+        return trim("{$this->firstname} {$this->lastname}");
+    }
+
+    /**
+     * Retorna el total de tickets asignados al agente.
+     */
+    public function totalTickets(): int
+    {
+        return Ticket::where('staff_id', $this->id)->count();
+    }
+
+    /**
+     * Determina si el agente tiene tickets asociados en el sistema.
+     */
+    public function estaEnUso(): bool
+    {
+        return Ticket::where('staff_id', $this->id)->exists();
     }
 
     /**
