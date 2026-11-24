@@ -84,56 +84,56 @@
                     headerTitle="Opciones de Ticket" 
                     formAction="">
                     
-                    <a href="#" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none">
+                    <button type="button" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none bg-transparent" data-bs-toggle="modal" data-bs-target="#cambiarPropietarioModal">
                         <div class="creative-dropdown-icon"><i class="bi bi-person-badge"></i></div>
                         <span>Cambiar Propietario</span>
-                    </a>
+                    </button>
                     
-                    <a href="#" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none">
+                    <button type="button" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none bg-transparent" data-bs-toggle="modal" data-bs-target="#unirTicketsModal">
                         <div class="creative-dropdown-icon"><i class="bi bi-link-45deg"></i></div>
                         <span>Unir Tiquetes</span>
-                    </a>
+                    </button>
                     
-                    <a href="#" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none">
+                    <button type="button" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none bg-transparent" data-bs-toggle="modal" data-bs-target="#ticketsVinculadosModal">
                         <div class="creative-dropdown-icon"><i class="bi bi-link"></i></div>
                         <span>Tickets vinculados</span>
-                    </a>
+                    </button>
                     
                     <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 6px 0;"></div>
                     
-                    <a href="#" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none">
+                    <button type="button" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none bg-transparent" data-bs-toggle="modal" data-bs-target="#horasSoporteModal">
                         <div class="creative-dropdown-icon"><i class="bi bi-clock-history"></i></div>
                         <span>Editar horas de soporte</span>
-                    </a>
+                    </button>
                     
                     <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 6px 0;"></div>
                     
-                    <a href="#" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none">
+                    <button type="button" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none bg-transparent" data-bs-toggle="modal" data-bs-target="#referidosModal">
                         <div class="creative-dropdown-icon"><i class="bi bi-share"></i></div>
                         <span>Administrar referidos</span>
-                    </a>
+                    </button>
                     
-                    <a href="#" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none">
+                    <button type="button" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none bg-transparent" data-bs-toggle="modal" data-bs-target="#requisicionModal">
                         <div class="creative-dropdown-icon"><i class="bi bi-box-seam"></i></div>
                         <span>Solicitud de Inventario</span>
-                    </a>
+                    </button>
                     
-                    <a href="#" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none">
+                    <button type="button" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none bg-transparent" data-bs-toggle="modal" data-bs-target="#colaboradoresModal">
                         <div class="creative-dropdown-icon"><i class="bi bi-people"></i></div>
                         <span>Gestionar Colaboradores</span>
-                    </a>
+                    </button>
                     
                     <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 6px 0;"></div>
                     
-                    <a href="#" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none">
+                    <button type="button" class="creative-dropdown-item border-0 w-100 text-start text-decoration-none bg-transparent" data-bs-toggle="modal" data-bs-target="#revisionEjecutivaModal">
                         <div class="creative-dropdown-icon"><i class="bi bi-shield-lock"></i></div>
                         <span>Solicitar revisión ejecutiva</span>
-                    </a>
+                    </button>
                     
-                    <a href="#" class="creative-dropdown-item text-danger border-0 w-100 text-start text-decoration-none">
+                    <button type="button" class="creative-dropdown-item text-danger border-0 w-100 text-start text-decoration-none bg-transparent" data-bs-toggle="modal" data-bs-target="#bloquearEmailModal">
                         <div class="creative-dropdown-icon text-danger" style="background: rgba(239, 68, 68, 0.1);"><i class="bi bi-envelope-x"></i></div>
                         <span>Bloquear Email</span>
-                    </a>
+                    </button>
                     
                     <button type="button" class="creative-dropdown-item text-danger border-0 w-100 text-start bg-transparent" data-bs-toggle="modal" data-bs-target="#deleteTicketModal">
                         <div class="creative-dropdown-icon text-danger" style="background: rgba(239, 68, 68, 0.1);"><i class="bi bi-trash"></i></div>
@@ -179,6 +179,9 @@
                 <textarea name="motivo" id="motivo_borrado" class="form-control bg-black text-white border-secondary shadow-none" rows="3" placeholder="Indica el motivo de eliminación (ej: Duplicado, Cancelado por cliente, Error de carga)..." required></textarea>
             </div>
         </x-delete-modal>
+
+        <!-- Modales de Opciones del Ticket -->
+        @include('agent.tickets.partials.modals-opciones')
         <!-- Modal de Cierre de Ticket -->
         <div class="modal fade" id="closeTicketModal" tabindex="-1" aria-labelledby="closeTicketModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">

@@ -61,6 +61,46 @@ class Ticket extends Model
     }
 
     /**
+     * Vínculos con otros tickets asociados.
+     */
+    public function vinculos()
+    {
+        return $this->hasMany(TicketLink::class, 'ticket_id');
+    }
+
+    /**
+     * Referencias a miembros del personal o departamentos.
+     */
+    public function referidos()
+    {
+        return $this->hasMany(TicketReferral::class, 'ticket_id');
+    }
+
+    /**
+     * Solicitudes de aprobación o revisiones ejecutivas.
+     */
+    public function aprobaciones()
+    {
+        return $this->hasMany(TicketApproval::class, 'ticket_id');
+    }
+
+    /**
+     * Requisiciones de materiales e inventario asociadas.
+     */
+    public function requisiciones()
+    {
+        return $this->hasMany(Requisition::class, 'ticket_id');
+    }
+
+    /**
+     * Colaboradores adicionales asignados al ticket.
+     */
+    public function colaboradores()
+    {
+        return $this->hasMany(TicketCollaborator::class, 'ticket_id');
+    }
+
+    /**
      * Determina si el ticket se encuentra en estado cerrado o resuelto.
      */
     public function estaCerrado(): bool

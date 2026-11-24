@@ -4,14 +4,25 @@ namespace App\Http\Controllers\Agent;
 
 use App\DataTransferObjects\Ticket\TicketData;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Agent\AdministrarReferidosTicketRequest;
+use App\Http\Requests\Agent\BloquearEmailTicketRequest;
+use App\Http\Requests\Agent\CambiarPropietarioTicketRequest;
+use App\Http\Requests\Agent\CrearRequisicionInventarioRequest;
+use App\Http\Requests\Agent\EditarHorasSoporteTicketRequest;
+use App\Http\Requests\Agent\GestionarColaboradorTicketRequest;
+use App\Http\Requests\Agent\SolicitarRevisionEjecutivaRequest;
+use App\Http\Requests\Agent\UnirTicketRequest;
+use App\Http\Requests\Agent\VincularTicketRequest;
 use App\Http\Requests\Ticket\StoreTicketRequest;
 use App\Models\Staff;
 use App\Models\ThreadEntry;
 use App\Models\Ticket;
 use App\Models\TicketStatus;
+use App\Models\User;
 use App\Repositories\DepartmentRepository;
 use App\Repositories\TicketRepository;
 use App\Services\TicketNotificacionService;
+use App\Services\TicketOpcionesService;
 use App\Services\TicketPdfService;
 use App\Services\TicketService;
 use Illuminate\Http\RedirectResponse;
@@ -23,6 +34,7 @@ class TicketController extends Controller
 {
     public function __construct(
         protected TicketService $ticketService,
+        protected TicketOpcionesService $ticketOpcionesService,
         protected TicketRepository $ticketRepository,
         protected DepartmentRepository $departmentRepository,
         protected TicketPdfService $ticketPdfService,
@@ -101,11 +113,25 @@ class TicketController extends Controller
             abort(404, 'Ticket no encontrado');
         }
 
+        $ticket->loadMissing([
+            'vinculos.ticketVinculado.status',
+            'referidos.staff',
+            'referidos.departamento',
+            'aprobaciones.solicitante',
+            'aprobaciones.gerente',
+            'requisiciones.items',
+            'requisiciones.agente',
+            'colaboradores',
+        ]);
+
         $departamentos = $this->departmentRepository->obtenerTodos();
         $miembrosStaff = Staff::where('is_active', 1)->orderBy('firstname')->get();
         $estados = TicketStatus::orderBy('id')->get();
+        $empresaId = (int) ($ticket->empresa_id ?? 1);
+        $usuarios = User::where('empresa_id', $empresaId)->where('status', 1)->orderBy('firstname')->get();
+        $gerentes = Staff::where('empresa_id', $empresaId)->where('is_active', 1)->orderBy('firstname')->get();
 
-        return view('agent.tickets.show', compact('ticket', 'departamentos', 'miembrosStaff', 'estados'));
+        return view('agent.tickets.show', compact('ticket', 'departamentos', 'miembrosStaff', 'estados', 'usuarios', 'gerentes'));
     }
 
     public function show($id): View
@@ -267,5 +293,253 @@ class TicketController extends Controller
     public function destroy(Request $request, $id): RedirectResponse
     {
         return $this->eliminar($request, $id);
+    }
+
+    /**
+     * Modifica el cliente titular o propietario del ticket.
+     */
+    public function cambiarPropietario(CambiarPropietarioTicketRequest $request, $id): RedirectResponse
+    {
+        $ticket = Ticket::findOrFail($id);
+        $staffId = auth('staff')->id() ?? 1;
+
+        try {
+            $this->ticketOpcionesService->cambiarPropietario(
+                $ticket,
+                (int) $request->validated('user_id'),
+                $staffId,
+                $request->validated('motivo')
+            );
+
+            return redirect()->back()->with('success', 'Propietario del ticket actualizado correctamente.');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Fusiona un ticket secundario dentro del ticket actual.
+     */
+    public function unir(UnirTicketRequest $request, $id): RedirectResponse
+    {
+        $ticket = Ticket::findOrFail($id);
+        $staffId = auth('staff')->id() ?? 1;
+
+        try {
+            $this->ticketOpcionesService->unirTickets(
+                $ticket,
+                $request->validated('ticket_secundario_id'),
+                $staffId,
+                $request->validated('motivo')
+            );
+
+            return redirect()->back()->with('success', 'Tickets fusionados correctamente.');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Vincula un ticket existente con el actual.
+     */
+    public function vincular(VincularTicketRequest $request, $id): RedirectResponse
+    {
+        $ticket = Ticket::findOrFail($id);
+        $staffId = auth('staff')->id() ?? 1;
+
+        try {
+            $this->ticketOpcionesService->vincularTicket(
+                $ticket,
+                $request->validated('ticket_vinculado_id'),
+                $staffId
+            );
+
+            return redirect()->back()->with('success', 'Ticket vinculado exitosamente.');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Desvincula un ticket relacionado.
+     */
+    public function desvincular($id, $linkId): RedirectResponse
+    {
+        $ticket = Ticket::findOrFail($id);
+        $staffId = auth('staff')->id() ?? 1;
+
+        try {
+            $this->ticketOpcionesService->desvincularTicket($ticket, (int) $linkId, $staffId);
+
+            return redirect()->back()->with('success', 'Vínculo eliminado exitosamente.');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Actualiza las horas de soporte dedicadas al ticket.
+     */
+    public function actualizarHorasSoporte(EditarHorasSoporteTicketRequest $request, $id): RedirectResponse
+    {
+        $ticket = Ticket::findOrFail($id);
+        $staffId = auth('staff')->id() ?? 1;
+
+        try {
+            $this->ticketOpcionesService->actualizarHorasSoporte(
+                $ticket,
+                $request->validated('support_start'),
+                $request->validated('support_end'),
+                $staffId
+            );
+
+            return redirect()->back()->with('success', 'Horas de soporte guardadas con éxito.');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Añade una referencia a personal o departamento.
+     */
+    public function agregarReferido(AdministrarReferidosTicketRequest $request, $id): RedirectResponse
+    {
+        $ticket = Ticket::findOrFail($id);
+        $staffId = auth('staff')->id() ?? 1;
+
+        try {
+            $this->ticketOpcionesService->agregarReferido(
+                $ticket,
+                $request->validated('staff_id') ? (int) $request->validated('staff_id') : null,
+                $request->validated('dept_id') ? (int) $request->validated('dept_id') : null,
+                $staffId
+            );
+
+            return redirect()->back()->with('success', 'Referencia registrada con éxito.');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Elimina una referencia asignada al ticket.
+     */
+    public function eliminarReferido($id, $referId): RedirectResponse
+    {
+        $ticket = Ticket::findOrFail($id);
+        $staffId = auth('staff')->id() ?? 1;
+
+        try {
+            $this->ticketOpcionesService->eliminarReferido($ticket, (int) $referId, $staffId);
+
+            return redirect()->back()->with('success', 'Referencia eliminada correctamente.');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Genera una requisición de inventario con los artículos solicitados.
+     */
+    public function crearRequisicion(CrearRequisicionInventarioRequest $request, $id): RedirectResponse
+    {
+        $ticket = Ticket::findOrFail($id);
+        $staffId = auth('staff')->id() ?? 1;
+
+        try {
+            $this->ticketOpcionesService->crearRequisicion(
+                $ticket,
+                $request->validated('items'),
+                $staffId
+            );
+
+            return redirect()->back()->with('success', 'Solicitud de inventario creada satisfactoriamente.');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Registra un nuevo colaborador en el ticket.
+     */
+    public function agregarColaborador(GestionarColaboradorTicketRequest $request, $id): RedirectResponse
+    {
+        $ticket = Ticket::findOrFail($id);
+        $staffId = auth('staff')->id() ?? 1;
+
+        try {
+            $this->ticketOpcionesService->agregarColaborador(
+                $ticket,
+                $request->validated('email'),
+                $request->validated('name'),
+                $request->validated('user_id') ? (int) $request->validated('user_id') : null,
+                $staffId
+            );
+
+            return redirect()->back()->with('success', 'Colaborador agregado correctamente.');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Elimina a un colaborador del ticket.
+     */
+    public function eliminarColaborador($id, $colaboradorId): RedirectResponse
+    {
+        $ticket = Ticket::findOrFail($id);
+        $staffId = auth('staff')->id() ?? 1;
+
+        try {
+            $this->ticketOpcionesService->eliminarColaborador($ticket, (int) $colaboradorId, $staffId);
+
+            return redirect()->back()->with('success', 'Colaborador removido exitosamente.');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Solicita una revisión ejecutiva para el ticket.
+     */
+    public function solicitarRevision(SolicitarRevisionEjecutivaRequest $request, $id): RedirectResponse
+    {
+        $ticket = Ticket::findOrFail($id);
+        $staffId = auth('staff')->id() ?? 1;
+
+        try {
+            $this->ticketOpcionesService->solicitarRevisionEjecutiva(
+                $ticket,
+                (int) $request->validated('manager_id'),
+                $request->validated('motivo'),
+                $staffId
+            );
+
+            return redirect()->back()->with('success', 'Revisión ejecutiva solicitada con éxito.');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Bloquea el correo electrónico o dominio del cliente del ticket.
+     */
+    public function bloquearEmail(BloquearEmailTicketRequest $request, $id): RedirectResponse
+    {
+        $ticket = Ticket::findOrFail($id);
+        $staffId = auth('staff')->id() ?? 1;
+
+        try {
+            $this->ticketOpcionesService->bloquearEmail(
+                $ticket,
+                $staffId,
+                $request->validated('motivo'),
+                $request->boolean('bloquear_dominio')
+            );
+
+            return redirect()->back()->with('success', 'Correo electrónico bloqueado exitosamente.');
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
     }
 }

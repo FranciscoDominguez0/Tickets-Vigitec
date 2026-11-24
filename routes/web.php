@@ -89,6 +89,20 @@ Route::prefix('agent')->group(function () {
         Route::get('/ticket/{id}/pdf', [TicketController::class, 'descargarPdf'])->name('agent.tickets.pdf');
         Route::delete('/ticket/{id}', [TicketController::class, 'eliminar'])->name('agent.tickets.destroy');
 
+        // Opciones del Ticket
+        Route::post('/ticket/{id}/change-owner', [TicketController::class, 'cambiarPropietario'])->name('agent.tickets.change_owner');
+        Route::post('/ticket/{id}/merge', [TicketController::class, 'unir'])->name('agent.tickets.merge');
+        Route::post('/ticket/{id}/link', [TicketController::class, 'vincular'])->name('agent.tickets.link');
+        Route::delete('/ticket/{id}/link/{linkId}', [TicketController::class, 'desvincular'])->name('agent.tickets.unlink');
+        Route::post('/ticket/{id}/support-hours', [TicketController::class, 'actualizarHorasSoporte'])->name('agent.tickets.support_hours');
+        Route::post('/ticket/{id}/refer', [TicketController::class, 'agregarReferido'])->name('agent.tickets.refer');
+        Route::delete('/ticket/{id}/refer/{referId}', [TicketController::class, 'eliminarReferido'])->name('agent.tickets.unrefer');
+        Route::post('/ticket/{id}/requisition', [TicketController::class, 'crearRequisicion'])->name('agent.tickets.requisition');
+        Route::post('/ticket/{id}/collaborators', [TicketController::class, 'agregarColaborador'])->name('agent.tickets.collaborators.store');
+        Route::delete('/ticket/{id}/collaborators/{collaboratorId}', [TicketController::class, 'eliminarColaborador'])->name('agent.tickets.collaborators.destroy');
+        Route::post('/ticket/{id}/request-approval', [TicketController::class, 'solicitarRevision'])->name('agent.tickets.request_approval');
+        Route::post('/ticket/{id}/ban-email', [TicketController::class, 'bloquearEmail'])->name('agent.tickets.ban_email');
+
         // Hilo del ticket
         Route::put('/thread/{id}', [TicketController::class, 'actualizarHilo'])->name('agent.tickets.thread.update');
         Route::delete('/thread/{id}', [TicketController::class, 'eliminarHilo'])->name('agent.tickets.thread.destroy');

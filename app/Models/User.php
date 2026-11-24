@@ -93,6 +93,11 @@ class User extends Authenticatable
         return $nombre !== '' ? $nombre : ($this->email ?? 'Usuario');
     }
 
+    public function getNameAttribute(): string
+    {
+        return $this->nombre_completo;
+    }
+
     public function getInicialesAttribute(): string
     {
         $primera = mb_substr($this->firstname ?? '', 0, 1);
