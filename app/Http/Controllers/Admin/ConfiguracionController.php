@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DataTransferObjects\Configuracion\ConfiguracionAgentesData;
+use App\DataTransferObjects\Configuracion\ConfiguracionUsuariosData;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\ActualizarConfiguracionAgentesRequest;
 use App\Http\Requests\Admin\ActualizarConfiguracionEmpresaRequest;
 use App\Http\Requests\Admin\ActualizarConfiguracionSolicitudesRequest;
 use App\Http\Requests\Admin\ActualizarConfiguracionUsuariosRequest;
@@ -12,6 +15,7 @@ use App\Models\HelpTopic;
 use App\Models\Priority;
 use App\Models\Sequence;
 use App\Models\TicketStatus;
+use App\Services\AppSettingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -19,6 +23,10 @@ use Illuminate\View\View;
 
 class ConfiguracionController extends Controller
 {
+    public function __construct(
+        protected AppSettingService $servicioConfiguracion
+    ) {}
+
     /**
      * Muestra la vista de configuración del perfil de la empresa (Páginas, logos y fondos).
      */
@@ -230,16 +238,54 @@ class ConfiguracionController extends Controller
     }
 
     /**
-     * Muestra la vista en blanco de configuración de agentes.
+     * Muestra la vista de configuración de agentes y personal.
      */
-    public function agentes(): View
+    public function agentes(Request $solicitud): View
     {
-        return view('admin.blank', [
-            'titulo' => 'Configuración de Agentes',
-            'icono' => 'bi-person-badge',
-            'seccion' => 'Configuración',
-            'descripcion' => 'Políticas y parámetros generales aplicados a los agentes del sistema.',
+        $empresaId = (int) (auth('staff')->user()->empresa_id ?? 1);
+        $configuracion = $this->servicioConfiguracion->obtenerConfiguracionAgentes($empresaId);
+
+        $pestanaActiva = (string) $solicitud->query('tab', 'general');
+        if (! in_array($pestanaActiva, ['general', 'passwords', 'security'], true)) {
+            $pestanaActiva = 'general';
+        }
+
+        return view('admin.settings.agents', [
+            'configuracion' => $configuracion,
+            'formatoNombre' => $configuracion->formatoNombre,
+            'ocultarIdentidad' => $configuracion->ocultarIdentidad,
+            'origenAvatar' => $configuracion->origenAvatar,
+            'deshabilitarColaboradores' => $configuracion->deshabilitarColaboradores,
+            'diasExpiracionClave' => $configuracion->diasExpiracionClave,
+            'permitirRestablecerClave' => $configuracion->permitirRestablecerClave,
+            'vigenciaTokenClave' => $configuracion->vigenciaTokenClave,
+            'longitudMinimaClave' => $configuracion->longitudMinimaClave,
+            'requerirSimbolosClave' => $configuracion->requerirSimbolosClave,
+            'tiempoExpiracionSesion' => $configuracion->tiempoExpiracionSesion,
+            'intentosMaximosLogin' => $configuracion->intentosMaximosLogin,
+            'duracionBloqueo' => $configuracion->duracionBloqueo,
+            'vincularIpSesion' => $configuracion->vincularIpSesion,
+            'pestanaActiva' => $pestanaActiva,
         ]);
+    }
+
+    /**
+     * Guarda la configuración de agentes y personal.
+     */
+    public function guardarAgentes(ActualizarConfiguracionAgentesRequest $solicitud): RedirectResponse
+    {
+        $empresaId = (int) (auth('staff')->user()->empresa_id ?? 1);
+        $datos = ConfiguracionAgentesData::desdeSolicitud($solicitud);
+
+        $this->servicioConfiguracion->guardarConfiguracionAgentes($datos, $empresaId);
+
+        $pestana = (string) ($solicitud->validated('active_tab') ?? 'general');
+        if (! in_array($pestana, ['general', 'passwords', 'security'], true)) {
+            $pestana = 'general';
+        }
+
+        return redirect()->route('admin.settings.agents', ['tab' => $pestana])
+            ->with('success', 'Configuración de agentes y personal actualizada exitosamente.');
     }
 
     /**
@@ -248,42 +294,29 @@ class ConfiguracionController extends Controller
     public function usuarios(Request $solicitud): View
     {
         $empresaId = (int) (auth('staff')->user()->empresa_id ?? 1);
-
-        $modoRegistro = (string) AppSetting::obtener('users.client_registration', 'public', $empresaId);
-        $registroRequerido = (bool) AppSetting::obtener('users.client_registration_required', false, $empresaId);
-        $verificarEmail = (bool) AppSetting::obtener('users.client_verify_email', true, $empresaId);
-        $permitirRestablecerClave = (bool) AppSetting::obtener('users.client_allow_pw_reset', true, $empresaId);
-        $tiempoExpiracionSesion = (int) AppSetting::obtener('users.client_session_timeout', 60, $empresaId);
-        $maxTicketsAbiertos = (int) AppSetting::obtener('users.client_max_open_tickets', 0, $empresaId);
-
-        $asignarOrganizacionAuto = (bool) AppSetting::obtener('users.auto_assign_organization', true, $empresaId);
-        $miembrosVenTicketsOrg = (bool) AppSetting::obtener('users.org_members_see_all_tickets', true, $empresaId);
-        $autoAgregarColaboradores = (bool) AppSetting::obtener('users.auto_add_collaborators', true, $empresaId);
-        $maxColaboradores = (int) AppSetting::obtener('users.max_collaborators_per_ticket', 10, $empresaId);
-
-        $mensajeBienvenida = (string) AppSetting::obtener('users.client_welcome_msg', '', $empresaId);
-        $avisoInvitados = (string) AppSetting::obtener('users.client_guest_ticket_notice', '', $empresaId);
+        $configuracion = $this->servicioConfiguracion->obtenerConfiguracionUsuarios($empresaId);
 
         $pestanaActiva = (string) $solicitud->query('tab', 'general');
         if (! in_array($pestanaActiva, ['general', 'organizations', 'notices'], true)) {
             $pestanaActiva = 'general';
         }
 
-        return view('admin.settings.users', compact(
-            'modoRegistro',
-            'registroRequerido',
-            'verificarEmail',
-            'permitirRestablecerClave',
-            'tiempoExpiracionSesion',
-            'maxTicketsAbiertos',
-            'asignarOrganizacionAuto',
-            'miembrosVenTicketsOrg',
-            'autoAgregarColaboradores',
-            'maxColaboradores',
-            'mensajeBienvenida',
-            'avisoInvitados',
-            'pestanaActiva'
-        ));
+        return view('admin.settings.users', [
+            'configuracion' => $configuracion,
+            'modoRegistro' => $configuracion->modoRegistro,
+            'registroRequerido' => $configuracion->registroRequerido,
+            'verificarEmail' => $configuracion->verificarEmail,
+            'permitirRestablecerClave' => $configuracion->permitirRestablecerClave,
+            'tiempoExpiracionSesion' => $configuracion->tiempoExpiracionSesion,
+            'maxTicketsAbiertos' => $configuracion->maxTicketsAbiertos,
+            'asignarOrganizacionAuto' => $configuracion->asignarOrganizacionAuto,
+            'miembrosVenTicketsOrg' => $configuracion->miembrosVenTicketsOrg,
+            'autoAgregarColaboradores' => $configuracion->autoAgregarColaboradores,
+            'maxColaboradores' => $configuracion->maxColaboradores,
+            'mensajeBienvenida' => $configuracion->mensajeBienvenida,
+            'avisoInvitados' => $configuracion->avisoInvitados,
+            'pestanaActiva' => $pestanaActiva,
+        ]);
     }
 
     /**
@@ -292,21 +325,9 @@ class ConfiguracionController extends Controller
     public function guardarUsuarios(ActualizarConfiguracionUsuariosRequest $solicitud): RedirectResponse
     {
         $empresaId = (int) (auth('staff')->user()->empresa_id ?? 1);
+        $datos = ConfiguracionUsuariosData::desdeSolicitud($solicitud);
 
-        AppSetting::establecer('users.client_registration', (string) $solicitud->validated('client_registration'), $empresaId);
-        AppSetting::establecer('users.client_registration_required', $solicitud->boolean('client_registration_required') ? '1' : '0', $empresaId);
-        AppSetting::establecer('users.client_verify_email', $solicitud->boolean('client_verify_email') ? '1' : '0', $empresaId);
-        AppSetting::establecer('users.client_allow_pw_reset', $solicitud->boolean('client_allow_pw_reset') ? '1' : '0', $empresaId);
-        AppSetting::establecer('users.client_session_timeout', (string) $solicitud->validated('client_session_timeout'), $empresaId);
-        AppSetting::establecer('users.client_max_open_tickets', (string) $solicitud->validated('client_max_open_tickets'), $empresaId);
-
-        AppSetting::establecer('users.auto_assign_organization', $solicitud->boolean('auto_assign_organization') ? '1' : '0', $empresaId);
-        AppSetting::establecer('users.org_members_see_all_tickets', $solicitud->boolean('org_members_see_all_tickets') ? '1' : '0', $empresaId);
-        AppSetting::establecer('users.auto_add_collaborators', $solicitud->boolean('auto_add_collaborators') ? '1' : '0', $empresaId);
-        AppSetting::establecer('users.max_collaborators_per_ticket', (string) $solicitud->validated('max_collaborators_per_ticket'), $empresaId);
-
-        AppSetting::establecer('users.client_welcome_msg', trim((string) ($solicitud->validated('client_welcome_msg') ?? '')), $empresaId);
-        AppSetting::establecer('users.client_guest_ticket_notice', trim((string) ($solicitud->validated('client_guest_ticket_notice') ?? '')), $empresaId);
+        $this->servicioConfiguracion->guardarConfiguracionUsuarios($datos, $empresaId);
 
         $pestana = (string) ($solicitud->validated('active_tab') ?? 'general');
         if (! in_array($pestana, ['general', 'organizations', 'notices'], true)) {

@@ -149,7 +149,6 @@ class AgentSettingTest extends TestCase
             route('admin.audit'),
             route('admin.settings.billing'),
             route('admin.settings.tasks'),
-            route('admin.settings.agents'),
         ];
 
         foreach ($rutas as $ruta) {

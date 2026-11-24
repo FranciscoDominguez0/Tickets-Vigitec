@@ -181,6 +181,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:staff', 'admin'])->gro
     Route::delete('/sequences/{id}', [SecuenciaController::class, 'eliminar'])->whereNumber('id')->name('sequences.destroy');
     Route::get('/settings/tasks', [ConfiguracionController::class, 'tareas'])->name('settings.tasks');
     Route::get('/settings/agents', [ConfiguracionController::class, 'agentes'])->name('settings.agents');
+    Route::post('/settings/agents', [ConfiguracionController::class, 'guardarAgentes'])->name('settings.agents.store');
     Route::get('/settings/users', [ConfiguracionController::class, 'usuarios'])->name('settings.users');
     Route::post('/settings/users', [ConfiguracionController::class, 'guardarUsuarios'])->name('settings.users.store');
 
