@@ -10,8 +10,8 @@ FROM php:8.4-cli-alpine AS vendor
 
 RUN apk add --no-cache git unzip libzip icu-libs libpng libjpeg-turbo freetype libwebp \
     && apk add --no-cache --virtual .build-deps \
-        $PHPIZE_DEPS libzip-dev icu-dev \
-        libpng-dev libjpeg-turbo-dev freetype-dev libwebp-dev libxml2-dev \
+    $PHPIZE_DEPS libzip-dev icu-dev \
+    libpng-dev libjpeg-turbo-dev freetype-dev libwebp-dev libxml2-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j"$(nproc)" gd pdo_mysql zip intl \
     && apk del .build-deps
@@ -20,7 +20,12 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-interaction --no-progress --prefer-dist
+RUN composer config --global process-timeout 600 \
+    && ( \
+    composer install --no-dev --no-scripts --no-interaction --no-progress --prefer-dist \
+    || (echo "Reintentando descarga de Composer (intento 2)..." && sleep 3 && composer install --no-dev --no-scripts --no-interaction --no-progress --prefer-dist) \
+    || (echo "Reintentando descarga de Composer vía git source (intento 3)..." && sleep 5 && composer install --no-dev --no-scripts --no-interaction --no-progress --prefer-source) \
+    )
 
 #############################
 # Stage 2: Vite (Frontend Assets)
@@ -42,11 +47,11 @@ WORKDIR /var/www/html
 
 RUN apk add --no-cache nginx supervisor mysql-client libzip icu-libs libpng libjpeg-turbo freetype libwebp \
     && apk add --no-cache --virtual .build-deps \
-        $PHPIZE_DEPS libzip-dev icu-dev \
-        libpng-dev libjpeg-turbo-dev freetype-dev libwebp-dev libxml2-dev \
+    $PHPIZE_DEPS libzip-dev icu-dev \
+    libpng-dev libjpeg-turbo-dev freetype-dev libwebp-dev libxml2-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j"$(nproc)" \
-        bcmath exif gd intl opcache pcntl pdo_mysql zip \
+    bcmath exif gd intl opcache pcntl pdo_mysql zip \
     && apk del .build-deps \
     && rm -rf /tmp/pear \
     && mkdir -p /run/nginx /run/php-fpm
