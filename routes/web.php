@@ -182,6 +182,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth:staff', 'admin'])->gro
     Route::get('/settings/tasks', [ConfiguracionController::class, 'tareas'])->name('settings.tasks');
     Route::get('/settings/agents', [ConfiguracionController::class, 'agentes'])->name('settings.agents');
     Route::get('/settings/users', [ConfiguracionController::class, 'usuarios'])->name('settings.users');
+    Route::post('/settings/users', [ConfiguracionController::class, 'guardarUsuarios'])->name('settings.users.store');
 
     // 2. Panel de Control (Logs y Auditoría)
     Route::get('/logs', [PanelControlController::class, 'registros'])->name('logs');

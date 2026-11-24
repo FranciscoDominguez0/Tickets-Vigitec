@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ActualizarConfiguracionEmpresaRequest;
 use App\Http\Requests\Admin\ActualizarConfiguracionSolicitudesRequest;
+use App\Http\Requests\Admin\ActualizarConfiguracionUsuariosRequest;
 use App\Models\AppSetting;
 use App\Models\Department;
 use App\Models\HelpTopic;
@@ -242,15 +243,77 @@ class ConfiguracionController extends Controller
     }
 
     /**
-     * Muestra la vista en blanco de configuración de usuarios.
+     * Muestra la vista de configuración de usuarios y clientes.
      */
-    public function usuarios(): View
+    public function usuarios(Request $solicitud): View
     {
-        return view('admin.blank', [
-            'titulo' => 'Configuración de Usuarios',
-            'icono' => 'bi-people',
-            'seccion' => 'Configuración',
-            'descripcion' => 'Parámetros del portal de clientes, registro y acceso de usuarios.',
-        ]);
+        $empresaId = (int) (auth('staff')->user()->empresa_id ?? 1);
+
+        $modoRegistro = (string) AppSetting::obtener('users.client_registration', 'public', $empresaId);
+        $registroRequerido = (bool) AppSetting::obtener('users.client_registration_required', false, $empresaId);
+        $verificarEmail = (bool) AppSetting::obtener('users.client_verify_email', true, $empresaId);
+        $permitirRestablecerClave = (bool) AppSetting::obtener('users.client_allow_pw_reset', true, $empresaId);
+        $tiempoExpiracionSesion = (int) AppSetting::obtener('users.client_session_timeout', 60, $empresaId);
+        $maxTicketsAbiertos = (int) AppSetting::obtener('users.client_max_open_tickets', 0, $empresaId);
+
+        $asignarOrganizacionAuto = (bool) AppSetting::obtener('users.auto_assign_organization', true, $empresaId);
+        $miembrosVenTicketsOrg = (bool) AppSetting::obtener('users.org_members_see_all_tickets', true, $empresaId);
+        $autoAgregarColaboradores = (bool) AppSetting::obtener('users.auto_add_collaborators', true, $empresaId);
+        $maxColaboradores = (int) AppSetting::obtener('users.max_collaborators_per_ticket', 10, $empresaId);
+
+        $mensajeBienvenida = (string) AppSetting::obtener('users.client_welcome_msg', '', $empresaId);
+        $avisoInvitados = (string) AppSetting::obtener('users.client_guest_ticket_notice', '', $empresaId);
+
+        $pestanaActiva = (string) $solicitud->query('tab', 'general');
+        if (! in_array($pestanaActiva, ['general', 'organizations', 'notices'], true)) {
+            $pestanaActiva = 'general';
+        }
+
+        return view('admin.settings.users', compact(
+            'modoRegistro',
+            'registroRequerido',
+            'verificarEmail',
+            'permitirRestablecerClave',
+            'tiempoExpiracionSesion',
+            'maxTicketsAbiertos',
+            'asignarOrganizacionAuto',
+            'miembrosVenTicketsOrg',
+            'autoAgregarColaboradores',
+            'maxColaboradores',
+            'mensajeBienvenida',
+            'avisoInvitados',
+            'pestanaActiva'
+        ));
+    }
+
+    /**
+     * Guarda la configuración de usuarios y clientes.
+     */
+    public function guardarUsuarios(ActualizarConfiguracionUsuariosRequest $solicitud): RedirectResponse
+    {
+        $empresaId = (int) (auth('staff')->user()->empresa_id ?? 1);
+
+        AppSetting::establecer('users.client_registration', (string) $solicitud->validated('client_registration'), $empresaId);
+        AppSetting::establecer('users.client_registration_required', $solicitud->boolean('client_registration_required') ? '1' : '0', $empresaId);
+        AppSetting::establecer('users.client_verify_email', $solicitud->boolean('client_verify_email') ? '1' : '0', $empresaId);
+        AppSetting::establecer('users.client_allow_pw_reset', $solicitud->boolean('client_allow_pw_reset') ? '1' : '0', $empresaId);
+        AppSetting::establecer('users.client_session_timeout', (string) $solicitud->validated('client_session_timeout'), $empresaId);
+        AppSetting::establecer('users.client_max_open_tickets', (string) $solicitud->validated('client_max_open_tickets'), $empresaId);
+
+        AppSetting::establecer('users.auto_assign_organization', $solicitud->boolean('auto_assign_organization') ? '1' : '0', $empresaId);
+        AppSetting::establecer('users.org_members_see_all_tickets', $solicitud->boolean('org_members_see_all_tickets') ? '1' : '0', $empresaId);
+        AppSetting::establecer('users.auto_add_collaborators', $solicitud->boolean('auto_add_collaborators') ? '1' : '0', $empresaId);
+        AppSetting::establecer('users.max_collaborators_per_ticket', (string) $solicitud->validated('max_collaborators_per_ticket'), $empresaId);
+
+        AppSetting::establecer('users.client_welcome_msg', trim((string) ($solicitud->validated('client_welcome_msg') ?? '')), $empresaId);
+        AppSetting::establecer('users.client_guest_ticket_notice', trim((string) ($solicitud->validated('client_guest_ticket_notice') ?? '')), $empresaId);
+
+        $pestana = (string) ($solicitud->validated('active_tab') ?? 'general');
+        if (! in_array($pestana, ['general', 'organizations', 'notices'], true)) {
+            $pestana = 'general';
+        }
+
+        return redirect()->route('admin.settings.users', ['tab' => $pestana])
+            ->with('success', 'Configuración de usuarios y clientes actualizada exitosamente.');
     }
 }
